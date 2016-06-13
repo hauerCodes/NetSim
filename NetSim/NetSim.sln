@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetSim.Lib", "NetSim.Lib\NetSim.Lib.csproj", "{536CA1BF-70A5-4686-B10F-97D08ECD1BB1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetSim", "NetSim\NetSim.csproj", "{6086333A-4248-4605-98C5-4847E2DE68CD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,17 +17,24 @@ Global
 		{536CA1BF-70A5-4686-B10F-97D08ECD1BB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{536CA1BF-70A5-4686-B10F-97D08ECD1BB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{536CA1BF-70A5-4686-B10F-97D08ECD1BB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6086333A-4248-4605-98C5-4847E2DE68CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6086333A-4248-4605-98C5-4847E2DE68CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6086333A-4248-4605-98C5-4847E2DE68CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6086333A-4248-4605-98C5-4847E2DE68CD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 2
+		SccNumberOfProjects = 3
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://hauersoftwarenet.visualstudio.com/
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = NetSim.Lib\\NetSim.Lib.csproj
 		SccProjectName1 = NetSim.Lib
 		SccLocalPath1 = NetSim.Lib
+		SccProjectUniqueName2 = NetSim\\NetSim.csproj
+		SccProjectName2 = NetSim
+		SccLocalPath2 = NetSim
 	EndGlobalSection
 EndGlobal

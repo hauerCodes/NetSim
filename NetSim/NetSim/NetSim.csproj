@@ -141,9 +141,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ViewModel\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\NetSim.Lib\NetSim.Lib.csproj">
       <Project>{536ca1bf-70a5-4686-b10f-97d08ecd1bb1}</Project>

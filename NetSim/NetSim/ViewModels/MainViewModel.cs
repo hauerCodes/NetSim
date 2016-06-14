@@ -33,6 +33,8 @@ namespace NetSim.ViewModels
 
         private NetSimItem currentViewedItem;
 
+        private Canvas drawCanvas;
+
         #region Constructor
 
         public MainViewModel(Canvas drawCanvas)
@@ -154,7 +156,17 @@ namespace NetSim.ViewModels
             
         }
 
-        public Canvas DrawCanvas { get; set; }
+        public Canvas DrawCanvas
+        {
+            get
+            {
+                return drawCanvas;
+            }
+            set
+            {
+                drawCanvas = value;
+            }
+        }
 
         public NetSimVisualizer Visualizer { get; set; }
 

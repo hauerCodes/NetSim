@@ -1,24 +1,78 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="NetSim.Lib.NetSimSimulator">
-    <Position X="5" Y="2" Width="1.5" />
+  <Class Name="NetSim.Lib.Simulator.NetSimClient" HideInheritanceLine="true">
+    <Position X="1.5" Y="4.75" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>NetSimSimulator.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAgACAAAAA=</HashCode>
+      <FileName>Simulator\NetSimClient.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="InputQueue" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="NetSim.Lib.Simulator.NetSimMessage" HideInheritanceLine="true">
+    <Position X="6.5" Y="3.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAIAAA=</HashCode>
+      <FileName>Simulator\NetSimMessage.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NetSim.Lib.NetSimClient">
-    <Position X="8" Y="2" Width="2" />
+  <Class Name="NetSim.Lib.Visualization.NetSimVisualizer">
+    <Position X="11" Y="1" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAABAAAAAAAAAAAAAEAAAgAQAAIAAA=</HashCode>
+      <FileName>Visualization\NetSimVisualizer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NetSim.Lib.Simulator.NetSimTable">
+    <Position X="11" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>NetSimClient.cs</FileName>
+      <FileName>Simulator\NetSimTable.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NetSim.Lib.NetSimConnection">
-    <Position X="8" Y="3.75" Width="2" />
+  <Class Name="NetSim.Lib.Simulator.NetSimConnection" HideInheritanceLine="true">
+    <Position X="5" Y="1" Width="1.5" />
+    <AssociationLine Name="From" Type="NetSim.Lib.Simulator.NetSimClient" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5.375" Y="2.684" />
+        <Point X="5.375" Y="5.233" />
+        <Point X="3.5" Y="5.233" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="To" Type="NetSim.Lib.Simulator.NetSimClient" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5.875" Y="2.684" />
+        <Point X="5.875" Y="5.734" />
+        <Point X="3.5" Y="5.734" />
+      </Path>
+    </AssociationLine>
     <TypeIdentifier>
-      <HashCode>AgAAAAAAAAAAAAAAAAAAAAAAAAAIAAACAAAAAAAAAAA=</HashCode>
-      <FileName>NetSimConnection.cs</FileName>
+      <HashCode>AgAAAAAAAAAAAAAAAAAAAAAAAAAIAAACAAAAACAAAAA=</HashCode>
+      <FileName>Simulator\NetSimConnection.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="From" />
+      <Property Name="To" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="NetSim.Lib.Simulator.NetSimSimulator">
+    <Position X="1.5" Y="1" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAAAAAAACAAAAAAAAAAAAAAQAACAGEAAAA=</HashCode>
+      <FileName>Simulator\NetSimSimulator.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Clients" />
+      <Property Name="Connections" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="NetSim.Lib.Simulator.NetSimItem">
+    <Position X="7.25" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAA=</HashCode>
+      <FileName>Simulator\NetSimItem.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

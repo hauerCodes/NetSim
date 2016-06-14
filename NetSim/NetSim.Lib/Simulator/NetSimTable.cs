@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NetSim.Lib
+namespace NetSim.Lib.Simulator
 {
-    public class NetSimClient
+    public class NetSimTable
     {
     }
 }

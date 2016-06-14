@@ -3,10 +3,35 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:NetSim"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
-    </Grid>
+        Title="MainWindow" Height="450" Width="525">
+    <DockPanel  >
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Test"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="Edit">
+                <MenuItem Header="Test"></MenuItem>
+            </MenuItem>
+        </Menu>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" MinWidth="100"/>
+                <ColumnDefinition Width="10*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0" Background="LightGray">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" Orientation="Vertical">
+                    <ToggleButton Margin="5" IsChecked="{Binding IsView, Mode=TwoWay}">View</ToggleButton>
+                    <ToggleButton Margin="5" IsChecked="{Binding IsCreateNode, Mode=TwoWay}">Create Nodes</ToggleButton>
+                    <ToggleButton Margin="5" IsChecked="{Binding IsCreateEdge, Mode=TwoWay}">Create Edges</ToggleButton>
+                </StackPanel>
+            </Grid>
+            <Canvas Grid.Column="1" Name="DrawCanvas" Background="Transparent" MouseLeftButtonUp="DrawCanvasMouseLeftButtonUp" MouseLeftButtonDown="DrawCanvasMouseLeftButtonDown" MouseMove="DrawCanvasMouseMove"  >
+            </Canvas>
+        </Grid>
+    </DockPanel>
 </Window>

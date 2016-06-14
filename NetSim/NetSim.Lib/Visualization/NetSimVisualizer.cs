@@ -13,9 +13,17 @@ namespace NetSim.Lib.Visualization
 {
     public class NetSimVisualizer
     {
+        /// <summary>
+        /// The simulator
+        /// </summary>
         private readonly IDrawableNetSimSimulator simulator;
 
+        /// <summary>
+        /// The draw canvas
+        /// </summary>
         private readonly Canvas drawCanvas;
+
+        #region Constructor
 
         public NetSimVisualizer(IDrawableNetSimSimulator simulator, Canvas drawCanvas)
         {
@@ -25,16 +33,27 @@ namespace NetSim.Lib.Visualization
             simulator.Updated += SimulatorUpdated;
         }
 
+        #endregion
+
+        /// <summary>
+        /// Refreshes this instance.
+        /// </summary>
         public void Refresh()
         {
             VisualizeCurrentState();
         }
 
+        /// <summary>
+        /// Simulators the updated.
+        /// </summary>
         private void SimulatorUpdated()
         {
             VisualizeCurrentState();
         }
 
+        /// <summary>
+        /// Visualizes the state of the current.
+        /// </summary>
         private void VisualizeCurrentState()
         {
             drawCanvas.Children.Clear();
@@ -54,18 +73,34 @@ namespace NetSim.Lib.Visualization
             }
         }
 
+        /// <summary>
+        /// Creates the connection edge.
+        /// </summary>
+        /// <param name="edge">The edge.</param>
+        /// <returns></returns>
         private UIElement CreateConnectionEdge(NetSimConnection edge)
         {
-            Line connectionLine = new Line() { StrokeThickness = 2, StrokeDashOffset = 1, Stroke = Brushes.YellowGreen };
+            Line connectionLine = new Line
+            {
+                StrokeThickness = 4,
+                StrokeDashOffset = 1,
+                Stroke = Brushes.YellowGreen,
+                Tag = edge,
+                X1 = edge.From.Location.Left,
+                Y1 = edge.From.Location.Top,
+                X2 = edge.To.Location.Left,
+                Y2 = edge.To.Location.Top
+            };
 
-            connectionLine.X1 = edge.From.Location.Left;
-            connectionLine.Y1 = edge.From.Location.Top;
-            connectionLine.X2 = edge.To.Location.Left;
-            connectionLine.Y2 = edge.To.Location.Top;
 
             return connectionLine;
         }
 
+        /// <summary>
+        /// Creates the client node.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <returns></returns>
         private UIElement CreateClientNode(NetSimItem node)
         {
             var grid = new Grid { Tag = node };

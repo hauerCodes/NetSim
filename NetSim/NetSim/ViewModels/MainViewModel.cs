@@ -12,6 +12,7 @@ using System.Windows.Shapes;
 
 using GalaSoft.MvvmLight;
 
+using NetSim.DetailPages;
 using NetSim.Lib.Simulator;
 using NetSim.Lib.Visualization;
 // ReSharper disable ExplicitCallerInfoArgument
@@ -28,7 +29,11 @@ namespace NetSim.ViewModels
 
         private Line draftConnectionLine;
 
-        private NetSimItem currentSelected;
+        private NetSimItem currentSelectedNode;
+
+        private NetSimItem currentViewedItem;
+
+        #region Constructor
 
         public MainViewModel(Canvas drawCanvas)
         {
@@ -38,6 +43,10 @@ namespace NetSim.ViewModels
             this.nextNodeName = 'A';
             this.IsView = true;
         }
+
+        #endregion
+
+        #region Properties
 
         public bool IsView
         {
@@ -93,24 +102,56 @@ namespace NetSim.ViewModels
             }
         }
 
-        public NetSimItem CurrentSelected
+        public NetSimItem CurrentSelectedNode
         {
             get
             {
-                return currentSelected;
+                return currentSelectedNode;
             }
             set
             {
-                currentSelected = value;
-                if (value != null)
-                {
-                    Debug.WriteLine($"CurrentSelected:{value.Id}");
-                }
-                else
-                {
-                    Debug.WriteLine($"CurrentSelected: -");
-                }
+                currentSelectedNode = value;
+                Debug.WriteLine(value != null ? $"CurrentSelected:{value.Id}" : $"CurrentSelected: -");
+
+                RaisePropertyChanged();
             }
+        }
+
+        public NetSimItem CurrentViewedItem
+        {
+            get
+            {
+                return currentViewedItem;
+            }
+            set
+            {
+                currentViewedItem = value;
+                Debug.WriteLine(value != null ? $"CurrentViewed:{value.Id}" : $"CurrentViewed: -");
+
+                RaisePropertyChanged();
+                RaisePropertyChanged(nameof(DetailPage));
+            }
+        }
+
+        public Page DetailPage
+        {
+            get
+            {
+                if (currentViewedItem == null) return null;
+
+                if(currentViewedItem is NetSimClient)
+                {
+                    return new ClientPage();
+                }
+
+                if (currentViewedItem is NetSimConnection)
+                {
+                    return new ConnectionPage();
+                }
+
+                return null;
+            }
+            
         }
 
         public Canvas DrawCanvas { get; set; }
@@ -118,6 +159,10 @@ namespace NetSim.ViewModels
         public NetSimVisualizer Visualizer { get; set; }
 
         public NetSimSimulator Simulator { get; set; }
+
+        #endregion
+
+        #region Add Methods
 
         public NetSimItem AddNode(Point location)
         {
@@ -143,37 +188,84 @@ namespace NetSim.ViewModels
             }
         }
 
-        public NetSimItem GetNode(Point getPosition)
-        {
-            //if(Mouse.DirectlyOver == null || Mouse.DirectlyOver == DrawCanvas)
-            //{
-            //    return null;
-            //}
+        #endregion
 
+        #region Handle Mouse Movement, Clicks
+
+        public NetSimItem GetCurrentItem(Point getPosition)
+        {
             Debug.WriteLine(Mouse.DirectlyOver);
 
             if (Mouse.DirectlyOver is Rectangle)
             {
                 return (Mouse.DirectlyOver as Rectangle).Tag as NetSimItem;
             }
+
             if (Mouse.DirectlyOver is Ellipse)
             {
                 return (Mouse.DirectlyOver as Ellipse).Tag as NetSimItem;
             }
+
             if (Mouse.DirectlyOver is Grid)
             {
                 return (Mouse.DirectlyOver as Grid).Tag as NetSimItem;
             }
+
             if (Mouse.DirectlyOver is TextBlock)
             {
                 return (Mouse.DirectlyOver as TextBlock).Tag as NetSimItem;
             }
+
+            if (Mouse.DirectlyOver is Line)
+            {
+                return (Mouse.DirectlyOver as Line).Tag as NetSimItem;
+            }
+
             return null;
+        }
+
+        public void HandleMouseLeftButtonDown(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        {
+            var item = GetCurrentItem(mouseButtonEventArgs.GetPosition(DrawCanvas));
+
+            if (item == null)
+            {
+                if (IsView)
+                {
+                    CurrentViewedItem = null;
+                }
+
+                return;
+            }
+
+            // ReSharper disable once CanBeReplacedWithTryCastAndCheckForNull
+            if (item is NetSimClient)
+            {
+                CurrentSelectedNode = item;
+
+                switch (viewMode)
+                {
+                    case ViewMode.CreateEdges:
+                        draftConnection = new NetSimConnection { From = (NetSimClient)item };
+                        break;
+                    case ViewMode.View:
+                        CurrentViewedItem = item;
+                        break;
+                }
+            }
+
+            if (item is NetSimConnection)
+            {
+                if (IsView)
+                {
+                    CurrentViewedItem = item;
+                }
+            }
         }
 
         public void HandleMouseLeftButtonUp(object sender, MouseButtonEventArgs mouseButtonEventArgs)
         {
-            if (IsCreateNode && CurrentSelected == null)
+            if (IsCreateNode && CurrentSelectedNode == null)
             {
                 AddNode(mouseButtonEventArgs.GetPosition(DrawCanvas));
             }
@@ -191,19 +283,54 @@ namespace NetSim.ViewModels
             }
         }
 
-        public void HandleMouseLeftButtonDown(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        public void HandleMouseMove(object sender, MouseEventArgs mouseEventArgs)
         {
-            Debug.WriteLine(nameof(HandleMouseLeftButtonDown));
-            var node = GetNode(mouseButtonEventArgs.GetPosition(DrawCanvas));
-            if (node is NetSimClient)
+            if (mouseEventArgs.LeftButton == MouseButtonState.Pressed)
             {
-                CurrentSelected = node;
-
-                if (IsCreateEdge)
+                switch (viewMode)
                 {
-                    draftConnection = new NetSimConnection();
-                    draftConnection.From = (NetSimClient)node;
+                    case ViewMode.View:
+                        if (CurrentSelectedNode != null)
+                        {
+                            var dragLocation = mouseEventArgs.GetPosition(DrawCanvas);
+                            CurrentSelectedNode.Location.Left = (int)dragLocation.X;
+                            CurrentSelectedNode.Location.Top = (int)dragLocation.Y;
+                            Visualizer.Refresh();
+                        }
+                        else
+                        {
+                            CurrentSelectedNode = null;
+                        }
+                        break;
+                    case ViewMode.CreateEdges:
+                        if (draftConnection?.From != null)
+                        {
+                            var point = mouseEventArgs.GetPosition(DrawCanvas);
+
+                            var node = GetCurrentItem(point);
+                            if (node != null && node.Id != draftConnection.From.Id)
+                            {
+                                CurrentSelectedNode = node;
+                                draftConnection.To = (NetSimClient)node;
+                            }
+                            else
+                            {
+                                CurrentSelectedNode = null;
+                                draftConnection.To = null;
+                            }
+
+                            DrawConnectionLine(point, draftConnection.To != null);
+                        }
+                        else
+                        {
+                            CurrentSelectedNode = null;
+                        }
+                        break;
                 }
+            }
+            else
+            {
+                CurrentSelectedNode = null;
             }
         }
 
@@ -232,55 +359,7 @@ namespace NetSim.ViewModels
             }
         }
 
-        public void HandleMouseMove(object sender, MouseEventArgs mouseEventArgs)
-        {
-            if (mouseEventArgs.LeftButton == MouseButtonState.Pressed)
-            {
-                switch (viewMode)
-                {
-                    case ViewMode.View:
-                        if (CurrentSelected != null)
-                        {
-                            var dragLocation = mouseEventArgs.GetPosition(DrawCanvas);
-                            CurrentSelected.Location.Left = (int)dragLocation.X;
-                            CurrentSelected.Location.Top = (int)dragLocation.Y;
-                            Visualizer.Refresh();
-                        }
-                        else
-                        {
-                            CurrentSelected = null;
-                        }
-                        break;
-                    case ViewMode.CreateEdges:
-                        if (draftConnection?.From != null)
-                        {
-                            var point = mouseEventArgs.GetPosition(DrawCanvas);
+        #endregion
 
-                            var node = GetNode(point);
-                            if (node != null && node.Id != draftConnection.From.Id)
-                            {
-                                CurrentSelected = node;
-                                draftConnection.To = (NetSimClient)node;
-                            }
-                            else
-                            {
-                                CurrentSelected = null;
-                                draftConnection.To = null;
-                            }
-
-                            DrawConnectionLine(point, draftConnection.To != null);
-                        }
-                        else
-                        {
-                            CurrentSelected = null;
-                        }
-                        break;
-                }
-            }
-            else
-            {
-                CurrentSelected = null;
-            }
-        }
     }
 }

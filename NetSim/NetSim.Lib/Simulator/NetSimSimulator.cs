@@ -12,9 +12,11 @@ namespace NetSim.Lib.Simulator
     public class NetSimSimulator : IDrawableNetSimSimulator
     {
         /// <summary>
-        /// Occurs when updated.
+        /// Occurs when Updated.
         /// </summary>
-        private event Action updated;
+        private event Action Updated;
+
+        #region Constructor 
 
         public NetSimSimulator()
         {
@@ -22,21 +24,31 @@ namespace NetSim.Lib.Simulator
             Connections = new List<NetSimConnection>();
         }
 
-        public event Action Updated
+        #endregion
+
+        #region Events
+
+        public event Action SimulatorUpdated
         {
             add
             {
-                updated += value;
+                Updated += value;
             }
             remove
             {
-                updated -= value;
+                Updated -= value;
             }
         }
+
+        #endregion
+
+        #region Properties 
 
         public List<NetSimClient> Clients { get; set; }
 
         public List<NetSimConnection> Connections { get; set; }
+
+        #endregion
 
         public NetSimItem AddClient(string id, int left, int top)
         {
@@ -79,9 +91,17 @@ namespace NetSim.Lib.Simulator
             OnUpdated();
         }
 
+        public void InitializeProtocol(NetSimProtocol protocol)
+        {
+            foreach(var client in Clients)
+            {
+                client.InitializeProtocol(protocol);
+            }
+        }
+
         protected void OnUpdated()
         {
-            updated?.Invoke();
+            Updated?.Invoke();
         }
 
     }

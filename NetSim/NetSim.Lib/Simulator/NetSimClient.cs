@@ -9,6 +9,8 @@ namespace NetSim.Lib.Simulator
 {
     public class NetSimClient : NetSimItem
     {
+        #region Constructor 
+
         public NetSimClient(string id, NetSimLocation location)
         {
             this.Id = id;
@@ -17,26 +19,27 @@ namespace NetSim.Lib.Simulator
             this.Connections = new Dictionary<string, NetSimConnection>();
         }
 
+        #endregion
+
+        #region Properties
+
         public Dictionary<string, NetSimConnection> Connections { get; set; }
 
         public Queue<NetSimMessage> InputQueue { get; set; }
 
-        public NetSimTable NetSimTable
-        {
-            get
-            {
-                throw new System.NotImplementedException();
-            }
+        public NetSimTable NetSimTable { get; set; }
 
-            set
-            {
-            }
+        #endregion
+
+        public void InitializeProtocol(NetSimProtocol protocol)
+        {
+            this.InputQueue = new Queue<NetSimMessage>();
         }
 
         public void ReceiveMessage(NetSimMessage message)
         {
-            throw new System.NotImplementedException();
+            InputQueue?.Enqueue(message);
         }
-
+        
     }
 }

@@ -8,7 +8,7 @@ namespace NetSim.Lib.Visualization
 {
     public interface IDrawableNetSimSimulator
     {
-        event Action Updated;
+        event Action SimulatorUpdated;
         List<NetSimClient> Clients { get; set; }
         List<NetSimConnection> Connections { get; set; }
     }

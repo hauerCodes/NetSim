@@ -30,7 +30,7 @@ namespace NetSim.Lib.Visualization
             this.simulator = simulator;
             this.drawCanvas = drawCanvas;
 
-            simulator.Updated += SimulatorUpdated;
+            simulator.SimulatorUpdated += SimulatorUpdated;
         }
 
         #endregion

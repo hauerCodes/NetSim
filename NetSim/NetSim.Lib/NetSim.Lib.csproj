@@ -68,7 +68,11 @@
   <ItemGroup>
     <Compile Include="Routing\AODV\AodvTable.cs" />
     <Compile Include="Routing\DSDV\DsdvTable.cs" />
+    <Compile Include="Routing\DSDV\DsdvTableEntry.cs" />
+    <Compile Include="Routing\DSDV\DsdvUpdateMessage.cs" />
     <Compile Include="Routing\DSR\DsrTable.cs" />
+    <Compile Include="Simulator\NetSimDestination.cs" />
+    <Compile Include="Simulator\NetSimProtocol.cs" />
     <Compile Include="Simulator\NetSimTableEntry.cs" />
     <Compile Include="Routing\OLSR\OlsrTable.cs" />
     <Compile Include="Visualization\IDrawableNetSimSimulator.cs" />

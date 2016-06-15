@@ -66,6 +66,11 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Routing\AODV\AodvTable.cs" />
+    <Compile Include="Routing\DSDV\DsdvTable.cs" />
+    <Compile Include="Routing\DSR\DsrTable.cs" />
+    <Compile Include="Simulator\NetSimTableEntry.cs" />
+    <Compile Include="Routing\OLSR\OlsrTable.cs" />
     <Compile Include="Visualization\IDrawableNetSimSimulator.cs" />
     <Compile Include="Simulator\NetSimItem.cs" />
     <Compile Include="Simulator\NetSimClient.cs" />
@@ -81,6 +86,7 @@
     <None Include="NetSim.Lib.Diagramm.cd" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -17,7 +17,7 @@ using NetSim.Lib.Simulator;
 using NetSim.Lib.Visualization;
 // ReSharper disable ExplicitCallerInfoArgument
 
-namespace NetSim.ViewModels
+namespace NetSim.ViewModel
 {
     public class MainViewModel : ViewModelBase
     {
@@ -50,6 +50,12 @@ namespace NetSim.ViewModels
 
         #region Properties
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is view.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this instance is view; otherwise, <c>false</c>.
+        /// </value>
         public bool IsView
         {
             get
@@ -68,6 +74,12 @@ namespace NetSim.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is create node.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is create node; otherwise, <c>false</c>.
+        /// </value>
         public bool IsCreateNode
         {
             get
@@ -86,6 +98,12 @@ namespace NetSim.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is create edge.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is create edge; otherwise, <c>false</c>.
+        /// </value>
         public bool IsCreateEdge
         {
             get
@@ -104,6 +122,12 @@ namespace NetSim.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets or sets the current selected node.
+        /// </summary>
+        /// <value>
+        /// The current selected node.
+        /// </value>
         public NetSimItem CurrentSelectedNode
         {
             get
@@ -119,6 +143,12 @@ namespace NetSim.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets or sets the current viewed item.
+        /// </summary>
+        /// <value>
+        /// The current viewed item.
+        /// </value>
         public NetSimItem CurrentViewedItem
         {
             get
@@ -135,6 +165,12 @@ namespace NetSim.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets the detail page.
+        /// </summary>
+        /// <value>
+        /// The detail page.
+        /// </value>
         public Page DetailPage
         {
             get
@@ -156,6 +192,12 @@ namespace NetSim.ViewModels
             
         }
 
+        /// <summary>
+        /// Gets or sets the draw canvas.
+        /// </summary>
+        /// <value>
+        /// The draw canvas.
+        /// </value>
         public Canvas DrawCanvas
         {
             get
@@ -168,8 +210,20 @@ namespace NetSim.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets or sets the visualizer.
+        /// </summary>
+        /// <value>
+        /// The visualizer.
+        /// </value>
         public NetSimVisualizer Visualizer { get; set; }
 
+        /// <summary>
+        /// Gets or sets the simulator.
+        /// </summary>
+        /// <value>
+        /// The simulator.
+        /// </value>
         public NetSimSimulator Simulator { get; set; }
 
         #endregion
@@ -320,7 +374,7 @@ namespace NetSim.ViewModels
                             var point = mouseEventArgs.GetPosition(DrawCanvas);
 
                             var node = GetCurrentItem(point);
-                            if (node != null && node.Id != draftConnection.From.Id)
+                            if (node != null && node.Id != draftConnection.From.Id && node is NetSimClient)
                             {
                                 CurrentSelectedNode = node;
                                 draftConnection.To = (NetSimClient)node;

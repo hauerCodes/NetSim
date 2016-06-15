@@ -1,50 +1,74 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="NetSim.Lib.Simulator.NetSimClient" HideInheritanceLine="true">
-    <Position X="1.5" Y="4.75" Width="2" />
+  <Class Name="NetSim.Lib.Simulator.NetSimClient">
+    <Position X="4.25" Y="4.75" Width="2" />
+    <InheritanceLine Type="NetSim.Lib.Simulator.NetSimItem" FixedToPoint="true">
+      <Path>
+        <Point X="2.25" Y="2.747" />
+        <Point X="2.25" Y="5.938" />
+        <Point X="4.25" Y="5.938" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="InputQueue" Type="NetSim.Lib.Simulator.NetSimMessage" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="4.25" Y="6.188" />
+        <Point X="2.25" Y="6.188" />
+        <Point X="2.25" Y="6.5" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="NetSimTable" Type="NetSim.Lib.Simulator.NetSimTable" ManuallyRouted="true" FixedFromPoint="true">
+      <Path>
+        <Point X="6.25" Y="5.688" />
+        <Point X="10.25" Y="5.688" />
+      </Path>
+    </AssociationLine>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAgACAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAgAAAACAAAAAAAAAgACAAAAA=</HashCode>
       <FileName>Simulator\NetSimClient.cs</FileName>
     </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="NetSimTable" />
+    </ShowAsAssociation>
     <ShowAsCollectionAssociation>
       <Property Name="InputQueue" />
     </ShowAsCollectionAssociation>
   </Class>
   <Class Name="NetSim.Lib.Simulator.NetSimMessage" HideInheritanceLine="true">
-    <Position X="6.5" Y="3.25" Width="2" />
+    <Position X="1.25" Y="6.5" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAIAAA=</HashCode>
       <FileName>Simulator\NetSimMessage.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NetSim.Lib.Visualization.NetSimVisualizer">
-    <Position X="11" Y="1" Width="3" />
+    <Position X="12.75" Y="1" Width="3" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAABAAAAAAAAAAAAAEAAAgAQAAIAAA=</HashCode>
+      <HashCode>AAAAAAAAAABAAIAABAAAAAAAAAAAAAEAAAgAQAAIAAA=</HashCode>
       <FileName>Visualization\NetSimVisualizer.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NetSim.Lib.Simulator.NetSimTable">
-    <Position X="11" Y="3.75" Width="1.5" />
+    <Position X="10.25" Y="5.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Simulator\NetSimTable.cs</FileName>
     </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Entries" />
+    </ShowAsCollectionAssociation>
   </Class>
-  <Class Name="NetSim.Lib.Simulator.NetSimConnection" HideInheritanceLine="true">
-    <Position X="5" Y="1" Width="1.5" />
-    <AssociationLine Name="From" Type="NetSim.Lib.Simulator.NetSimClient" FixedFromPoint="true" FixedToPoint="true">
+  <Class Name="NetSim.Lib.Simulator.NetSimConnection">
+    <Position X="4.25" Y="1" Width="2" />
+    <AssociationLine Name="From" Type="NetSim.Lib.Simulator.NetSimClient" FixedToPoint="true">
       <Path>
-        <Point X="5.375" Y="2.684" />
-        <Point X="5.375" Y="5.233" />
-        <Point X="3.5" Y="5.233" />
+        <Point X="4.875" Y="2.684" />
+        <Point X="4.875" Y="4.75" />
       </Path>
     </AssociationLine>
-    <AssociationLine Name="To" Type="NetSim.Lib.Simulator.NetSimClient" FixedFromPoint="true" FixedToPoint="true">
+    <AssociationLine Name="To" Type="NetSim.Lib.Simulator.NetSimClient" FixedToPoint="true">
       <Path>
-        <Point X="5.875" Y="2.684" />
-        <Point X="5.875" Y="5.734" />
-        <Point X="3.5" Y="5.734" />
+        <Point X="5.688" Y="2.684" />
+        <Point X="5.688" Y="4.75" />
       </Path>
     </AssociationLine>
     <TypeIdentifier>
@@ -57,7 +81,7 @@
     </ShowAsAssociation>
   </Class>
   <Class Name="NetSim.Lib.Simulator.NetSimSimulator">
-    <Position X="1.5" Y="1" Width="2.25" />
+    <Position X="7.5" Y="1" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAIAAAAAAAAAAAACAAAAAAAAAAAAAAQAACAGEAAAA=</HashCode>
       <FileName>Simulator\NetSimSimulator.cs</FileName>
@@ -69,10 +93,45 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="NetSim.Lib.Simulator.NetSimItem">
-    <Position X="7.25" Y="1" Width="1.5" />
+    <Position X="1.5" Y="1" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAA=</HashCode>
+      <HashCode>AAACAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Simulator\NetSimItem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NetSim.Lib.DsdvTable">
+    <Position X="7.75" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Routing\DSDV\DsdvTable.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NetSim.Lib.OlsrTable">
+    <Position X="9.5" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Routing\OLSR\OlsrTable.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NetSim.Lib.AodvTable">
+    <Position X="11.25" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Routing\AODV\AodvTable.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NetSim.Lib.DsrTable">
+    <Position X="13" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Routing\DSR\DsrTable.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NetSim.Lib.NetSimTableEntry">
+    <Position X="16" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Simulator\NetSimTableEntry.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

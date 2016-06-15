@@ -8,7 +8,7 @@ using GalaSoft.MvvmLight;
 
 using NetSim.Lib.Simulator;
 
-namespace NetSim.ViewModels
+namespace NetSim.ViewModel
 {
     public class ClientViewModel : ViewModelBase
     {

@@ -21,6 +21,18 @@ namespace NetSim.Lib.Simulator
 
         public Queue<NetSimMessage> InputQueue { get; set; }
 
+        public NetSimTable NetSimTable
+        {
+            get
+            {
+                throw new System.NotImplementedException();
+            }
+
+            set
+            {
+            }
+        }
+
         public void ReceiveMessage(NetSimMessage message)
         {
             throw new System.NotImplementedException();

@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace NetSim.ViewModels
+namespace NetSim.ViewModel
 {
     internal enum ViewMode
     {

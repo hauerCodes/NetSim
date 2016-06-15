@@ -87,11 +87,11 @@
     <Compile Include="DetailPages\ConnectionPage.xaml.cs">
       <DependentUpon>ConnectionPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModels\ConnectionViewModel.cs" />
-    <Compile Include="ViewModels\ClientViewModel.cs" />
-    <Compile Include="ViewModels\MainViewModel.cs" />
-    <Compile Include="ViewModels\ViewMode.cs" />
-    <Compile Include="ViewModels\ViewModelLocator.cs" />
+    <Compile Include="ViewModel\ConnectionViewModel.cs" />
+    <Compile Include="ViewModel\ClientViewModel.cs" />
+    <Compile Include="ViewModel\MainViewModel.cs" />
+    <Compile Include="ViewModel\ViewMode.cs" />
+    <Compile Include="ViewModel\ViewModelLocator.cs" />
     <Page Include="DetailPages\ConnectionPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

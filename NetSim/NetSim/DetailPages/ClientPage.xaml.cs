@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 using NetSim.Lib.Simulator;
+using NetSim.ViewModel;
 
 namespace NetSim.DetailPages
 {

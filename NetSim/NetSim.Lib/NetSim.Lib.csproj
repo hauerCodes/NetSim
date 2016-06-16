@@ -66,13 +66,26 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Routing\AODV\AodvRrepMessage.cs" />
+    <Compile Include="Routing\AODV\AodvRreqMessage.cs" />
+    <Compile Include="Routing\AODV\AodvHelloMessage.cs" />
+    <Compile Include="Routing\AODV\AodvRoutingProtocol.cs" />
+    <Compile Include="Routing\AODV\AodvTableEntry.cs" />
+    <Compile Include="Routing\DSDV\DsdvRoutingProtocol.cs" />
+    <Compile Include="Routing\DSDV\DsdvSequence.cs" />
+    <Compile Include="Routing\DSR\DsrRoutingProtocol.cs" />
+    <Compile Include="Routing\DSR\DsrTableEntry.cs" />
+    <Compile Include="Routing\OLSR\OlsrRoutingProtocol.cs" />
+    <Compile Include="Routing\OLSR\OlsrTableEntry.cs" />
+    <Compile Include="Routing\RoutingProtocolFactory.cs" />
+    <Compile Include="Simulator\NetSimRoutingProtocol.cs" />
     <Compile Include="Routing\AODV\AodvTable.cs" />
     <Compile Include="Routing\DSDV\DsdvTable.cs" />
     <Compile Include="Routing\DSDV\DsdvTableEntry.cs" />
     <Compile Include="Routing\DSDV\DsdvUpdateMessage.cs" />
     <Compile Include="Routing\DSR\DsrTable.cs" />
     <Compile Include="Simulator\NetSimDestination.cs" />
-    <Compile Include="Simulator\NetSimProtocol.cs" />
+    <Compile Include="Simulator\NetSimProtocolType.cs" />
     <Compile Include="Simulator\NetSimTableEntry.cs" />
     <Compile Include="Routing\OLSR\OlsrTable.cs" />
     <Compile Include="Visualization\IDrawableNetSimSimulator.cs" />

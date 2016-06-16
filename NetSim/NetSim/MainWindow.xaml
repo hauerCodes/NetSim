@@ -13,7 +13,7 @@
                 <Separator></Separator>
                 <MenuItem Header="Exit"></MenuItem>
             </MenuItem>
-            <MenuItem Header="Routing Protocol">
+            <MenuItem Header="Routing RoutingProtocol">
                 <MenuItem IsCheckable="True" IsChecked="True" Header="DSDV"></MenuItem>
                 <MenuItem IsCheckable="True" IsChecked="False" Header="OLSR"></MenuItem>
                 <MenuItem IsCheckable="True" IsChecked="False" Header="AODV"></MenuItem>

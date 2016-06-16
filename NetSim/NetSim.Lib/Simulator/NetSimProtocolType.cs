@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace NetSim.Lib.Simulator
 {
-    public enum NetSimProtocol
+    public enum NetSimProtocolType
     {
         /// <summary>
         /// Destionation Sequences Distance Vector

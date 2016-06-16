@@ -5,18 +5,67 @@ using System.Text;
 
 namespace NetSim.Lib.Simulator
 {
-    public abstract class NetSimTable
+    public abstract class NetSimTable : ICloneable
     {
-        public List<NetSimTableEntry> Entries
+        /// <summary>
+        /// Should be invoked when table gets updated.
+        /// </summary>
+        private event Action TableUpdate;
+
+        #region Constructor
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NetSimTable"/> class.
+        /// </summary>
+        protected NetSimTable()
         {
-            get
+            this.Entries = new List<NetSimTableEntry>();
+        }
+
+        #endregion
+
+        #region Events
+
+        /// <summary>
+        /// Occurs when table gets updated.
+        /// </summary>
+        public event Action TableUpdated
+        {
+            add
             {
-                throw new System.NotImplementedException();
+                TableUpdate += value;
+            }
+            remove
+            {
+                TableUpdate -= value;
             }
 
-            set
-            {
-            }
         }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets the entries.
+        /// </summary>
+        /// <value>
+        /// The entries.
+        /// </value>
+        public List<NetSimTableEntry> Entries { get; set; }
+
+        #endregion
+
+        /// <summary>
+        /// Should be called when table gets updated.
+        /// </summary>
+        protected virtual void OnTableUpdate()
+        {
+            TableUpdate?.Invoke();
+        }
+
+        public abstract NetSimTableEntry GetRouteFor(string destinationId);
+
+        public abstract object Clone();
     }
 }

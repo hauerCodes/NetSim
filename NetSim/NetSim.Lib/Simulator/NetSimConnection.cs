@@ -14,26 +14,46 @@ namespace NetSim.Lib.Simulator
     {
         public NetSimConnection()
         {
+            this.PendingMessages = new Queue<NetSimMessage>();
         }
 
-        public NetSimClient From { get; set; }
+        public Queue<NetSimMessage> PendingMessages { get; set; }
 
-        public NetSimClient To { get; set; }
+        public NetSimClient EndPointA { get; set; }
+
+        public NetSimClient EndPointB { get; set; }
 
         public int Metric { get; set; } = 1;
 
         public bool IsOffline { get; set; } = false;
 
-        public void TransportMessage(NetSimDestination destination, NetSimMessage message)
-        {
-            if(From != null && destination == NetSimDestination.From)
-            {
-                From.ReceiveMessage(message);
-            }
+        public bool IsTransmitting => PendingMessages.Count > 0;
 
-            if(To != null && destination == NetSimDestination.To)
+        public void StartTransportMessage(NetSimMessage message)
+        {
+            if (EndPointA == null || EndPointB == null || IsOffline) return;
+
+            if (EndPointA.Id.Equals(message.Receiver) || EndPointB.Id.Equals(message.Receiver))
             {
-                To.ReceiveMessage(message);
+                PendingMessages.Enqueue(message);
+            }
+        }
+
+        public void EndTransportMessages()
+        {
+            while(PendingMessages.Count > 0 )
+            {
+                var message = PendingMessages.Dequeue();
+
+                if (EndPointA != null && message.Receiver.Equals(EndPointA.Id))
+                {
+                    EndPointA.ReceiveMessage(message);
+                }
+
+                if (EndPointB != null && message.Receiver.Equals(EndPointB.Id))
+                {
+                    EndPointB.ReceiveMessage(message);
+                }
             }
         }
 

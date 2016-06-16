@@ -86,11 +86,22 @@ namespace NetSim.Lib.Visualization
                 StrokeDashOffset = 1,
                 Stroke = Brushes.YellowGreen,
                 Tag = edge,
-                X1 = edge.From.Location.Left,
-                Y1 = edge.From.Location.Top,
-                X2 = edge.To.Location.Left,
-                Y2 = edge.To.Location.Top
+                X1 = edge.EndPointA.Location.Left,
+                Y1 = edge.EndPointA.Location.Top,
+                X2 = edge.EndPointB.Location.Left,
+                Y2 = edge.EndPointB.Location.Top
             };
+
+            if (edge.IsOffline)
+            {
+                connectionLine.StrokeDashArray = new DoubleCollection(new List<double>() { 2, 2 });
+            }
+
+            if (edge.IsTransmitting)
+            {
+                // todo
+
+            }
 
 
             return connectionLine;

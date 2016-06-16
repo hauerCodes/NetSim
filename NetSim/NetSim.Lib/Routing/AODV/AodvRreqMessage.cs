@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 using NetSim.Lib.Simulator;
 
-namespace NetSim.Lib.Routing.DSDV
+namespace NetSim.Lib.Routing.AODV
 {
-    public class DsdvUpdateMessage : NetSimMessage
+    public class AodvRreqMessage : NetSimMessage
     {
-        public DsdvTable UpdateTable { get; set; }
     }
 }

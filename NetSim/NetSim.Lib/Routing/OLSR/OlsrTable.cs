@@ -1,11 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace NetSim.Lib
+using NetSim.Lib.Simulator;
+
+namespace NetSim.Lib.Routing.OLSR
 {
-    public class OlsrTable : Simulator.NetSimTable
+    public class OlsrTable : NetSimTable
     {
+        public override NetSimTableEntry GetRouteFor(string destinationId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,11 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace NetSim.Lib
+using NetSim.Lib.Simulator;
+
+namespace NetSim.Lib.Routing.DSR
 {
-    public class DsrTable : Simulator.NetSimTable
+    public class DsrTable : NetSimTable
     {
+        public override object Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -243,7 +243,12 @@ namespace NetSim.ViewModel
         {
             try
             {
-                Simulator.AddConnection(from.Id, to.Id, 1);
+                if(!Simulator.AddConnection(from.Id, to.Id, 1))
+                {
+                    draftConnection = null;
+                    DrawCanvas.Children.Remove(draftConnectionLine);
+                    draftConnectionLine = null;
+                }
             }
             catch (Exception ex)
             {
@@ -312,7 +317,7 @@ namespace NetSim.ViewModel
                 switch (viewMode)
                 {
                     case ViewMode.CreateEdges:
-                        draftConnection = new NetSimConnection { From = (NetSimClient)item };
+                        draftConnection = new NetSimConnection { EndPointA = (NetSimClient)item };
                         break;
                     case ViewMode.View:
                         CurrentViewedItem = item;
@@ -336,9 +341,9 @@ namespace NetSim.ViewModel
                 AddNode(mouseButtonEventArgs.GetPosition(DrawCanvas));
             }
 
-            if (IsCreateEdge && draftConnection?.From != null && draftConnection?.To != null)
+            if (IsCreateEdge && draftConnection?.EndPointA != null && draftConnection?.EndPointB != null)
             {
-                AddEdge(draftConnection.From, draftConnection.To);
+                AddEdge(draftConnection.EndPointA, draftConnection.EndPointB);
                 draftConnection = null;
             }
             else
@@ -369,23 +374,23 @@ namespace NetSim.ViewModel
                         }
                         break;
                     case ViewMode.CreateEdges:
-                        if (draftConnection?.From != null)
+                        if (draftConnection?.EndPointA != null)
                         {
                             var point = mouseEventArgs.GetPosition(DrawCanvas);
 
                             var node = GetCurrentItem(point);
-                            if (node != null && node.Id != draftConnection.From.Id && node is NetSimClient)
+                            if (node != null && node.Id != draftConnection.EndPointA.Id && node is NetSimClient)
                             {
                                 CurrentSelectedNode = node;
-                                draftConnection.To = (NetSimClient)node;
+                                draftConnection.EndPointB = (NetSimClient)node;
                             }
                             else
                             {
                                 CurrentSelectedNode = null;
-                                draftConnection.To = null;
+                                draftConnection.EndPointB = null;
                             }
 
-                            DrawConnectionLine(point, draftConnection.To != null);
+                            DrawConnectionLine(point, draftConnection.EndPointB != null);
                         }
                         else
                         {
@@ -407,19 +412,19 @@ namespace NetSim.ViewModel
             DrawCanvas.Children.Remove(draftConnectionLine);
             draftConnectionLine = null;
 
-            if (draftConnection?.From != null)
+            if (draftConnection?.EndPointA != null)
             {
                 draftConnectionLine = new Line() { StrokeThickness = 2, StrokeDashOffset = 1, Stroke = possibleConnection ? Brushes.Green : Brushes.Red };
                 DrawCanvas.Children.Add(draftConnectionLine);
 
-                if (endPoint.X - draftConnection.From.Location.Left < 0 &&
-                   endPoint.Y - draftConnection.From.Location.Top < 0)
+                if (endPoint.X - draftConnection.EndPointA.Location.Left < 0 &&
+                   endPoint.Y - draftConnection.EndPointA.Location.Top < 0)
                 {
                     drawOffset = -4;
                 }
 
-                draftConnectionLine.X1 = draftConnection.From.Location.Left;
-                draftConnectionLine.Y1 = draftConnection.From.Location.Top;
+                draftConnectionLine.X1 = draftConnection.EndPointA.Location.Left;
+                draftConnectionLine.Y1 = draftConnection.EndPointA.Location.Top;
                 draftConnectionLine.X2 = endPoint.X - drawOffset;
                 draftConnectionLine.Y2 = endPoint.Y - drawOffset;
             }

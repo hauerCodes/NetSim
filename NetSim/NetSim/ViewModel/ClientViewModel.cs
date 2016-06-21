@@ -12,12 +12,13 @@ namespace NetSim.ViewModel
 {
     public class ClientViewModel : ViewModelBase
     {
-        private readonly NetSimClient client;
-
         public ClientViewModel(NetSimClient client)
         {
-            this.client = client;
+            this.Client = client;
         }
+
+        public NetSimClient Client { get; }
+
 
     }
 }

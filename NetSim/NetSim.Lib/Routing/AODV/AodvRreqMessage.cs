@@ -10,5 +10,9 @@ namespace NetSim.Lib.Routing.AODV
 {
     public class AodvRreqMessage : NetSimMessage
     {
+        public override object Clone()
+        {
+            return new AodvRreqMessage() { Receiver = this.Receiver, Sender = this.Sender };
+        }
     }
 }

@@ -12,20 +12,26 @@ namespace NetSim.ViewModel
 {
     public class ConnectionViewModel : ViewModelBase
     {
-        private NetSimConnection connection;
-
         public ConnectionViewModel(NetSimConnection connection)
         {
-            this.connection = connection;
+            this.Connection = connection;
         }
 
-        public NetSimConnection Connection
+        public NetSimConnection Connection { get; }
+
+        public string CurrentMessages
         {
-            get { return connection; }
-            set { connection = value; }
+            get
+            {
+                StringBuilder builder = new StringBuilder();
+                foreach(var message in this.Connection.PendingMessages)
+                {
+                    builder.AppendLine(message.ToString());
+                }
+
+                return builder.ToString();
+            }
         }
-
-
     }
 
 }

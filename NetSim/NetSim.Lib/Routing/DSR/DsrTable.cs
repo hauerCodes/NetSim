@@ -11,5 +11,10 @@ namespace NetSim.Lib.Routing.DSR
         {
             throw new NotImplementedException();
         }
+
+        public override NetSimTableEntry GetRouteFor(string destinationId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

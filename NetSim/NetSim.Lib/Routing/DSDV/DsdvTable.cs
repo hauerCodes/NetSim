@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 
 using NetSim.Lib.Simulator;
 
@@ -13,18 +14,15 @@ namespace NetSim.Lib.Routing.DSDV
         /// <param name="destination">The destination.</param>
         /// <param name="nextHop">The next hop.</param>
         /// <param name="metric">The metric.</param>
-        public void AddInitialRouteEntry(string destination, string nextHop, int metric)
+        /// <param name="sequenceNr">The sequence nr.</param>
+        public void AddInitialRouteEntry(string destination, string nextHop, int metric, DsdvSequence sequenceNr)
         {
             this.Entries.Add(new DsdvTableEntry()
             {
                 Destination = destination,
                 NextHop = nextHop,
                 Metric = metric,
-                SequenceNr = new DsdvSequence()
-                {
-                    SequenceId = destination,
-                    SequenceNr = 0
-                }
+                SequenceNr = sequenceNr
             });
         }
 
@@ -63,22 +61,29 @@ namespace NetSim.Lib.Routing.DSDV
                 var localRoute = Entries.FirstOrDefault(r => r.Destination.Equals(updateRoute.Destination));
 
                 // if no local route exists add route with nexthop sender and increment metric
-                if(localRoute == null)
+                if (localRoute == null)
                 {
                     var dsdvTableEntry = updateRoute as DsdvTableEntry;
 
                     if (dsdvTableEntry != null)
                     {
-                        AddRouteEntry(updateRoute.Destination,
+                        AddRouteEntry(
+                            updateRoute.Destination,
                             senderId,
                             updateRoute.Metric + 1,
                             dsdvTableEntry.SequenceNr);
                         updated = true;
                     }
                 }
+                else
+                {
+                    // if updateRoute (metric + 1) is better than local existant route - update and add increment metric
+                    if (updateRoute.Metric + 1 < localRoute.Metric)
+                    {
 
-                // if updateRoute is better than local route - update and increment metric
-                // updated = true;                
+                        updated = true;
+                    }
+                }
             }
 
             return updated;
@@ -101,6 +106,22 @@ namespace NetSim.Lib.Routing.DSDV
         public override object Clone()
         {
             return new DsdvTable() { Entries = this.Entries.Select(e => (NetSimTableEntry)e.Clone()).ToList() };
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder();
+
+            builder.AppendLine($"Dest Next Metric SeqNr");
+            builder.Append(base.ToString());
+
+            return builder.ToString();
         }
     }
 }

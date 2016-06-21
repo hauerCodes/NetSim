@@ -91,7 +91,6 @@
     <Compile Include="ViewModel\ClientViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ViewMode.cs" />
-    <Compile Include="ViewModel\ViewModelLocator.cs" />
     <Page Include="DetailPages\ConnectionPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

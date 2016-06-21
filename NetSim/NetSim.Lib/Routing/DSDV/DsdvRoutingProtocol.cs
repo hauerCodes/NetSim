@@ -15,11 +15,27 @@ namespace NetSim.Lib.Routing.DSDV
         /// </summary>
         private int periodicUpdateCounter = 10;
 
+        #region Constructor 
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DsdvRoutingProtocol"/> class.
         /// </summary>
         /// <param name="client">The client.</param>
         public DsdvRoutingProtocol(NetSimClient client) : base(client){}
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets the current sequence.
+        /// </summary>
+        /// <value>
+        /// The current sequence.
+        /// </value>
+        public DsdvSequence CurrentSequence { get; set; }
+
+        #endregion
 
         /// <summary>
         /// Initializes this instance.
@@ -29,17 +45,21 @@ namespace NetSim.Lib.Routing.DSDV
             // create table
             this.Table = new DsdvTable();
 
+            // cast to right type
             var localTableRef = (DsdvTable)this.Table;
 
-            // self routing entry  with metric 0
-            localTableRef.AddInitialRouteEntry(Client.Id, Client.Id, 0);
+            // create current (initial) sequence nr (ID-000)
+            this.CurrentSequence = new DsdvSequence() { SequenceId = this.Client.Id, SequenceNr = 0 };
 
-            //add intial routes
-            foreach(var to in Client.Connections.Keys)
-            {
-                //localTableRef.AddInitialRouteEntry(to, to, Client.Connections[to].Metric);
-                localTableRef.AddInitialRouteEntry(to, to, 1);
-            }
+            // self routing entry with metric 0 and initial sequence nr
+            localTableRef.AddInitialRouteEntry(Client.Id, Client.Id, 0, CurrentSequence);
+
+            //add intial routes for each direct connection
+            //foreach(var to in Client.Connections.Keys)
+            //{
+            //    //localTableRef.AddInitialRouteEntry(to, to, Client.Connections[to].Metric);
+            //    localTableRef.AddInitialRouteEntry(to, to, 1);
+            //}
         }
 
         /// <summary>
@@ -81,7 +101,9 @@ namespace NetSim.Lib.Routing.DSDV
                 // if message is update message
                 if (message is DsdvUpdateMessage)
                 {
+                    // client table
                     var dsdvTable = Table as DsdvTable;
+
                     if (dsdvTable != null)
                     {
                         if (dsdvTable.HandleUpdate(message.Sender, (message as DsdvUpdateMessage).UpdateTable))

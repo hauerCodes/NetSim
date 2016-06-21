@@ -64,8 +64,34 @@ namespace NetSim.Lib.Simulator
             TableUpdate?.Invoke();
         }
 
+        /// <summary>
+        /// Gets the route for.
+        /// </summary>
+        /// <param name="destinationId">The destination identifier.</param>
+        /// <returns></returns>
         public abstract NetSimTableEntry GetRouteFor(string destinationId);
 
+        /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        /// <returns></returns>
         public abstract object Clone();
+
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder();
+
+            foreach(var entry in Entries)
+            {
+                builder.AppendLine(entry.ToString());
+            }
+            return builder.ToString();
+        }
     }
 }

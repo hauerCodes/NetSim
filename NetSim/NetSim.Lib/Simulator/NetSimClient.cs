@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
+using NetSim.Lib.Annotations;
 using NetSim.Lib.Routing;
 using NetSim.Lib.Visualization;
 
 namespace NetSim.Lib.Simulator
 {
-    public class NetSimClient : NetSimItem
+    public class NetSimClient : NetSimItem, INotifyPropertyChanged
     {
         /// <summary>
         /// Occurs when clientStateUpdate.
@@ -40,13 +43,48 @@ namespace NetSim.Lib.Simulator
 
         #region Properties
 
+        /// <summary>
+        /// Gets or sets the connections.
+        /// </summary>
+        /// <value>
+        /// The connections.
+        /// </value>
         public Dictionary<string, NetSimConnection> Connections { get; set; }
 
+        /// <summary>
+        /// Gets or sets the input queue.
+        /// </summary>
+        /// <value>
+        /// The input queue.
+        /// </value>
         public Queue<NetSimMessage> InputQueue { get; set; }
 
+        /// <summary>
+        /// Gets or sets the routing protocol.
+        /// </summary>
+        /// <value>
+        /// The routing protocol.
+        /// </value>
         public NetSimRoutingProtocol RoutingProtocol { get; set; }
 
-        public int StepCounter => stepCounter;
+        /// <summary>
+        /// Gets the step counter.
+        /// </summary>
+        /// <value>
+        /// The step counter.
+        /// </value>
+        public int StepCounter
+        {
+            get
+            {
+                return stepCounter;
+            }
+            private set
+            {
+                this.stepCounter = value;
+                OnPropertyChanged();
+            }
+        }
 
         #endregion
 
@@ -67,6 +105,11 @@ namespace NetSim.Lib.Simulator
             }
         }
 
+        /// <summary>
+        /// Occurs when a property is changed.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
         #endregion
 
         /// <summary>
@@ -76,7 +119,7 @@ namespace NetSim.Lib.Simulator
         public void InitializeProtocol(NetSimProtocolType protocolType)
         {
             // (re)set step counter
-            this.stepCounter = 0;
+            this.StepCounter = 0;
 
             // create protocoll instance
             this.RoutingProtocol = RoutingProtocolFactory.CreateInstance(protocolType, this);
@@ -94,13 +137,17 @@ namespace NetSim.Lib.Simulator
         /// <param name="message">The message.</param>
         public void BroadcastMessage(NetSimMessage message)
         {
-            NetSimMessage localCopy = (NetSimMessage)message.Clone();
-
             foreach(var connection in Connections)
             {
+                //create copy of message
+                NetSimMessage localCopy = (NetSimMessage)message.Clone();
+                
                 // insert receiver id 
                 localCopy.Receiver = connection.Key;
                 localCopy.Sender = Id;
+
+                //transport message
+                connection.Value.StartTransportMessage(localCopy);
             }
         }
 
@@ -127,19 +174,25 @@ namespace NetSim.Lib.Simulator
         /// <summary>
         /// Performs the routing step.
         /// </summary>
-        public void PerformRoutingStep()
+        public void PerformSimulationStep()
         {
             RoutingProtocol.PerformRoutingStep();
 
-            stepCounter++;
+            StepCounter++;
         }
 
         /// <summary>
-        /// Called when [state updated].
+        /// Called when the state is updated.
         /// </summary>
         protected void OnStateUpdated()
         {
             ClientStateUpdate?.Invoke();
+        }
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

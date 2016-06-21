@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 
 using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
 
 using NetSim.DetailPages;
 using NetSim.Lib.Simulator;
@@ -21,9 +23,11 @@ namespace NetSim.ViewModel
 {
     public class MainViewModel : ViewModelBase
     {
-        private char nextNodeName;
+        private char nextNodeName = 'A';
 
         private ViewMode viewMode;
+
+        private NetSimProtocolType protocolType;
 
         private NetSimConnection draftConnection;
 
@@ -33,17 +37,28 @@ namespace NetSim.ViewModel
 
         private NetSimItem currentViewedItem;
 
-        private Canvas drawCanvas;
+        private ICommand startSimulationCommand;
+
+        private ICommand pauseSimulationCommand;
+
+        private ICommand performStepCommand;
+
+        private ICommand resetSimulationCommand;
 
         #region Constructor
 
         public MainViewModel(Canvas drawCanvas)
         {
-            DrawCanvas = drawCanvas;
-            Simulator = new NetSimSimulator();
-            Visualizer = new NetSimVisualizer(Simulator, drawCanvas);
-            this.nextNodeName = 'A';
+            this.DrawCanvas = drawCanvas;
+            this.Simulator = new NetSimSimulator();
+            this.Visualizer = new NetSimVisualizer(Simulator, drawCanvas);
+
+            this.Simulator.PropertyChanged += OnSimulatorPropertyChangedEventHandler;
+
             this.IsView = true;
+            this.ProtocolType = NetSimProtocolType.DSDV;
+
+            InitializeCommands();
         }
 
         #endregion
@@ -177,19 +192,19 @@ namespace NetSim.ViewModel
             {
                 if (currentViewedItem == null) return null;
 
-                if(currentViewedItem is NetSimClient)
+                if (currentViewedItem is NetSimClient)
                 {
-                    return new ClientPage();
+                    return new ClientPage() { Client = currentViewedItem as NetSimClient };
                 }
 
                 if (currentViewedItem is NetSimConnection)
                 {
-                    return new ConnectionPage();
+                    return new ConnectionPage() { Connection = currentViewedItem as NetSimConnection };
                 }
 
                 return null;
             }
-            
+
         }
 
         /// <summary>
@@ -198,17 +213,7 @@ namespace NetSim.ViewModel
         /// <value>
         /// The draw canvas.
         /// </value>
-        public Canvas DrawCanvas
-        {
-            get
-            {
-                return drawCanvas;
-            }
-            set
-            {
-                drawCanvas = value;
-            }
-        }
+        public Canvas DrawCanvas { get; set; }
 
         /// <summary>
         /// Gets or sets the visualizer.
@@ -226,29 +231,217 @@ namespace NetSim.ViewModel
         /// </value>
         public NetSimSimulator Simulator { get; set; }
 
+        /// <summary>
+        /// Gets or sets the type of the protocol.
+        /// </summary>
+        /// <value>
+        /// The type of the protocol.
+        /// </value>
+        public NetSimProtocolType ProtocolType
+        {
+            get
+            {
+                return this.protocolType;
+            }
+            set
+            {
+                this.protocolType = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets the simulation step.
+        /// </summary>
+        /// <value>
+        /// The simulation step.
+        /// </value>
+        public int SimulationStep => this.Simulator.StepCounter;
+
+        #endregion
+
+        #region Commands
+
+        /// <summary>
+        /// Gets or sets the start simulation command.
+        /// </summary>
+        /// <value>
+        /// The start simulation command.
+        /// </value>
+        public ICommand StartSimulationCommand
+        {
+            get
+            {
+                return startSimulationCommand;
+            }
+            set
+            {
+                this.startSimulationCommand = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the start simulation command.
+        /// </summary>
+        /// <value>
+        /// The start simulation command.
+        /// </value>
+        public ICommand PauseSimulationCommand
+        {
+            get
+            {
+                return pauseSimulationCommand;
+            }
+            set
+            {
+                this.pauseSimulationCommand = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the start simulation command.
+        /// </summary>
+        /// <value>
+        /// The start simulation command.
+        /// </value>
+        public ICommand ResetSimulationCommand
+        {
+            get
+            {
+                return resetSimulationCommand;
+            }
+            set
+            {
+                this.resetSimulationCommand = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the perform step command.
+        /// </summary>
+        /// <value>
+        /// The perform step command.
+        /// </value>
+        public ICommand PerformStepCommand
+        {
+            get
+            {
+                return performStepCommand;
+            }
+            set
+            {
+                this.performStepCommand = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        #endregion
+
+        #region Initialize
+        private void InitializeCommands()
+        {
+            this.PerformStepCommand = new RelayCommand(ExecuteSimulationStep, CanExecuteSimulationStep);
+            this.StartSimulationCommand = new RelayCommand(ExecuteStartSimulation, CanExecuteStartSimulation);
+            this.PauseSimulationCommand = new RelayCommand(ExecutePauseSimulation, CanExecutePauseSimulation);
+            this.ResetSimulationCommand = new RelayCommand(ExecutePauseSimulation, CanExecutePauseSimulation);
+        }
+
+        #endregion
+
+        #region Command Execution
+
+        private void ExecutePauseSimulation()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ExecuteSimulationStep()
+        {
+            if (!Simulator.IsInitialized)
+            {
+                Simulator.InitializeProtocol(NetSimProtocolType.DSDV);
+            }
+
+            Simulator.PerformSimulationStep();
+
+            if(CurrentViewedItem != null)
+            {
+                // update details view for client or connection
+                this.CurrentViewedItem = CurrentViewedItem;
+            }
+        }
+
+        private void ExecuteStartSimulation()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Command CanExecute Check
+
+        private bool CanExecutePauseSimulation()
+        {
+            return SimulatorNetworkCreated();
+        }
+
+        private bool CanExecuteStartSimulation()
+        {
+            return SimulatorNetworkCreated();
+        }
+
+        private bool CanExecuteSimulationStep()
+        {
+            return SimulatorNetworkCreated();
+        }
+
+        private bool SimulatorNetworkCreated()
+        {
+            return Simulator.Clients.Count > 0 && Simulator.Connections.Count > 0;
+        }
+
+
         #endregion
 
         #region Add Methods
 
+        /// <summary>
+        /// Adds the node.
+        /// </summary>
+        /// <param name="location">The location.</param>
+        /// <returns></returns>
         public NetSimItem AddNode(Point location)
         {
             var returnObj = Simulator.AddClient(nextNodeName.ToString(), (int)location.X, (int)location.Y);
 
             nextNodeName++;
 
+            CheckCanExecuteCommands();
+
             return returnObj;
         }
 
+        /// <summary>
+        /// Adds the edge.
+        /// </summary>
+        /// <param name="from">From.</param>
+        /// <param name="to">To.</param>
         public void AddEdge(NetSimItem from, NetSimItem to)
         {
             try
             {
-                if(!Simulator.AddConnection(from.Id, to.Id, 1))
+                if (!Simulator.AddConnection(from.Id, to.Id, 1))
                 {
                     draftConnection = null;
                     DrawCanvas.Children.Remove(draftConnectionLine);
                     draftConnectionLine = null;
                 }
+
+                CheckCanExecuteCommands();
+
             }
             catch (Exception ex)
             {
@@ -263,6 +456,11 @@ namespace NetSim.ViewModel
 
         #region Handle Mouse Movement, Clicks
 
+        /// <summary>
+        /// Gets the current item.
+        /// </summary>
+        /// <param name="getPosition">The get position.</param>
+        /// <returns></returns>
         public NetSimItem GetCurrentItem(Point getPosition)
         {
             Debug.WriteLine(Mouse.DirectlyOver);
@@ -295,6 +493,11 @@ namespace NetSim.ViewModel
             return null;
         }
 
+        /// <summary>
+        /// Handles the mouse left button down.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="mouseButtonEventArgs">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         public void HandleMouseLeftButtonDown(object sender, MouseButtonEventArgs mouseButtonEventArgs)
         {
             var item = GetCurrentItem(mouseButtonEventArgs.GetPosition(DrawCanvas));
@@ -334,6 +537,11 @@ namespace NetSim.ViewModel
             }
         }
 
+        /// <summary>
+        /// Handles the mouse left button up.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="mouseButtonEventArgs">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         public void HandleMouseLeftButtonUp(object sender, MouseButtonEventArgs mouseButtonEventArgs)
         {
             if (IsCreateNode && CurrentSelectedNode == null)
@@ -354,6 +562,11 @@ namespace NetSim.ViewModel
             }
         }
 
+        /// <summary>
+        /// Handles the mouse move.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="mouseEventArgs">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
         public void HandleMouseMove(object sender, MouseEventArgs mouseEventArgs)
         {
             if (mouseEventArgs.LeftButton == MouseButtonState.Pressed)
@@ -405,6 +618,11 @@ namespace NetSim.ViewModel
             }
         }
 
+        /// <summary>
+        /// Draws the connection line.
+        /// </summary>
+        /// <param name="endPoint">The end point.</param>
+        /// <param name="possibleConnection">if set to <c>true</c> [possible connection].</param>
         private void DrawConnectionLine(Point endPoint, bool possibleConnection = false)
         {
             int drawOffset = 4;
@@ -431,6 +649,30 @@ namespace NetSim.ViewModel
         }
 
         #endregion
+
+        /// <summary>
+        /// Called when a simulator property changes.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="PropertyChangedEventArgs"/> instance containing the event data.</param>
+        private void OnSimulatorPropertyChangedEventHandler(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName.Equals(nameof(Simulator.StepCounter)))
+            {
+                RaisePropertyChanged(nameof(SimulationStep));
+            }
+        }
+
+        /// <summary>
+        /// Checks if commands can be executed.
+        /// </summary>
+        private void CheckCanExecuteCommands()
+        {
+            (PerformStepCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (StartSimulationCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (PauseSimulationCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (ResetSimulationCommand as RelayCommand)?.RaiseCanExecuteChanged();
+        }
 
     }
 }

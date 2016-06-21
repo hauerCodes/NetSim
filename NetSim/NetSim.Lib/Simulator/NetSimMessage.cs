@@ -7,15 +7,17 @@ using NetSim.Lib.Visualization;
 
 namespace NetSim.Lib.Simulator
 {
-    public class NetSimMessage : NetSimItem, ICloneable
+    public abstract class NetSimMessage : NetSimItem, ICloneable
     {
         public string Sender { get; set; }
 
         public string Receiver { get; set; }
 
-        public object Clone()
+        public abstract object Clone();
+
+        public override string ToString()
         {
-            return new NetSimMessage() { Sender = this.Sender, Receiver = this.Receiver };
+            return $"#[{this.GetType().Name}] {Sender} - {Receiver}";
         }
     }
 }

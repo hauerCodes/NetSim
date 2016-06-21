@@ -13,6 +13,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using NetSim.Lib.Simulator;
+using NetSim.ViewModel;
+
 namespace NetSim.DetailPages
 {
     /// <summary>
@@ -20,9 +23,36 @@ namespace NetSim.DetailPages
     /// </summary>
     public partial class ConnectionPage : Page
     {
+        /// <summary>
+        /// The connection
+        /// </summary>
+        private NetSimConnection connection;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConnectionPage"/> class.
+        /// </summary>
         public ConnectionPage()
         {
             InitializeComponent();
+        }
+
+        /// <summary>
+        /// Gets or sets the connection.
+        /// </summary>
+        /// <value>
+        /// The connection.
+        /// </value>
+        public NetSimConnection Connection
+        {
+            get
+            {
+                return connection;
+            }
+            set
+            {
+                connection = value;
+                this.DataContext = new ConnectionViewModel(connection);
+            }
         }
     }
 }

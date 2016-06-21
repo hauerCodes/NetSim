@@ -8,7 +8,23 @@
       d:DesignHeight="300" d:DesignWidth="300"
       Title="ClientPage">
 
-    <Grid>
-        <TextBlock>Client</TextBlock>
+    <Grid Margin="10,5,5,5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" Grid.Row="0" FontWeight="Bold" >Client</TextBlock>
+        <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding Path=Client.Id}" ></TextBlock>
+        <TextBlock Grid.Column="0" Grid.Row="1" >Client Step</TextBlock>
+        <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding Path=Client.StepCounter}" ></TextBlock>
+
+        <TextBlock Grid.Column="0" Grid.Row="2" Margin="0 5 0 0" FontWeight="Bold" >Table</TextBlock>
+        <TextBlock Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding Path=Client.RoutingProtocol.Table}" FontFamily="Consolas" ></TextBlock>
     </Grid>
 </Page>

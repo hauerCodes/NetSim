@@ -95,14 +95,13 @@ namespace NetSim.Lib.Visualization
             if (edge.IsOffline)
             {
                 connectionLine.StrokeDashArray = new DoubleCollection(new List<double>() { 2, 2 });
+                connectionLine.Stroke = Brushes.Red;
             }
 
             if (edge.IsTransmitting)
             {
-                // todo
-
+                connectionLine.Stroke = Brushes.Orange;
             }
-
 
             return connectionLine;
         }
@@ -112,7 +111,7 @@ namespace NetSim.Lib.Visualization
         /// </summary>
         /// <param name="node">The node.</param>
         /// <returns></returns>
-        private UIElement CreateClientNode(NetSimItem node)
+        private UIElement CreateClientNode(NetSimClient node)
         {
             var grid = new Grid { Tag = node };
             var ellipse = new Ellipse
@@ -123,6 +122,9 @@ namespace NetSim.Lib.Visualization
                 Fill = Brushes.LightGray,
                 Tag = node
             };
+
+            
+
             var textBlock = new TextBlock
             {
                 Text = node.Id,

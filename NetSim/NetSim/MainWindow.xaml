@@ -13,7 +13,7 @@
                 <Separator></Separator>
                 <MenuItem Header="Exit"></MenuItem>
             </MenuItem>
-            <MenuItem Header="Routing RoutingProtocol">
+            <MenuItem Header="Routing">
                 <MenuItem IsCheckable="True" IsChecked="True" Header="DSDV"></MenuItem>
                 <MenuItem IsCheckable="True" IsChecked="False" Header="OLSR"></MenuItem>
                 <MenuItem IsCheckable="True" IsChecked="False" Header="AODV"></MenuItem>
@@ -28,15 +28,44 @@
             <Grid Grid.Column="0" Background="LightGray">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition />
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0" Orientation="Vertical">
-                    <TextBlock Margin="5">Network Creation</TextBlock>
+                    <TextBlock Margin="5" FontWeight="Bold">Network Creation</TextBlock>
                     <ToggleButton Margin="5" IsChecked="{Binding IsView, Mode=TwoWay}">View Mode</ToggleButton>
-                    <ToggleButton Margin="5" IsChecked="{Binding IsCreateNode, Mode=TwoWay}">Create Nodes</ToggleButton>
-                    <ToggleButton Margin="5" IsChecked="{Binding IsCreateEdge, Mode=TwoWay}">Create Edges</ToggleButton>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                    <ToggleButton Grid.Column="0" Margin="5" IsChecked="{Binding IsCreateNode, Mode=TwoWay}">Create Nodes</ToggleButton>
+                    <ToggleButton Grid.Column="1" Margin="5" IsChecked="{Binding IsCreateEdge, Mode=TwoWay}">Create Edges</ToggleButton>
+                    </Grid>
                 </StackPanel>
-                <Frame Grid.Row="1" Content="{Binding Path=DetailPage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" NavigationUIVisibility="Hidden"></Frame>
+                <StackPanel Grid.Row="1" Orientation="Vertical">
+                    <TextBlock Margin="5" FontWeight="Bold">Control Simulation</TextBlock>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Row="0" Grid.Column="0" Margin="5" Command="{Binding StartSimulationCommand}">Start</Button>
+                        <Button Grid.Row="0" Grid.Column="1" Margin="5" Command="{Binding PerformStepCommand}">Step</Button>
+                    </Grid>
+                    <Button Margin="5" >Reset</Button>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" TextAlignment="Center">Simulation Step</TextBlock>
+                        <TextBlock Grid.Column="1" Text="{Binding Path=SimulationStep}"></TextBlock>
+                    </Grid>
+                </StackPanel>
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+                    <Frame  Content="{Binding Path=DetailPage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" NavigationUIVisibility="Hidden"></Frame>
+                </ScrollViewer>
             </Grid>
             <Canvas Grid.Column="1" Name="DrawCanvas" 
                         MouseLeftButtonUp="DrawCanvasMouseLeftButtonUp" 

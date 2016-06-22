@@ -35,6 +35,7 @@ namespace NetSim.Lib.Simulator
             this.Id = id;
             this.Location = location;
             this.stepCounter = 0;
+            this.IsInitialized = false;
             this.InputQueue = new Queue<NetSimMessage>();
             this.Connections = new Dictionary<string, NetSimConnection>();
         }
@@ -86,6 +87,14 @@ namespace NetSim.Lib.Simulator
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this instance is initialized.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is initialized; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsInitialized { get; private set; }
+
         #endregion
 
         #region Events
@@ -129,6 +138,9 @@ namespace NetSim.Lib.Simulator
 
             //initialize protocol
             RoutingProtocol.Initialize();
+
+            // client is initialized
+            this.IsInitialized = true;
         }
 
         /// <summary>
@@ -189,6 +201,10 @@ namespace NetSim.Lib.Simulator
             ClientStateUpdate?.Invoke();
         }
 
+        /// <summary>
+        /// Called when a property changes.
+        /// </summary>
+        /// <param name="propertyName">Name of the property.</param>
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

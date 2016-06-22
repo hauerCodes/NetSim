@@ -490,6 +490,11 @@ namespace NetSim.ViewModel
                 return (Mouse.DirectlyOver as Line).Tag as NetSimItem;
             }
 
+            if (Mouse.DirectlyOver is Path)
+            {
+                return (Mouse.DirectlyOver as Path).Tag as NetSimItem;
+            }
+
             return null;
         }
 

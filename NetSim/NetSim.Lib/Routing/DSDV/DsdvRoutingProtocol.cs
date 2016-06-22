@@ -115,9 +115,9 @@ namespace NetSim.Lib.Routing.DSDV
                 else
                 {
                     // forward message if client is not reciever
-                    if (message.Receiver.Equals(this.Client.Id))
+                    if (!message.Receiver.Equals(this.Client.Id))
                     {
-
+                        this.Client.SendMessage(message);
                     }
                 }
             }

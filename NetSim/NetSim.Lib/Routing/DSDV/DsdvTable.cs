@@ -77,6 +77,10 @@ namespace NetSim.Lib.Routing.DSDV
                 }
                 else
                 {
+                    // if route exists check if better metric and sequence number is higher (newer) than local number
+                    var dsdvLocalRouteEntry = localRoute as DsdvTableEntry;
+                    var dsdvUpdateRoute = updateRoute as DsdvTableEntry;
+
                     // if updateRoute (metric + 1) is better than local existant route - update and add increment metric
                     if (updateRoute.Metric + 1 < localRoute.Metric)
                     {

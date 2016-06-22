@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
 using NetSim.Lib.Controls;
@@ -68,9 +69,10 @@ namespace NetSim.Lib.Visualization
 
                 if (edge.IsTransmitting && !edge.IsOffline)
                 {
-                    UIElement message = CreateMessage(edge);
-
-                    drawCanvas.Children.Add(message);
+                    foreach (var message in edge.PendingMessages)
+                    {
+                        AddMessage(edge, message);
+                    }
                 }
             }
 
@@ -83,17 +85,66 @@ namespace NetSim.Lib.Visualization
             }
         }
 
-        private UIElement CreateMessage(NetSimConnection edge)
+        /// <summary>
+        /// Adds the message.
+        /// </summary>
+        /// <param name="edge">The edge.</param>
+        /// <param name="message">The message.</param>
+        private void AddMessage(NetSimConnection edge, NetSimMessage message)
         {
-            var message = new MessageControl { Width = 15, Height = 15, Tag = edge, MessagePath = { Tag = edge } };
+            var uimessage = new MessageControl { Width = 15, Height = 15, Tag = edge, MessagePath = { Tag = edge } };
 
             int top = (edge.EndPointA.Location.Top + edge.EndPointB.Location.Top) / 2;
             int left = (edge.EndPointA.Location.Left + edge.EndPointB.Location.Left) / 2;
 
-            Canvas.SetLeft(message, left);
-            Canvas.SetTop(message, top);
+            Canvas.SetLeft(uimessage, left);
+            Canvas.SetTop(uimessage, top);
 
-            return message;
+            drawCanvas.Children.Add(uimessage);
+
+            var storyBoard = CreateMessageAnimation(edge, message, uimessage);
+
+            uimessage.BeginStoryboard(storyBoard);
+
+            storyBoard.Begin();
+        }
+
+        /// <summary>
+        /// Creates the message animation.
+        /// </summary>
+        /// <param name="edge">The edge.</param>
+        /// <param name="message">The message.</param>
+        /// <param name="uimessage">The uimessage.</param>
+        /// <returns></returns>
+        private static Storyboard CreateMessageAnimation(NetSimConnection edge, NetSimMessage message, MessageControl uimessage)
+        {
+            NetSimItem receiver = edge.EndPointA.Id.Equals(message.Receiver) ? edge.EndPointA : edge.EndPointB;
+            NetSimItem sender = edge.EndPointA.Id.Equals(message.Sender) ? edge.EndPointA : edge.EndPointB;
+
+            DoubleAnimation animationTop = new DoubleAnimation()
+            {
+                From = sender.Location.Top,
+                To = receiver.Location.Top,
+                Duration = TimeSpan.FromSeconds(1)
+            };
+
+            DoubleAnimation animationLeft = new DoubleAnimation()
+            {
+                From = sender.Location.Left,
+                To = receiver.Location.Left,
+                Duration = TimeSpan.FromSeconds(1)
+            };
+
+            Storyboard board = new Storyboard();
+            board.Children.Add(animationLeft);
+            board.Children.Add(animationTop);
+
+            Storyboard.SetTarget(animationTop, uimessage);
+            Storyboard.SetTargetProperty(animationTop, new PropertyPath(Canvas.TopProperty));
+
+            Storyboard.SetTarget(animationLeft, uimessage);
+            Storyboard.SetTargetProperty(animationLeft, new PropertyPath(Canvas.LeftProperty));
+            return board;
         }
 
         /// <summary>

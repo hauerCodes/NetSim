@@ -72,6 +72,12 @@ namespace NetSim.Lib.Simulator
         public abstract void PerformRoutingStep();
 
         /// <summary>
+        /// Sends the message.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        public abstract void SendMessage(NetSimMessage message);
+
+        /// <summary>
         /// Gets the route.
         /// </summary>
         /// <param name="destinationId">The destination identifier.</param>

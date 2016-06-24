@@ -195,12 +195,7 @@ namespace NetSim.Lib.Simulator
         /// <param name="message">The message.</param>
         public void SendMessage(NetSimMessage message)
         {
-            string nextHopId = RoutingProtocol.GetRoute(message.Receiver);
-
-            //"hack" to determine the receiver endpoint of message
-            message.NextReceiver = nextHopId;
-
-            Connections[nextHopId].StartTransportMessage(message);
+            RoutingProtocol.SendMessage(message);
         }
 
         /// <summary>

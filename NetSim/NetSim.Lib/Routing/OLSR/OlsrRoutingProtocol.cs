@@ -10,6 +10,15 @@ namespace NetSim.Lib.Routing.OLSR
 {
     public class OlsrRoutingProtocol : NetSimRoutingProtocol
     {
+        /// <summary>
+        /// Gets a value indicating whether this instance is initial broadcast.
+        /// </summary>
+        private bool isFirstBroadcastReady;
+
+        /// <summary>
+        /// The periodic update counter
+        /// </summary>
+        private int periodicUpdateCounter = 10;
 
         #region Constructor 
 
@@ -49,6 +58,9 @@ namespace NetSim.Lib.Routing.OLSR
 
         #endregion
 
+        /// <summary>
+        /// Initializes this instance.
+        /// </summary>
         public override void Initialize()
         {
             // call base initialization (stepcounter and data)
@@ -58,10 +70,16 @@ namespace NetSim.Lib.Routing.OLSR
             this.OneHopNeighborTable = new OlsrNeighborTable();
             this.TwoHopNeighborTable = new OlsrNeighborTable();
 
+            // set intial broadcast to false
+            this.isFirstBroadcastReady = false;
+
             //set protocol state 
-            this.State = OlsrState.HelloOneHop;
+            this.State = OlsrState.Hello;
         }
 
+        /// <summary>
+        /// Performs the routing step.
+        /// </summary>
         public override void PerformRoutingStep()
         {
             switch (State)
@@ -70,35 +88,137 @@ namespace NetSim.Lib.Routing.OLSR
                     // send hello message to all direct links
                     BroadcastHelloMessages();
 
-                    State = OlsrState.WaitForHello;
+                    State = OlsrState.ReceiveHello;
                     break;
 
-                case OlsrState.WaitForHello:
+                case OlsrState.ReceiveHello:
                     // wait for incoming hello messages 
-                    ReceiveHelloMessages();
+                    HandleIncommingMessages();
 
-                    // wait unitl every connected links has sent his hello
-                    if(this.OneHopNeighborTable.Entries.Count >= this.Client.Connections.Count(x => !x.Value.IsOffline))
+                    if (!isFirstBroadcastReady)
                     {
-                        this.State = OlsrState.Hello;
+                        // intial broadcast ready (hello received)
+                        isFirstBroadcastReady = true;
+
+                        // wait unitl every connected links has sent his hello
+                        if (this.OneHopNeighborTable.Entries.Count
+                            >= this.Client.Connections.Count(x => !x.Value.IsOffline))
+                        {
+                            this.State = OlsrState.Hello;
+                        }
+                    }
+                    else
+                    {
+                        // start to calculate the mpr list and routing table
+                        this.State = OlsrState.Calculate;
                     }
                     break;
 
+                case OlsrState.Calculate:
+                    // search mpr and calculate routing table
+
+
+                    this.State = OlsrState.TopologyControl;
+                    break;
                 case OlsrState.TopologyControl:
+
+                    // restart hello process
+                    if (stepCounter % periodicUpdateCounter == 0)
+                    {
+                        State = OlsrState.Hello;
+                        isFirstBroadcastReady = false;
+                    }
+
                     break;
             }
 
             stepCounter++;
         }
 
-        private void BroadcastHelloMessages()
+        /// <summary>
+        /// Sends the message.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        public override void SendMessage(NetSimMessage message)
         {
-            throw new NotImplementedException();
+            string nextHopId = GetRoute(message.Receiver);
+
+            //"hack" to determine the receiver endpoint of message
+            message.NextReceiver = nextHopId;
+
+            Client.Connections[nextHopId].StartTransportMessage(message);
         }
 
-        private void ReceiveHelloMessages()
+        /// <summary>
+        /// Broadcasts the hello messages.
+        /// </summary>
+        private void BroadcastHelloMessages()
         {
-            throw new NotImplementedException();
+            // send hello message with all direct neighbors of this client
+            Client.BroadcastMessage(new OlsrHelloMessage()
+            {
+                Neighbors = OneHopNeighborTable.Entries.Select(e => e.NeighborId).ToList()
+            });
+        }
+
+        /// <summary>
+        /// Handles the received hello message.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        private void HandleReceivedHelloMessage(OlsrHelloMessage message)
+        {
+            if (message.Neighbors != null && message.Neighbors.Any())
+            {
+                //update two hop neighbors
+                foreach (string twohopneighbor in message.Neighbors)
+                {
+                    //upate one hop neighbors
+                    if (TwoHopNeighborTable.GetEntryFor(twohopneighbor) == null)
+                    {
+                        TwoHopNeighborTable.AddEntry(twohopneighbor, message.Sender);
+                    }
+                }
+            }
+            else
+            {
+                //upate one hop neighbors
+                if (OneHopNeighborTable.GetEntryFor(message.Sender) == null)
+                {
+                    OneHopNeighborTable.AddEntry(message.Sender);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handles the incomming messages.
+        /// </summary>
+        private void HandleIncommingMessages()
+        {
+            if (Client.InputQueue.Count > 0)
+            {
+                while (Client.InputQueue.Count > 0)
+                {
+                    var message = Client.InputQueue.Dequeue();
+
+                    // if message is update message
+                    if (message is OlsrHelloMessage)
+                    {
+                        HandleReceivedHelloMessage((OlsrHelloMessage)message);
+                    }
+                    else
+                    {
+                        // forward message if client is not reciever
+                        if (!message.Receiver.Equals(this.Client.Id))
+                        {
+                            SendMessage(message);
+                        }
+                        else
+                        {
+                            Client.ReceiveData(message);
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -120,12 +240,5 @@ namespace NetSim.Lib.Routing.OLSR
         {
             return TwoHopNeighborTable.GetEntryFor(id) != null;
         }
-    }
-
-    public enum OlsrState
-    {
-        Hello,
-        WaitForHello,
-        TopologyControl
     }
 }

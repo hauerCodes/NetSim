@@ -12,7 +12,12 @@ namespace NetSim.Lib.Routing.AODV
     {
         public override object Clone()
         {
-            throw new NotImplementedException();
+            return new AodvTableEntry()
+            {
+                Destination = this.Destination,
+                Metric = this.Metric,
+                NextHop = this.NextHop,
+            };
         }
     }
 }

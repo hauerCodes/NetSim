@@ -10,6 +10,8 @@ namespace NetSim.Lib.Routing.OLSR
 {
     public class OlsrNeighborTable
     {
+        #region Constructor
+
         /// <summary>
         /// Initializes a new instance of the <see cref="OlsrNeighborTable"/> class.
         /// </summary>
@@ -17,6 +19,10 @@ namespace NetSim.Lib.Routing.OLSR
         {
             this.Entries = new List<OlsrNeighborTableEntry>();
         }
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
         /// Gets or sets the entries.
@@ -26,6 +32,8 @@ namespace NetSim.Lib.Routing.OLSR
         /// </value>
         public List<OlsrNeighborTableEntry> Entries { get; set; }
 
+        #endregion
+
         /// <summary>
         /// Gets the entry for.
         /// </summary>
@@ -34,6 +42,21 @@ namespace NetSim.Lib.Routing.OLSR
         public OlsrNeighborTableEntry GetEntryFor(string searchId)
         {
             return Entries.FirstOrDefault(e => e.NeighborId.Equals(searchId));
+        }
+
+        /// <summary>
+        /// Adds the entry.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="accessThough">The access though.</param>
+        public void AddEntry(string sender, string accessThough = null)
+        {
+            this.Entries.Add(new OlsrNeighborTableEntry()
+            {
+                NeighborId = sender,
+                AccessableThough = accessThough,
+                IsMultiPointRelay = false
+            });
         }
 
         /// <summary>
@@ -52,5 +75,7 @@ namespace NetSim.Lib.Routing.OLSR
             }
             return builder.ToString();
         }
+
+
     }
 }

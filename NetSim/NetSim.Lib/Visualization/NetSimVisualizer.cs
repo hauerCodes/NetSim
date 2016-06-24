@@ -296,16 +296,33 @@ namespace NetSim.Lib.Visualization
         /// <returns></returns>
         private UIElement CreateOlsrClientNode(NetSimClient node)
         {
-            if (CurrentSelectedItem != null && node.Id.Equals(CurrentSelectedItem.Id))
+            if (CurrentSelectedItem != null)
             {
-                return CreateClientNode(node, Brushes.PaleVioletRed);
+                if (node.Id.Equals(CurrentSelectedItem.Id))
+                {
+                    return CreateClientNode(node, Brushes.MistyRose);
+                }
+
+                OlsrRoutingProtocol currentSelectedNodeProtocol = CurrentSelectedItem.RoutingProtocol as OlsrRoutingProtocol;
+
+                if (currentSelectedNodeProtocol != null)
+                {
+                    //is n(1 hop) neigbor
+                    if (currentSelectedNodeProtocol.IsOneHopNeighbor(node.Id))
+                    {
+                        return CreateClientNode(node, Brushes.DarkViolet);
+                    }
+
+                    //is n(2 hop) neighbor
+                    if (currentSelectedNodeProtocol.IsTwoHopNeighbor(node.Id))
+                    {
+                        return CreateClientNode(node, Brushes.PaleVioletRed);
+                    }
+
+                    //is mpr neighbor
+                }
+
             }
-
-            //is n(1 hop) neigbor
-
-            //is n(2 hop) neighbor
-
-            //is mpr neighbor
 
             return CreateClientNode(node, Brushes.Lavender);
         }

@@ -25,5 +25,10 @@ namespace NetSim.Lib.Routing.DSR
         {
             throw new NotImplementedException();
         }
+
+        public override void SendMessage(NetSimMessage message)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

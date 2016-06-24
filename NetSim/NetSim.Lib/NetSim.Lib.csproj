@@ -83,6 +83,7 @@
     <Compile Include="Routing\OLSR\OlsrNeighborTable.cs" />
     <Compile Include="Routing\OLSR\OlsrNeighborTableEntry.cs" />
     <Compile Include="Routing\OLSR\OlsrRoutingProtocol.cs" />
+    <Compile Include="Routing\OLSR\OlsrState.cs" />
     <Compile Include="Routing\OLSR\OlsrTableEntry.cs" />
     <Compile Include="Routing\RoutingProtocolFactory.cs" />
     <Compile Include="Simulator\DataMessage.cs" />

@@ -8,6 +8,7 @@ namespace NetSim.Lib.Routing.DSDV
 {
     public class DsdvTable : NetSimTable
     {
+
         /// <summary>
         /// Adds the initial route entry.
         /// </summary>
@@ -55,25 +56,29 @@ namespace NetSim.Lib.Routing.DSDV
             bool updated = false;
 
             // iterate through update 
-            foreach(var updateRoute in receivedUpdate.Entries)
+            foreach (var updateRoute in receivedUpdate.Entries)
             {
                 // search localroute
                 var localRoute = Entries.FirstOrDefault(r => r.Destination.Equals(updateRoute.Destination));
+
+                //ignore own local route
+                if (localRoute != null && localRoute.Metric == 0)
+                {
+                    continue;
+                }
 
                 // if no local route exists add route with nexthop sender and increment metric
                 if (localRoute == null)
                 {
                     var dsdvTableEntry = updateRoute as DsdvTableEntry;
 
-                    if (dsdvTableEntry != null)
-                    {
-                        AddRouteEntry(
-                            updateRoute.Destination,
-                            senderId,
-                            updateRoute.Metric + 1,
-                            dsdvTableEntry.SequenceNr);
-                        updated = true;
-                    }
+                    if (dsdvTableEntry == null) continue;
+                    AddRouteEntry(
+                        updateRoute.Destination,
+                        senderId,
+                        updateRoute.Metric + 1,
+                        dsdvTableEntry.SequenceNr);
+                    updated = true;
                 }
                 else
                 {
@@ -81,11 +86,51 @@ namespace NetSim.Lib.Routing.DSDV
                     var dsdvLocalRouteEntry = localRoute as DsdvTableEntry;
                     var dsdvUpdateRoute = updateRoute as DsdvTableEntry;
 
-                    // if updateRoute (metric + 1) is better than local existant route - update and add increment metric
-                    if (updateRoute.Metric + 1 < localRoute.Metric)
-                    {
+                    if (dsdvUpdateRoute == null || dsdvLocalRouteEntry == null) continue;
 
-                        updated = true;
+                    var sequenceCompare = dsdvUpdateRoute.SequenceNr.CompareTo(dsdvLocalRouteEntry.SequenceNr);
+
+                    switch (sequenceCompare)
+                    {
+                        case 0: // if update route sequencenr is equal to local route sequencenr
+
+                            // check if updateRoute (metric + 1) is better than local existant route
+                            if (updateRoute.Metric + 1 < localRoute.Metric)
+                            {
+                                // update and add increment metric
+                                dsdvLocalRouteEntry.NextHop = senderId;
+                                dsdvLocalRouteEntry.Metric = dsdvUpdateRoute.Metric + 1;
+                                dsdvLocalRouteEntry.SequenceNr = (DsdvSequence)dsdvUpdateRoute.SequenceNr.Clone();
+                                updated = true;
+                            }
+
+                            break;
+                        case 1: // if update route sequencenr is higher then local route sequencenr
+
+                            // if metric is the same 
+                            if (updateRoute.Metric + 1 == localRoute.Metric)
+                            {
+                                // update sequence nr
+                                dsdvLocalRouteEntry.SequenceNr = (DsdvSequence)dsdvUpdateRoute.SequenceNr.Clone();
+                            }
+                            else
+                            {
+                                // update local route with newer information (metric + 1)
+                                dsdvLocalRouteEntry.NextHop = senderId;
+
+                                if (dsdvUpdateRoute.Metric != NotReachable)
+                                {
+                                    dsdvLocalRouteEntry.Metric = dsdvUpdateRoute.Metric + 1;
+                                }
+                                else
+                                {
+                                    dsdvLocalRouteEntry.Metric = dsdvUpdateRoute.Metric;
+                                }
+                                dsdvLocalRouteEntry.SequenceNr = (DsdvSequence)dsdvUpdateRoute.SequenceNr.Clone();
+                                updated = true;
+                            }
+
+                            break;
                     }
                 }
             }

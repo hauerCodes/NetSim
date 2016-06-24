@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 using NetSim.Lib.Annotations;
 using NetSim.Lib.Routing;
@@ -11,7 +12,7 @@ using NetSim.Lib.Visualization;
 
 namespace NetSim.Lib.Simulator
 {
-    public class NetSimClient : NetSimItem, INotifyPropertyChanged
+    public class NetSimClient : NetSimItem, INotifyPropertyChanged, INetSimConnectionEndpoint
     {
         /// <summary>
         /// Occurs when clientStateUpdate.
@@ -22,6 +23,11 @@ namespace NetSim.Lib.Simulator
         /// The step counter
         /// </summary>
         private int stepCounter;
+
+        /// <summary>
+        /// The client data
+        /// </summary>
+        private StringBuilder clientData;
 
         #region Constructor 
 
@@ -35,6 +41,7 @@ namespace NetSim.Lib.Simulator
             this.Id = id;
             this.Location = location;
             this.stepCounter = 0;
+            this.clientData = new StringBuilder();
             this.IsInitialized = false;
             this.InputQueue = new Queue<NetSimMessage>();
             this.Connections = new Dictionary<string, NetSimConnection>();
@@ -95,6 +102,14 @@ namespace NetSim.Lib.Simulator
         /// </value>
         public bool IsInitialized { get; private set; }
 
+        /// <summary>
+        /// Gets the current data.
+        /// </summary>
+        /// <value>
+        /// The current data.
+        /// </value>
+        public string CurrentData => clientData.ToString();
+
         #endregion
 
         #region Events
@@ -127,8 +142,18 @@ namespace NetSim.Lib.Simulator
         /// <param name="protocolType">Type of the protocol.</param>
         public void InitializeProtocol(NetSimProtocolType protocolType)
         {
+            // if client is already intialized - then this is a reset
+            if(IsInitialized)
+            {
+                //clear pending messages in connections
+                Connections.Values.ToList().ForEach(c => { c.PendingMessages.Clear(); });
+            }
+
             // (re)set step counter
             this.StepCounter = 0;
+
+            // (re)set the client data
+            this.clientData = new StringBuilder();
 
             // create protocoll instance
             this.RoutingProtocol = RoutingProtocolFactory.CreateInstance(protocolType, this);
@@ -156,6 +181,7 @@ namespace NetSim.Lib.Simulator
                 
                 // insert receiver id 
                 localCopy.Receiver = connection.Key;
+                localCopy.NextReceiver = connection.Key;
                 localCopy.Sender = Id;
 
                 //transport message
@@ -171,6 +197,9 @@ namespace NetSim.Lib.Simulator
         {
             string nextHopId = RoutingProtocol.GetRoute(message.Receiver);
 
+            //"hack" to determine the receiver endpoint of message
+            message.NextReceiver = nextHopId;
+
             Connections[nextHopId].StartTransportMessage(message);
         }
 
@@ -181,6 +210,15 @@ namespace NetSim.Lib.Simulator
         public void ReceiveMessage(NetSimMessage message)
         {
             InputQueue?.Enqueue(message);
+        }
+
+        /// <summary>
+        /// Receives a datamessage
+        /// </summary>
+        /// <param name="message">The message.</param>
+        public void ReceiveData(NetSimMessage message)
+        {
+            clientData?.AppendLine(message.ToString());
         }
 
         /// <summary>

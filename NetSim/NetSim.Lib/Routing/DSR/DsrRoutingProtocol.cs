@@ -17,7 +17,8 @@ namespace NetSim.Lib.Routing.DSR
 
         public override void Initialize()
         {
-            throw new NotImplementedException();
+            // call base initialization (stepcounter and data)
+            base.Initialize();
         }
 
         public override void PerformRoutingStep()

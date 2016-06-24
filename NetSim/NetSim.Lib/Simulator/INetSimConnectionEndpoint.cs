@@ -5,23 +5,21 @@ using NetSim.Lib.Visualization;
 
 namespace NetSim.Lib.Simulator
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public abstract class NetSimItem : INetSimVisualizeableItem
+    public interface INetSimConnectionEndpoint
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NetSimItem"/> class.
-        /// </summary>
-        protected NetSimItem() { }
-
         /// <summary>
         /// Gets or sets the identifier.
         /// </summary>
         /// <value>
         /// The identifier.
         /// </value>
-        public string Id { get; set; }
+        string Id { get; set; }
+
+        /// <summary>
+        /// Receives the message.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        void ReceiveMessage(NetSimMessage message);
 
         /// <summary>
         /// Gets or sets the location.
@@ -29,6 +27,7 @@ namespace NetSim.Lib.Simulator
         /// <value>
         /// The location.
         /// </value>
-        public NetSimLocation Location { get; set; }
+        NetSimLocation Location { get; set; }
+
     }
 }

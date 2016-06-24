@@ -23,8 +23,10 @@
         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Path=Connection.Id}"></TextBlock>
 
         <TextBlock Grid.Row="1" Grid.Column="0">Offline</TextBlock>
-        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Path=Connection.IsOffline}"></TextBlock>
-
+        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" >
+            <CheckBox IsChecked="{Binding Path=Connection.IsOffline}"></CheckBox>
+            <TextBlock Margin="5 0 0 0" Text="{Binding Path=Connection.IsOffline}"></TextBlock>
+        </StackPanel>
         <TextBlock Grid.Row="2" Grid.Column="0">Current Messages</TextBlock>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" FontFamily="Consolas" Text="{Binding Path=CurrentMessages}"></TextBlock>

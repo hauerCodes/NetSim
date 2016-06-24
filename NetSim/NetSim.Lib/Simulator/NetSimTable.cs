@@ -12,6 +12,11 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         private event Action TableUpdate;
 
+        /// <summary>
+        /// The not reachable
+        /// </summary>
+        protected const int NotReachable = -1;
+
         #region Constructor
 
         /// <summary>

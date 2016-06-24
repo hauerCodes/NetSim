@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +15,8 @@ using System.Windows.Shapes;
 
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+
+using Microsoft.Win32;
 
 using NetSim.DetailPages;
 using NetSim.Lib.Simulator;
@@ -27,6 +31,10 @@ namespace NetSim.ViewModel
 
         private ViewMode viewMode;
 
+        private bool isRunSimluation;
+
+        private object simluationLockObj = new object();
+
         private NetSimProtocolType protocolType;
 
         private NetSimConnection draftConnection;
@@ -37,6 +45,10 @@ namespace NetSim.ViewModel
 
         private NetSimItem currentViewedItem;
 
+        private ICommand saveNetworkCommand;
+
+        private ICommand loadNetworkCommand;
+
         private ICommand startSimulationCommand;
 
         private ICommand pauseSimulationCommand;
@@ -44,6 +56,11 @@ namespace NetSim.ViewModel
         private ICommand performStepCommand;
 
         private ICommand resetSimulationCommand;
+
+        /// <summary>
+        /// The simulation task
+        /// </summary>
+        private Task simulationTask;
 
         #region Constructor
 
@@ -175,6 +192,12 @@ namespace NetSim.ViewModel
                 currentViewedItem = value;
                 Debug.WriteLine(value != null ? $"CurrentViewed:{value.Id}" : $"CurrentViewed: -");
 
+                var client = value as NetSimClient;
+                if (client != null)
+                {
+                    this.Visualizer.CurrentSelectedItem = client;
+                }
+
                 RaisePropertyChanged();
                 RaisePropertyChanged(nameof(DetailPage));
             }
@@ -247,6 +270,9 @@ namespace NetSim.ViewModel
             {
                 this.protocolType = value;
                 RaisePropertyChanged();
+
+                ExecuteResetSimulation();
+                
             }
         }
 
@@ -338,45 +364,188 @@ namespace NetSim.ViewModel
             }
         }
 
+        /// <summary>
+        /// Gets or sets the save network command.
+        /// </summary>
+        /// <value>
+        /// The save network command.
+        /// </value>
+        public ICommand SaveNetworkCommand
+        {
+            get
+            {
+                return saveNetworkCommand;
+            }
+            set
+            {
+                this.saveNetworkCommand = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the load network command.
+        /// </summary>
+        /// <value>
+        /// The load network command.
+        /// </value>
+        public ICommand LoadNetworkCommand
+        {
+            get
+            {
+                return loadNetworkCommand;
+            }
+            set
+            {
+                this.loadNetworkCommand = value;
+                RaisePropertyChanged();
+            }
+        }
+
         #endregion
 
         #region Initialize
+
+        /// <summary>
+        /// Initializes the commands.
+        /// </summary>
         private void InitializeCommands()
         {
             this.PerformStepCommand = new RelayCommand(ExecuteSimulationStep, CanExecuteSimulationStep);
             this.StartSimulationCommand = new RelayCommand(ExecuteStartSimulation, CanExecuteStartSimulation);
             this.PauseSimulationCommand = new RelayCommand(ExecutePauseSimulation, CanExecutePauseSimulation);
-            this.ResetSimulationCommand = new RelayCommand(ExecutePauseSimulation, CanExecutePauseSimulation);
+            this.ResetSimulationCommand = new RelayCommand(ExecuteResetSimulation, CanExecuteResetSimulation);
+
+            this.SaveNetworkCommand = new RelayCommand(ExecuteSaveNetwork);
+            this.LoadNetworkCommand = new RelayCommand(ExecuteLoadNetwork);
         }
 
         #endregion
 
         #region Command Execution
 
-        private void ExecutePauseSimulation()
+        /// <summary>
+        /// Executes the load network.
+        /// </summary>
+        private void ExecuteLoadNetwork()
         {
-            throw new NotImplementedException();
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                InitialDirectory = @"c:\temp\",
+                Filter = "netsim files(*.netsim)|*.netsim|All files (*.*)|*.*"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                MessageBox.Show(openFileDialog.FileName);
+                //todo
+            }
+
         }
 
+        /// <summary>
+        /// Executes the save network.
+        /// </summary>
+        private void ExecuteSaveNetwork()
+        {
+            SaveFileDialog openFileDialog = new SaveFileDialog
+            {
+                InitialDirectory = @"c:\temp\",
+                Filter = "netsim files(*.netsim)|*.netsim|All files (*.*)|*.*",
+                DefaultExt = "netsim",
+                FileName = $"NetworkSave_{DateTime.Now.ToString("ddMMyyyy")}",
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                MessageBox.Show(openFileDialog.FileName);
+                //todo
+            }
+        }
+
+        /// <summary>
+        /// Executes the start simulation.
+        /// </summary>
+        private void ExecuteStartSimulation()
+        {
+            isRunSimluation = true;
+
+            simulationTask = Task.Run(() => RunSimulation());
+
+            CheckCanExecuteCommands();
+        }
+
+        /// <summary>
+        /// Executes the pause simulation.
+        /// </summary>
+        private void ExecutePauseSimulation()
+        {
+            lock (simluationLockObj)
+            {
+                isRunSimluation = false;
+            }
+
+            CheckCanExecuteCommands();
+        }
+
+        /// <summary>
+        /// Executes the simulation step.
+        /// </summary>
         private void ExecuteSimulationStep()
         {
             if (!Simulator.IsInitialized)
             {
-                Simulator.InitializeProtocol(NetSimProtocolType.DSDV);
+                Simulator.InitializeProtocol(ProtocolType);
             }
 
             Simulator.PerformSimulationStep();
 
-            if(CurrentViewedItem != null)
+            UpdateCurrentViewedItem();
+
+            CheckCanExecuteCommands();
+        }
+
+        /// <summary>
+        /// Runs the simulation.
+        /// </summary>
+        private void RunSimulation()
+        {
+            if (!Simulator.IsInitialized)
             {
-                // update details view for client or connection
-                this.CurrentViewedItem = CurrentViewedItem;
+                Simulator.InitializeProtocol(ProtocolType);
+            }
+
+            while (isRunSimluation)
+            {
+                lock (simluationLockObj)
+                {
+                    Simulator.PerformSimulationStep();
+                }
+
+                UpdateCurrentViewedItem();
+
+                if (isRunSimluation)
+                {
+                    Thread.Sleep(TimeSpan.FromSeconds(1.1));
+                }
             }
         }
 
-        private void ExecuteStartSimulation()
+        /// <summary>
+        /// Executes the reset simulation.
+        /// </summary>
+        private void ExecuteResetSimulation()
         {
-            throw new NotImplementedException();
+            lock (simluationLockObj)
+            {
+                isRunSimluation = false;
+            }
+
+            simulationTask?.Wait();
+
+            Simulator.InitializeProtocol(this.ProtocolType);
+            UpdateCurrentViewedItem();
+            CheckCanExecuteCommands();
         }
 
         #endregion
@@ -385,17 +554,22 @@ namespace NetSim.ViewModel
 
         private bool CanExecutePauseSimulation()
         {
-            return SimulatorNetworkCreated();
+            return SimulatorNetworkCreated() && isRunSimluation;
         }
 
         private bool CanExecuteStartSimulation()
+        {
+            return SimulatorNetworkCreated() && !isRunSimluation;
+        }
+
+        private bool CanExecuteResetSimulation()
         {
             return SimulatorNetworkCreated();
         }
 
         private bool CanExecuteSimulationStep()
         {
-            return SimulatorNetworkCreated();
+            return SimulatorNetworkCreated() && !isRunSimluation;
         }
 
         private bool SimulatorNetworkCreated()
@@ -415,7 +589,12 @@ namespace NetSim.ViewModel
         /// <returns></returns>
         public NetSimItem AddNode(Point location)
         {
-            var returnObj = Simulator.AddClient(nextNodeName.ToString(), (int)location.X, (int)location.Y);
+            NetSimItem returnObj;
+
+            lock (simluationLockObj)
+            {
+                 returnObj = Simulator.AddClient(nextNodeName.ToString(), (int)location.X, (int)location.Y);
+            }
 
             nextNodeName++;
 
@@ -433,11 +612,14 @@ namespace NetSim.ViewModel
         {
             try
             {
-                if (!Simulator.AddConnection(from.Id, to.Id, 1))
+                lock (simluationLockObj)
                 {
-                    draftConnection = null;
-                    DrawCanvas.Children.Remove(draftConnectionLine);
-                    draftConnectionLine = null;
+                    if (!Simulator.AddConnection(from.Id, to.Id, 1))
+                    {
+                        draftConnection = null;
+                        DrawCanvas.Children.Remove(draftConnectionLine);
+                        draftConnectionLine = null;
+                    }
                 }
 
                 CheckCanExecuteCommands();
@@ -490,9 +672,9 @@ namespace NetSim.ViewModel
                 return (Mouse.DirectlyOver as Line).Tag as NetSimItem;
             }
 
-            if (Mouse.DirectlyOver is Path)
+            if (Mouse.DirectlyOver is System.Windows.Shapes.Path)
             {
-                return (Mouse.DirectlyOver as Path).Tag as NetSimItem;
+                return (Mouse.DirectlyOver as System.Windows.Shapes.Path).Tag as NetSimItem;
             }
 
             return null;
@@ -556,7 +738,7 @@ namespace NetSim.ViewModel
 
             if (IsCreateEdge && draftConnection?.EndPointA != null && draftConnection?.EndPointB != null)
             {
-                AddEdge(draftConnection.EndPointA, draftConnection.EndPointB);
+                AddEdge(draftConnection.EndPointA as NetSimItem, draftConnection.EndPointB as NetSimItem);
                 draftConnection = null;
             }
             else
@@ -654,6 +836,18 @@ namespace NetSim.ViewModel
         }
 
         #endregion
+
+        /// <summary>
+        /// Updates the current viewed item.
+        /// </summary>
+        private void UpdateCurrentViewedItem()
+        {
+            if (CurrentViewedItem != null)
+            {
+                // update details view for client or connection
+                this.CurrentViewedItem = CurrentViewedItem;
+            }
+        }
 
         /// <summary>
         /// Called when a simulator property changes.

@@ -9,6 +9,10 @@ using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
 using NetSim.Lib.Controls;
+using NetSim.Lib.Routing.AODV;
+using NetSim.Lib.Routing.DSDV;
+using NetSim.Lib.Routing.DSR;
+using NetSim.Lib.Routing.OLSR;
 using NetSim.Lib.Simulator;
 
 namespace NetSim.Lib.Visualization
@@ -25,14 +29,47 @@ namespace NetSim.Lib.Visualization
         /// </summary>
         private readonly Canvas drawCanvas;
 
+        /// <summary>
+        /// The current selected item
+        /// </summary>
+        private NetSimClient currentSelectedItem;
+
         #region Constructor
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NetSimVisualizer"/> class.
+        /// </summary>
+        /// <param name="simulator">The simulator.</param>
+        /// <param name="drawCanvas">The draw canvas.</param>
         public NetSimVisualizer(IDrawableNetSimSimulator simulator, Canvas drawCanvas)
         {
             this.simulator = simulator;
             this.drawCanvas = drawCanvas;
 
             simulator.SimulatorUpdated += SimulatorUpdated;
+        }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets the current selected item.
+        /// </summary>
+        /// <value>
+        /// The current selected item.
+        /// </value>
+        public NetSimClient CurrentSelectedItem
+        {
+            get
+            {
+                return currentSelectedItem;
+            }
+            set
+            {
+                currentSelectedItem = value;
+                SimulatorUpdated();
+            }
         }
 
         #endregion
@@ -58,31 +95,34 @@ namespace NetSim.Lib.Visualization
         /// </summary>
         private void VisualizeCurrentState()
         {
-            drawCanvas.Children.Clear();
-
-            // draw the connections
-            foreach (NetSimConnection edge in simulator.Connections)
+            drawCanvas.Dispatcher.Invoke(() =>
             {
-                UIElement uiedge = CreateConnectionEdge(edge);
+                drawCanvas.Children.Clear();
 
-                drawCanvas.Children.Add(uiedge);
-
-                if (edge.IsTransmitting && !edge.IsOffline)
+                // draw the connections
+                foreach (NetSimConnection edge in simulator.Connections)
                 {
-                    foreach (var message in edge.PendingMessages)
+                    UIElement uiedge = CreateConnectionEdge(edge);
+
+                    drawCanvas.Children.Add(uiedge);
+
+                    if (edge.IsTransmitting && !edge.IsOffline)
                     {
-                        AddMessage(edge, message);
+                        foreach (var message in edge.PendingMessages)
+                        {
+                            AddMessage(edge, message);
+                        }
                     }
                 }
-            }
 
-            // draw the clients
-            foreach (NetSimClient node in simulator.Clients)
-            {
-                UIElement uinode = CreateClientNode(node);
+                // draw the clients
+                foreach (NetSimClient node in simulator.Clients)
+                {
+                    UIElement uinode = CreateProtocolSpecificClientNode(node);
 
-                drawCanvas.Children.Add(uinode);
-            }
+                    drawCanvas.Children.Add(uinode);
+                }
+            });
         }
 
         /// <summary>
@@ -118,8 +158,14 @@ namespace NetSim.Lib.Visualization
         /// <returns></returns>
         private static Storyboard CreateMessageAnimation(NetSimConnection edge, NetSimMessage message, MessageControl uimessage)
         {
-            NetSimItem receiver = edge.EndPointA.Id.Equals(message.Receiver) ? edge.EndPointA : edge.EndPointB;
-            NetSimItem sender = edge.EndPointA.Id.Equals(message.Sender) ? edge.EndPointA : edge.EndPointB;
+            INetSimVisualizeableItem receiver = (edge.EndPointA.Id.Equals(message.NextReceiver) ? edge.EndPointA : edge.EndPointB) as INetSimVisualizeableItem;
+            INetSimVisualizeableItem sender = (edge.EndPointA.Id.Equals(message.Sender) ? edge.EndPointA : edge.EndPointB) as INetSimVisualizeableItem;
+
+            if (receiver == null || sender == null)
+            {
+                // return empty storyboard
+                return new Storyboard();
+            }
 
             DoubleAnimation animationTop = new DoubleAnimation()
             {
@@ -203,11 +249,73 @@ namespace NetSim.Lib.Visualization
         }
 
         /// <summary>
+        /// Creates the protocol specific client node.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <returns></returns>
+        private UIElement CreateProtocolSpecificClientNode(NetSimClient node)
+        {
+            if (node.RoutingProtocol is DsdvRoutingProtocol)
+            {
+                return CreateDsdvClientNode(node);
+            }
+            else if (node.RoutingProtocol is AodvRoutingProtocol)
+            {
+                return null;
+            }
+            else if (node.RoutingProtocol is DsrRoutingProtocol)
+            {
+                return null;
+            }
+            else if (node.RoutingProtocol is OlsrRoutingProtocol)
+            {
+                return CreateOlsrClientNode(node);
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Creates the client node.
         /// </summary>
         /// <param name="node">The node.</param>
         /// <returns></returns>
-        private UIElement CreateClientNode(NetSimClient node)
+        private UIElement CreateDsdvClientNode(NetSimClient node)
+        {
+            if (CurrentSelectedItem != null && node.Id.Equals(CurrentSelectedItem.Id))
+            {
+                return CreateClientNode(node, Brushes.DarkSeaGreen);
+            }
+
+            return CreateClientNode(node, Brushes.YellowGreen);
+        }
+
+        /// <summary>
+        /// Creates the client node.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <returns></returns>
+        private UIElement CreateOlsrClientNode(NetSimClient node)
+        {
+            if (CurrentSelectedItem != null && node.Id.Equals(CurrentSelectedItem.Id))
+            {
+                return CreateClientNode(node, Brushes.PaleVioletRed);
+            }
+
+            //is n(1 hop) neigbor
+
+            //is n(2 hop) neighbor
+
+            //is mpr neighbor
+
+            return CreateClientNode(node, Brushes.Lavender);
+        }
+
+        /// <summary>
+        /// Creates the client node.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <returns></returns>
+        private UIElement CreateClientNode(NetSimClient node, Brush color)
         {
             var grid = new Grid { Tag = node };
             var ellipse = new Ellipse
@@ -215,7 +323,7 @@ namespace NetSim.Lib.Visualization
                 Width = 50,
                 Height = 50,
                 Stroke = Brushes.Black,
-                Fill = node.IsInitialized ? Brushes.YellowGreen : Brushes.LightGray,
+                Fill = color,
                 Tag = node,
                 ToolTip = node.RoutingProtocol?.Table?.ToString()
             };
@@ -236,6 +344,7 @@ namespace NetSim.Lib.Visualization
 
             return grid;
         }
+
 
     }
 }

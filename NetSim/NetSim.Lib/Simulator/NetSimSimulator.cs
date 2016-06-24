@@ -235,6 +235,7 @@ namespace NetSim.Lib.Simulator
                 client.InitializeProtocol(initProtocol);
             }
 
+            OnUpdated();
             this.IsInitialized = true;
         }
 

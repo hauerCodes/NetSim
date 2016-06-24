@@ -8,7 +8,7 @@ using NetSim.Lib.Simulator;
 
 namespace NetSim.Lib.Routing.AODV
 {
-    class AodvRoutingProtocol : NetSimRoutingProtocol
+    public class AodvRoutingProtocol : NetSimRoutingProtocol
     {
         public AodvRoutingProtocol(NetSimClient client)
             : base(client)
@@ -17,7 +17,9 @@ namespace NetSim.Lib.Routing.AODV
 
         public override void Initialize()
         {
-            throw new NotImplementedException();
+            // call base initialization (stepcounter and data)
+            base.Initialize();
+
         }
 
         public override void PerformRoutingStep()

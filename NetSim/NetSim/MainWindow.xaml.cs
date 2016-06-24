@@ -45,5 +45,10 @@ namespace NetSim
         {
             ViewModel.HandleMouseLeftButtonDown(sender, e);
         }
+
+        private void ExitMenuItemClick(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
     }
 }

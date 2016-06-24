@@ -32,6 +32,7 @@ namespace NetSim.Lib.Simulator
         protected NetSimRoutingProtocol(NetSimClient client)
         {
             this.Client = client;
+            this.stepCounter = 0;
         }
 
         #endregion
@@ -59,7 +60,11 @@ namespace NetSim.Lib.Simulator
         /// <summary>
         /// Initializes this instance.
         /// </summary>
-        public abstract void Initialize();
+        public virtual void Initialize()
+        {
+            // reset stepcounter
+            this.stepCounter = 0;
+        }
 
         /// <summary>
         /// Performs the routing step.
@@ -76,28 +81,5 @@ namespace NetSim.Lib.Simulator
             return Table.GetRouteFor(destinationId).NextHop;
         }
 
-        /// <summary>
-        /// Checks for topology updates.
-        /// </summary>
-        /// <returns></returns>
-        protected virtual bool CheckForTopologyUpdates()
-        {
-            bool topologyChangeUpdate = false; 
-
-            foreach (var connection in Client.Connections.Where(c => c.Value.IsOffline))
-            {
-                // connection.key is the "to" destination
-                var routeEntry = Table.GetRouteFor(connection.Key);
-
-                // if route is reachable - broken link detected
-                if (routeEntry != null && routeEntry.IsReachable)
-                {
-                    routeEntry.Metric = NotReachable;
-                    topologyChangeUpdate = true;
-                }
-            }
-
-            return topologyChangeUpdate;
-        }
     }
 }

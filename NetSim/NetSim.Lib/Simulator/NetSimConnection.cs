@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-
-using NetSim.Lib;
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Visualization;
 
 namespace NetSim.Lib.Simulator
 {
     public class NetSimConnection : NetSimItem
     {
+        /// <summary>
+        /// The is offline
+        /// </summary>
+        private bool isOffline;
+
         /// <summary>
         /// Occurs when clientStateUpdate.
         /// </summary>
@@ -24,6 +22,7 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         public NetSimConnection()
         {
+            this.IsOffline = false;
             this.PendingMessages = new Queue<NetSimMessage>();
         }
 
@@ -45,7 +44,7 @@ namespace NetSim.Lib.Simulator
         /// <value>
         /// The end point a.
         /// </value>
-        public NetSimClient EndPointA { get; set; }
+        public INetSimConnectionEndpoint EndPointA { get; set; }
 
         /// <summary>
         /// Gets or sets the end point b.
@@ -53,7 +52,7 @@ namespace NetSim.Lib.Simulator
         /// <value>
         /// The end point b.
         /// </value>
-        public NetSimClient EndPointB { get; set; }
+        public INetSimConnectionEndpoint EndPointB { get; set; }
 
         /// <summary>
         /// Gets or sets the metric.
@@ -69,7 +68,18 @@ namespace NetSim.Lib.Simulator
         /// <value>
         /// <c>true</c> if this instance is offline; otherwise, <c>false</c>.
         /// </value>
-        public bool IsOffline { get; set; } = false;
+        public bool IsOffline
+        {
+            get
+            {
+                return isOffline;
+            }
+            set
+            {
+                isOffline = value;
+                OnStateUpdated();
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether this instance is transmitting.
@@ -108,7 +118,7 @@ namespace NetSim.Lib.Simulator
         {
             if (EndPointA == null || EndPointB == null || IsOffline) return;
 
-            if (EndPointA.Id.Equals(message.Receiver) || EndPointB.Id.Equals(message.Receiver))
+            if (EndPointA.Id.Equals(message.NextReceiver) || EndPointB.Id.Equals(message.NextReceiver))
             {
                 PendingMessages.Enqueue(message);
                 OnStateUpdated();
@@ -124,13 +134,13 @@ namespace NetSim.Lib.Simulator
             {
                 var message = PendingMessages.Dequeue();
 
-                if (EndPointA != null && message.Receiver.Equals(EndPointA.Id))
+                if (EndPointA != null && message.NextReceiver.Equals(EndPointA.Id))
                 {
                     EndPointA.ReceiveMessage(message);
                     OnStateUpdated();
                 }
 
-                if (EndPointB != null && message.Receiver.Equals(EndPointB.Id))
+                if (EndPointB != null && message.NextReceiver.Equals(EndPointB.Id))
                 {
                     EndPointB.ReceiveMessage(message);
                     OnStateUpdated();

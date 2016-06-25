@@ -34,6 +34,13 @@ namespace NetSim.Lib.Routing.OLSR
         {
             return new OlsrHelloMessage() { Neighbors = new List<string>(Neighbors) };
         }
+
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();

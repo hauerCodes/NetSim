@@ -48,15 +48,18 @@ namespace NetSim.Lib.Routing.OLSR
         /// Adds the entry.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="accessThough">The access though.</param>
-        public void AddEntry(string sender, string accessThough = null)
+        /// <param name="accessThrough">The access though.</param>
+        public void AddEntry(string sender, string accessThrough = null)
         {
-            this.Entries.Add(new OlsrNeighborTableEntry()
+            var entry = new OlsrNeighborTableEntry()
             {
                 NeighborId = sender,
-                AccessableThough = accessThough,
                 IsMultiPointRelay = false
-            });
+            };
+
+            entry.AccessableThrough.Add(accessThrough);
+
+            this.Entries.Add(entry);
         }
 
         /// <summary>

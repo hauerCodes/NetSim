@@ -93,25 +93,22 @@ namespace NetSim.Lib.Routing.OLSR
 
                 case OlsrState.ReceiveHello:
                     // wait for incoming hello messages 
-                    HandleIncommingMessages();
-
-                    if (!isFirstBroadcastReady)
+                    if (HandleIncommingMessagesAndCheckForUpdate())
                     {
-                        // intial broadcast ready (hello received)
-                        isFirstBroadcastReady = true;
-
-                        // wait unitl every connected links has sent his hello
-                        if (this.OneHopNeighborTable.Entries.Count
-                            >= this.Client.Connections.Count(x => !x.Value.IsOffline))
-                        {
-                            this.State = OlsrState.Hello;
-                        }
+                        State = OlsrState.Hello;
                     }
                     else
                     {
-                        // start to calculate the mpr list and routing table
                         this.State = OlsrState.Calculate;
                     }
+
+                    //// wait unitl every connected links has sent his hello
+                    //if (this.OneHopNeighborTable.Entries.Count
+                    //    >= this.Client.Connections.Count(x => !x.Value.IsOffline))
+                    //{
+                    //    this.State = OlsrState.Hello;
+                    //}
+
                     break;
 
                 case OlsrState.Calculate:
@@ -121,6 +118,10 @@ namespace NetSim.Lib.Routing.OLSR
                     this.State = OlsrState.TopologyControl;
                     break;
                 case OlsrState.TopologyControl:
+                    if (HandleIncommingMessagesAndCheckForUpdate())
+                    {
+                        State = OlsrState.Hello;
+                    }
 
                     // restart hello process
                     if (stepCounter % periodicUpdateCounter == 0)
@@ -165,35 +166,52 @@ namespace NetSim.Lib.Routing.OLSR
         /// Handles the received hello message.
         /// </summary>
         /// <param name="message">The message.</param>
-        private void HandleReceivedHelloMessage(OlsrHelloMessage message)
+        private bool HandleReceivedHelloMessage(OlsrHelloMessage message)
         {
+            bool helloUpdate = false;
+
+            //upate one hop neighbors
+            if (OneHopNeighborTable.GetEntryFor(message.Sender) == null)
+            {
+                OneHopNeighborTable.AddEntry(message.Sender);
+                helloUpdate = true;
+            }
+
             if (message.Neighbors != null && message.Neighbors.Any())
             {
                 //update two hop neighbors
                 foreach (string twohopneighbor in message.Neighbors)
                 {
+                    var twoHopBeighbor = TwoHopNeighborTable.GetEntryFor(twohopneighbor);
+
                     //upate one hop neighbors
-                    if (TwoHopNeighborTable.GetEntryFor(twohopneighbor) == null)
+                    if (twoHopBeighbor == null)
                     {
+                        // if neighbor not exists add it 
                         TwoHopNeighborTable.AddEntry(twohopneighbor, message.Sender);
+                    }
+                    else
+                    {
+                        // if neighbor exists check if sender is listed in accessthrough
+                        if (!twoHopBeighbor.AccessableThrough.Contains(message.Sender))
+                        {
+                            //if not add it to the accessable through
+                            twoHopBeighbor.AccessableThrough.Add(message.Sender);
+                        }
                     }
                 }
             }
-            else
-            {
-                //upate one hop neighbors
-                if (OneHopNeighborTable.GetEntryFor(message.Sender) == null)
-                {
-                    OneHopNeighborTable.AddEntry(message.Sender);
-                }
-            }
+
+            return helloUpdate;
         }
 
         /// <summary>
         /// Handles the incomming messages.
         /// </summary>
-        private void HandleIncommingMessages()
+        private bool HandleIncommingMessagesAndCheckForUpdate()
         {
+            bool helloUpdate = false;
+
             if (Client.InputQueue.Count > 0)
             {
                 while (Client.InputQueue.Count > 0)
@@ -203,7 +221,10 @@ namespace NetSim.Lib.Routing.OLSR
                     // if message is update message
                     if (message is OlsrHelloMessage)
                     {
-                        HandleReceivedHelloMessage((OlsrHelloMessage)message);
+                        if (HandleReceivedHelloMessage((OlsrHelloMessage)message))
+                        {
+                            helloUpdate = true;
+                        }
                     }
                     else
                     {
@@ -219,6 +240,8 @@ namespace NetSim.Lib.Routing.OLSR
                     }
                 }
             }
+
+            return helloUpdate;
         }
 
         /// <summary>

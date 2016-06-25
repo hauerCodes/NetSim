@@ -1,10 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NetSim.Lib.Routing.OLSR
 {
     public class OlsrNeighborTableEntry
     {
+        public OlsrNeighborTableEntry()
+        {
+            this.AccessableThrough = new List<string>();
+        }
+
         /// <summary>
         /// Gets or sets the neighbor identifier.
         /// </summary>
@@ -19,7 +25,7 @@ namespace NetSim.Lib.Routing.OLSR
         /// <value>
         /// The accessable though.
         /// </value>
-        public string AccessableThough { get; set; }
+        public List<string> AccessableThrough { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this instance is multi point relay.
@@ -42,9 +48,9 @@ namespace NetSim.Lib.Routing.OLSR
                 return $"{NeighborId,4} MPR";
             }
 
-            if (!String.IsNullOrEmpty(AccessableThough))
+            if (AccessableThrough.Any())
             {
-                return $"{NeighborId,4} {AccessableThough,4}";
+                return $"{NeighborId,4} {String.Join(" ", AccessableThrough)}";
             }
 
             return NeighborId;

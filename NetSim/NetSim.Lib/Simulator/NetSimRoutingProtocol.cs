@@ -84,7 +84,7 @@ namespace NetSim.Lib.Simulator
         /// <returns></returns>
         public virtual string GetRoute(string destinationId)
         {
-            return Table.GetRouteFor(destinationId).NextHop;
+            return Table.GetRouteFor(destinationId)?.NextHop;
         }
 
     }

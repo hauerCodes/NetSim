@@ -88,6 +88,8 @@
     <Compile Include="Routing\RoutingProtocolFactory.cs" />
     <Compile Include="Simulator\DataMessage.cs" />
     <Compile Include="Simulator\INetSimConnectionEndpoint.cs" />
+    <Compile Include="Simulator\NetSimQueuedMessage.cs" />
+    <Compile Include="Simulator\NetSimSequence.cs" />
     <Compile Include="Storage\SimulationStorage.cs" />
     <Compile Include="Storage\StorageConnection.cs" />
     <Compile Include="Storage\StorageClient.cs" />

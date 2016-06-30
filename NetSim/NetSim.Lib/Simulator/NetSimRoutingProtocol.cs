@@ -22,8 +22,7 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         // ReSharper disable once InconsistentNaming
         protected int stepCounter;
-
-        
+  
         /// <summary>
         /// Initializes a new instance of the <see cref="NetSimRoutingProtocol"/> class.
         /// </summary>
@@ -33,10 +32,7 @@ namespace NetSim.Lib.Simulator
             this.Client = client;
             this.stepCounter = 0;
         }
-
-        
-
-        
+   
         /// <summary>
         /// Gets or sets the table.
         /// </summary>
@@ -60,8 +56,6 @@ namespace NetSim.Lib.Simulator
         /// The step counter.
         /// </value>
         public int StepCounter => stepCounter;
-
-        
 
         /// <summary>
         /// Initializes this instance.
@@ -94,7 +88,7 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         /// <param name="destinationId">The destination identifier.</param>
         /// <returns></returns>
-        public virtual string GetRoute(string destinationId)
+        protected virtual string GetRoute(string destinationId)
         {
             return Table.GetRouteFor(destinationId)?.NextHop;
         }

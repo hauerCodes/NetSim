@@ -18,7 +18,7 @@ namespace NetSim.Lib.Routing.DSR
         public DsrRoutingProtocol(NetSimClient client) : base(client) { }
 
         /// <summary>
-        /// Gets the output queue.
+        /// Gets the output message queue (should be used only for data messages).
         /// </summary>
         /// <value>
         /// The output queue.
@@ -108,10 +108,16 @@ namespace NetSim.Lib.Routing.DSR
                     // and enqueue message again
                     OutputQueue.Enqueue(queuedMessage);
                 }
+
                 counter--;
             }
         }
 
+        /// <summary>
+        /// Gets the DSR cached route.
+        /// </summary>
+        /// <param name="receiver">The receiver.</param>
+        /// <returns></returns>
         private NetSimTableEntry GetDsrRoute(string receiver)
         {
             return Table.GetRouteFor(receiver);

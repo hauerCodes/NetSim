@@ -23,8 +23,7 @@ namespace NetSim.Lib.Simulator
         // ReSharper disable once InconsistentNaming
         protected int stepCounter;
 
-        #region Constructor
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="NetSimRoutingProtocol"/> class.
         /// </summary>
@@ -35,10 +34,9 @@ namespace NetSim.Lib.Simulator
             this.stepCounter = 0;
         }
 
-        #endregion
+        
 
-        #region Properties
-
+        
         /// <summary>
         /// Gets or sets the table.
         /// </summary>
@@ -63,7 +61,7 @@ namespace NetSim.Lib.Simulator
         /// </value>
         public int StepCounter => stepCounter;
 
-        #endregion
+        
 
         /// <summary>
         /// Initializes this instance.

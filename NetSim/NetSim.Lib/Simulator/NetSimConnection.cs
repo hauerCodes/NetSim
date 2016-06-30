@@ -15,8 +15,7 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         private event Action ConnectionStateUpdate;
 
-        #region Constructor
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="NetSimConnection"/> class.
         /// </summary>
@@ -26,10 +25,9 @@ namespace NetSim.Lib.Simulator
             this.PendingMessages = new Queue<NetSimMessage>();
         }
 
-        #endregion
+        
 
-        #region Properties
-
+        
         /// <summary>
         /// Gets or sets the pending messages.
         /// </summary>
@@ -89,10 +87,9 @@ namespace NetSim.Lib.Simulator
         /// </value>
         public bool IsTransmitting => PendingMessages.Count > 0;
 
-        #endregion
+        
 
-        #region Events
-
+        
         /// <summary>
         /// Occurs when client state is updated due routing or other events.
         /// </summary>
@@ -108,7 +105,7 @@ namespace NetSim.Lib.Simulator
             }
         }
 
-        #endregion
+        
 
         /// <summary>
         /// Starts the transport message.

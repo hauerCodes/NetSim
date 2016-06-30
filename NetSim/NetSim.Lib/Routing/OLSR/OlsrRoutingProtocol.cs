@@ -20,18 +20,16 @@ namespace NetSim.Lib.Routing.OLSR
         /// </summary>
         private int periodicUpdateCounter = 10;
 
-        #region Constructor 
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="OlsrRoutingProtocol"/> class.
         /// </summary>
         /// <param name="client">The client.</param>
         public OlsrRoutingProtocol(NetSimClient client) : base(client) { }
 
-        #endregion
+        
 
-        #region Properties
-
+        
         /// <summary>
         /// Gets or sets the one hop neighbor table.
         /// </summary>
@@ -56,7 +54,7 @@ namespace NetSim.Lib.Routing.OLSR
         /// </value>
         public OlsrState State { get; set; }
 
-        #endregion
+        
 
         /// <summary>
         /// Initializes this instance.

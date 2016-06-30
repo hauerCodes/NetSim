@@ -17,8 +17,7 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         protected const int NotReachable = -1;
 
-        #region Constructor
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="NetSimTable"/> class.
         /// </summary>
@@ -27,10 +26,9 @@ namespace NetSim.Lib.Simulator
             this.Entries = new List<NetSimTableEntry>();
         }
 
-        #endregion
+        
 
-        #region Events
-
+        
         /// <summary>
         /// Occurs when table gets updated.
         /// </summary>
@@ -47,10 +45,9 @@ namespace NetSim.Lib.Simulator
 
         }
 
-        #endregion
+        
 
-        #region Properties
-
+        
         /// <summary>
         /// Gets or sets the entries.
         /// </summary>
@@ -59,7 +56,7 @@ namespace NetSim.Lib.Simulator
         /// </value>
         public List<NetSimTableEntry> Entries { get; set; }
 
-        #endregion
+        
 
         /// <summary>
         /// Should be called when table gets updated.

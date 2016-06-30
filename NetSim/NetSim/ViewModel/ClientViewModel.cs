@@ -29,8 +29,7 @@ namespace NetSim.ViewModel
         /// </summary>
         private string sendMessageData;
 
-        #region Constructor
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="ClientViewModel"/> class.
         /// </summary>
@@ -42,10 +41,9 @@ namespace NetSim.ViewModel
             InitializeCommands();
         }
 
-        #endregion
+        
 
-        #region Properties
-
+        
         /// <summary>
         /// Gets the client.
         /// </summary>
@@ -88,10 +86,9 @@ namespace NetSim.ViewModel
             }
         }
 
-        #endregion
+        
 
-        #region Commands
-
+        
         /// <summary>
         /// Gets or sets the start simulation command.
         /// </summary>
@@ -111,10 +108,9 @@ namespace NetSim.ViewModel
             }
         }
 
-        #endregion
+        
 
-        #region Initialize
-
+        
         /// <summary>
         /// Initializes the commands.
         /// </summary>
@@ -145,6 +141,6 @@ namespace NetSim.ViewModel
             return (!string.IsNullOrEmpty(this.SendMessageDestination) && !string.IsNullOrEmpty(this.SendMessageData));
         }
 
-        #endregion
+        
     }
 }

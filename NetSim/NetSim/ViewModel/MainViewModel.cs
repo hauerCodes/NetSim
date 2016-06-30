@@ -27,34 +27,79 @@ namespace NetSim.ViewModel
 {
     public class MainViewModel : ViewModelBase
     {
+        /// <summary>
+        /// The next node name
+        /// </summary>
         private char nextNodeName = 'A';
 
+        /// <summary>
+        /// The view mode
+        /// </summary>
         private ViewMode viewMode;
 
+        /// <summary>
+        /// The is run simluation
+        /// </summary>
         private bool isRunSimluation;
 
-        private object simluationLockObj = new object();
+        /// <summary>
+        /// The simluation lock object
+        /// </summary>
+        private readonly object simluationLockObj = new object();
 
+        /// <summary>
+        /// The protocol type
+        /// </summary>
         private NetSimProtocolType protocolType;
 
+        /// <summary>
+        /// The draft connection
+        /// </summary>
         private NetSimConnection draftConnection;
 
+        /// <summary>
+        /// The draft connection line
+        /// </summary>
         private Line draftConnectionLine;
 
+        /// <summary>
+        /// The current selected node
+        /// </summary>
         private NetSimItem currentSelectedNode;
 
+        /// <summary>
+        /// The current viewed item
+        /// </summary>
         private NetSimItem currentViewedItem;
 
+        /// <summary>
+        /// The save network command
+        /// </summary>
         private ICommand saveNetworkCommand;
 
+        /// <summary>
+        /// The load network command
+        /// </summary>
         private ICommand loadNetworkCommand;
 
+        /// <summary>
+        /// The start simulation command
+        /// </summary>
         private ICommand startSimulationCommand;
 
+        /// <summary>
+        /// The pause simulation command
+        /// </summary>
         private ICommand pauseSimulationCommand;
 
+        /// <summary>
+        /// The perform step command
+        /// </summary>
         private ICommand performStepCommand;
 
+        /// <summary>
+        /// The reset simulation command
+        /// </summary>
         private ICommand resetSimulationCommand;
 
         /// <summary>
@@ -62,8 +107,10 @@ namespace NetSim.ViewModel
         /// </summary>
         private Task simulationTask;
 
-        #region Constructor
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainViewModel"/> class.
+        /// </summary>
+        /// <param name="drawCanvas">The draw canvas.</param>
         public MainViewModel(Canvas drawCanvas)
         {
             this.DrawCanvas = drawCanvas;
@@ -77,10 +124,6 @@ namespace NetSim.ViewModel
 
             InitializeCommands();
         }
-
-        #endregion
-
-        #region Properties
 
         /// <summary>
         /// Gets or sets a value indicating whether this instance is view.
@@ -272,7 +315,7 @@ namespace NetSim.ViewModel
                 RaisePropertyChanged();
 
                 ExecuteResetSimulation();
-                
+
             }
         }
 
@@ -283,10 +326,6 @@ namespace NetSim.ViewModel
         /// The simulation step.
         /// </value>
         public int SimulationStep => this.Simulator.StepCounter;
-
-        #endregion
-
-        #region Commands
 
         /// <summary>
         /// Gets or sets the start simulation command.
@@ -402,10 +441,6 @@ namespace NetSim.ViewModel
             }
         }
 
-        #endregion
-
-        #region Initialize
-
         /// <summary>
         /// Initializes the commands.
         /// </summary>
@@ -419,10 +454,6 @@ namespace NetSim.ViewModel
             this.SaveNetworkCommand = new RelayCommand(ExecuteSaveNetwork);
             this.LoadNetworkCommand = new RelayCommand(ExecuteLoadNetwork);
         }
-
-        #endregion
-
-        #region Command Execution
 
         /// <summary>
         /// Executes the load network.
@@ -548,10 +579,6 @@ namespace NetSim.ViewModel
             CheckCanExecuteCommands();
         }
 
-        #endregion
-
-        #region Command CanExecute Check
-
         private bool CanExecutePauseSimulation()
         {
             return SimulatorNetworkCreated() && isRunSimluation;
@@ -577,11 +604,6 @@ namespace NetSim.ViewModel
             return Simulator.Clients.Count > 0 && Simulator.Connections.Count > 0;
         }
 
-
-        #endregion
-
-        #region Add Methods
-
         /// <summary>
         /// Adds the node.
         /// </summary>
@@ -593,7 +615,7 @@ namespace NetSim.ViewModel
 
             lock (simluationLockObj)
             {
-                 returnObj = Simulator.AddClient(nextNodeName.ToString(), (int)location.X, (int)location.Y);
+                returnObj = Simulator.AddClient(nextNodeName.ToString(), (int)location.X, (int)location.Y);
             }
 
             nextNodeName++;
@@ -633,10 +655,6 @@ namespace NetSim.ViewModel
                 draftConnectionLine = null;
             }
         }
-
-        #endregion
-
-        #region Handle Mouse Movement, Clicks
 
         /// <summary>
         /// Gets the current item.
@@ -834,8 +852,6 @@ namespace NetSim.ViewModel
                 draftConnectionLine.Y2 = endPoint.Y - drawOffset;
             }
         }
-
-        #endregion
 
         /// <summary>
         /// Updates the current viewed item.

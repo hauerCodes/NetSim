@@ -77,7 +77,11 @@
     <Compile Include="Routing\AODV\AodvTableEntry.cs" />
     <Compile Include="Routing\DSDV\DsdvRoutingProtocol.cs" />
     <Compile Include="Routing\DSDV\DsdvSequence.cs" />
+    <Compile Include="Routing\DSR\DsrCacheEntry.cs" />
     <Compile Include="Routing\DSR\DsrRoutingProtocol.cs" />
+    <Compile Include="Routing\DSR\DsrRrerMessage.cs" />
+    <Compile Include="Routing\DSR\DsrRrepMessage.cs" />
+    <Compile Include="Routing\DSR\DsrRreqMessage.cs" />
     <Compile Include="Routing\DSR\DsrTableEntry.cs" />
     <Compile Include="Routing\OLSR\OlsrHelloMessage.cs" />
     <Compile Include="Routing\OLSR\OlsrNeighborTable.cs" />

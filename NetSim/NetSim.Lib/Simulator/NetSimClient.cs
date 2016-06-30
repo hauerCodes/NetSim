@@ -29,8 +29,7 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         private StringBuilder clientData;
 
-        #region Constructor 
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="NetSimClient"/> class.
         /// </summary>
@@ -47,10 +46,9 @@ namespace NetSim.Lib.Simulator
             this.Connections = new Dictionary<string, NetSimConnection>();
         }
 
-        #endregion
+        
 
-        #region Properties
-
+        
         /// <summary>
         /// Gets or sets the connections.
         /// </summary>
@@ -110,10 +108,9 @@ namespace NetSim.Lib.Simulator
         /// </value>
         public string CurrentData => clientData.ToString();
 
-        #endregion
+        
 
-        #region Events
-
+        
         /// <summary>
         /// Occurs when client state is updated due routing or other events.
         /// </summary>
@@ -134,7 +131,7 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        #endregion
+        
 
         /// <summary>
         /// Initializes the protocol.

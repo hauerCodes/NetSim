@@ -10,8 +10,7 @@ namespace NetSim.Lib.Routing.OLSR
 {
     public class OlsrNeighborTable
     {
-        #region Constructor
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="OlsrNeighborTable"/> class.
         /// </summary>
@@ -20,10 +19,9 @@ namespace NetSim.Lib.Routing.OLSR
             this.Entries = new List<OlsrNeighborTableEntry>();
         }
 
-        #endregion
+        
 
-        #region Properties
-
+        
         /// <summary>
         /// Gets or sets the entries.
         /// </summary>
@@ -32,7 +30,7 @@ namespace NetSim.Lib.Routing.OLSR
         /// </value>
         public List<OlsrNeighborTableEntry> Entries { get; set; }
 
-        #endregion
+        
 
         /// <summary>
         /// Gets the entry for.

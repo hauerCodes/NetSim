@@ -25,18 +25,16 @@ namespace NetSim.Lib.Routing.DSDV
         /// </summary>
         private List<string> offlineLinks;
 
-        #region Constructor 
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="DsdvRoutingProtocol"/> class.
         /// </summary>
         /// <param name="client">The client.</param>
         public DsdvRoutingProtocol(NetSimClient client) : base(client) { }
 
-        #endregion
+        
 
-        #region Properties
-
+        
         /// <summary>
         /// Gets or sets the current sequence.
         /// </summary>
@@ -45,7 +43,7 @@ namespace NetSim.Lib.Routing.DSDV
         /// </value>
         public DsdvSequence CurrentSequence { get; set; }
 
-        #endregion
+        
 
         /// <summary>
         /// Initializes this instance.

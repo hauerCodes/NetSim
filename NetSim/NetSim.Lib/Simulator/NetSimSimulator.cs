@@ -34,8 +34,7 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         private NetSimProtocolType protocol;
 
-        #region Constructor 
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="NetSimSimulator"/> class.
         /// </summary>
@@ -47,10 +46,9 @@ namespace NetSim.Lib.Simulator
             IsInitialized = false;
         }
 
-        #endregion
+        
 
-        #region Events
-
+        
         /// <summary>
         /// Occurs when the simulator updates.
         /// </summary>
@@ -71,10 +69,9 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        #endregion
+        
 
-        #region Properties 
-
+        
         /// <summary>
         /// Gets or sets the clients.
         /// </summary>
@@ -148,7 +145,7 @@ namespace NetSim.Lib.Simulator
             }
         }
 
-        #endregion
+        
 
         /// <summary>
         /// Adds the client.

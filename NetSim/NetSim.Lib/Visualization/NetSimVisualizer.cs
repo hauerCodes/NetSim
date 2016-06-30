@@ -34,8 +34,7 @@ namespace NetSim.Lib.Visualization
         /// </summary>
         private NetSimClient currentSelectedItem;
 
-        #region Constructor
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="NetSimVisualizer"/> class.
         /// </summary>
@@ -49,10 +48,9 @@ namespace NetSim.Lib.Visualization
             simulator.SimulatorUpdated += SimulatorUpdated;
         }
 
-        #endregion
+        
 
-        #region Properties
-
+        
         /// <summary>
         /// Gets or sets the current selected item.
         /// </summary>
@@ -72,7 +70,7 @@ namespace NetSim.Lib.Visualization
             }
         }
 
-        #endregion
+        
 
         /// <summary>
         /// Refreshes this instance.

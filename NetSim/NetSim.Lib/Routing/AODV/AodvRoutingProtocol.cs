@@ -10,17 +10,12 @@ namespace NetSim.Lib.Routing.AODV
 {
     public class AodvRoutingProtocol : NetSimRoutingProtocol
     {
-        #region Constructor
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="AodvRoutingProtocol"/> class.
         /// </summary>
         /// <param name="client">The client.</param>
         public AodvRoutingProtocol(NetSimClient client) : base(client) { }
-
-        #endregion
-
-        #region Properties
 
         /// <summary>
         /// Gets the output queue.
@@ -29,8 +24,6 @@ namespace NetSim.Lib.Routing.AODV
         /// The output queue.
         /// </value>
         public Queue<NetSimQueuedMessage> OutputQueue { get; private set; }
-
-        #endregion
 
         public override void Initialize()
         {
@@ -43,6 +36,7 @@ namespace NetSim.Lib.Routing.AODV
             //intialize outgoing messages
             this.OutputQueue = new Queue<NetSimQueuedMessage>();
 
+            // local table reference casted to the right type
             var localTableRef = (AodvTable)this.Table;
 
             // self routing entry with metric 0
@@ -63,8 +57,8 @@ namespace NetSim.Lib.Routing.AODV
         private void HandleOutgoingMessages()
         {
             int counter = OutputQueue.Count;
-            
-            while(counter > 0)
+
+            while (counter > 0)
             {
                 // get next queued message
                 var queuedMessage = OutputQueue.Dequeue();
@@ -166,7 +160,8 @@ namespace NetSim.Lib.Routing.AODV
         /// <returns></returns>
         protected override string GetRoutingData()
         {
-            return Table.ToString(); 
+            //TODO
+            return Table.ToString();
         }
     }
 }

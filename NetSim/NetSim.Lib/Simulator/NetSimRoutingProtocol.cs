@@ -48,6 +48,14 @@ namespace NetSim.Lib.Simulator
         public NetSimTable Table { get; set; }
 
         /// <summary>
+        /// Gets the routing data.
+        /// </summary>
+        /// <value>
+        /// The routing data.
+        /// </value>
+        public string RoutingData => GetRoutingData();
+
+        /// <summary>
         /// Gets the step counter.
         /// </summary>
         /// <value>
@@ -76,6 +84,12 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         /// <param name="message">The message.</param>
         public abstract void SendMessage(NetSimMessage message);
+
+        /// <summary>
+        /// Gets the routing data.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract string GetRoutingData();
 
         /// <summary>
         /// Gets the route.

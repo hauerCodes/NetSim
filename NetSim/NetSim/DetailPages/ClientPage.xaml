@@ -47,7 +47,7 @@
         </Grid>
 
         <TextBlock Grid.Column="0" Grid.Row="4" Margin="0 5 0 0" FontWeight="Bold" >Table</TextBlock>
-        <TextBlock Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="2" Text="{Binding Path=Client.RoutingProtocol.Table}" FontFamily="Consolas" ></TextBlock>
+        <TextBlock Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="2" Text="{Binding Path=Client.RoutingProtocol.RoutingData}" FontFamily="Consolas" ></TextBlock>
         <TextBlock Grid.Column="0" Grid.Row="6" Margin="0 5 0 0" FontWeight="Bold" >Data</TextBlock>
         <TextBlock Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="2" Text="{Binding Path=Client.CurrentData}" FontFamily="Consolas" ></TextBlock>
     </Grid>

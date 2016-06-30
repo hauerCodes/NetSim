@@ -160,5 +160,13 @@ namespace NetSim.Lib.Routing.AODV
 
         }
 
+        /// <summary>
+        /// Gets the routing data.
+        /// </summary>
+        /// <returns></returns>
+        protected override string GetRoutingData()
+        {
+            return Table.ToString(); 
+        }
     }
 }

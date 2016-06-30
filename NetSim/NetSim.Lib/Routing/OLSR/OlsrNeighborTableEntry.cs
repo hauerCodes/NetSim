@@ -45,12 +45,12 @@ namespace NetSim.Lib.Routing.OLSR
         {
             if (IsMultiPointRelay)
             {
-                return $"{NeighborId,4} MPR";
+                return $"{NeighborId,2} MPR";
             }
 
             if (AccessableThrough.Any())
             {
-                return $"{NeighborId,4} {String.Join(" ", AccessableThrough)}";
+                return $"{NeighborId,2} {String.Join(",", AccessableThrough)}";
             }
 
             return NeighborId;

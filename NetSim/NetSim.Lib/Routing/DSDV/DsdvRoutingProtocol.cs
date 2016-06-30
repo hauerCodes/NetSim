@@ -137,6 +137,15 @@ namespace NetSim.Lib.Routing.DSDV
         }
 
         /// <summary>
+        /// Gets the routing data.
+        /// </summary>
+        /// <returns></returns>
+        protected override string GetRoutingData()
+        {
+            return Table.ToString();
+        }
+
+        /// <summary>
         /// Checks for topology updates.
         /// </summary>
         /// <returns></returns>

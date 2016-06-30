@@ -261,11 +261,11 @@ namespace NetSim.Lib.Visualization
             }
             else if (node.RoutingProtocol is AodvRoutingProtocol)
             {
-                return null;
+                return CreateAodvClientNode(node);
             }
             else if (node.RoutingProtocol is DsrRoutingProtocol)
             {
-                return null;
+                return CreateDsrClientNode(node);
             }
             else if (node.RoutingProtocol is OlsrRoutingProtocol)
             {
@@ -294,13 +294,43 @@ namespace NetSim.Lib.Visualization
         /// </summary>
         /// <param name="node">The node.</param>
         /// <returns></returns>
+        private UIElement CreateAodvClientNode(NetSimClient node)
+        {
+            if (CurrentSelectedItem != null && node.Id.Equals(CurrentSelectedItem.Id))
+            {
+                return CreateClientNode(node, Brushes.DodgerBlue);
+            }
+
+            return CreateClientNode(node, Brushes.DeepSkyBlue);
+        }
+
+        /// <summary>
+        /// Creates the client node.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <returns></returns>
+        private UIElement CreateDsrClientNode(NetSimClient node)
+        {
+            if (CurrentSelectedItem != null && node.Id.Equals(CurrentSelectedItem.Id))
+            {
+                return CreateClientNode(node, Brushes.Coral);
+            }
+
+            return CreateClientNode(node, Brushes.DarkOrange);
+        }
+
+        /// <summary>
+        /// Creates the client node.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <returns></returns>
         private UIElement CreateOlsrClientNode(NetSimClient node)
         {
             if (CurrentSelectedItem != null)
             {
                 if (node.Id.Equals(CurrentSelectedItem.Id))
                 {
-                    return CreateClientNode(node, Brushes.MistyRose);
+                    return CreateClientNode(node, Brushes.Plum);
                 }
 
                 OlsrRoutingProtocol currentSelectedNodeProtocol = CurrentSelectedItem.RoutingProtocol as OlsrRoutingProtocol;
@@ -310,13 +340,13 @@ namespace NetSim.Lib.Visualization
                     //is n(1 hop) neigbor
                     if (currentSelectedNodeProtocol.IsOneHopNeighbor(node.Id))
                     {
-                        return CreateClientNode(node, Brushes.DarkViolet);
+                        return CreateClientNode(node, Brushes.SteelBlue);
                     }
 
                     //is n(2 hop) neighbor
                     if (currentSelectedNodeProtocol.IsTwoHopNeighbor(node.Id))
                     {
-                        return CreateClientNode(node, Brushes.PaleVioletRed);
+                        return CreateClientNode(node, Brushes.PowderBlue);
                     }
 
                     //is mpr neighbor
@@ -324,7 +354,7 @@ namespace NetSim.Lib.Visualization
 
             }
 
-            return CreateClientNode(node, Brushes.Lavender);
+            return CreateClientNode(node, Brushes.Orchid);
         }
 
         /// <summary>

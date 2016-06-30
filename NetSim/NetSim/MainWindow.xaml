@@ -67,30 +67,24 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Grid  Grid.Row="0" Grid.Column="0" Margin="5" >
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <Button  Grid.Row="0" Grid.Column="0"   Command="{Binding StartSimulationCommand}">Start</Button>
-                            <Button  Grid.Row="0" Grid.Column="1" Margin="5 0 0 0" Command="{Binding PauseSimulationCommand}">Pause</Button>
-                        </Grid>
-
-                        <Button Grid.Row="0" Grid.Column="1" Margin="5" Command="{Binding PerformStepCommand}">Step</Button>
-                        <Button Grid.Row="1" Grid.Column="0" Margin="5" Command="{Binding ResetSimulationCommand}" >Reset</Button>
-                        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="5 0 0 0">
-                            <TextBlock Grid.Column="0" TextAlignment="Left" VerticalAlignment="Center" FontSize="10">Simulation<LineBreak></LineBreak>Step</TextBlock>
-                            <TextBlock Grid.Column="1" MinWidth="15" Text="{Binding Path=SimulationStep}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0" TextAlignment="Left" ></TextBlock>
-                        </StackPanel>
+                        <Button Grid.Row="0" Grid.Column="0" Margin="5" Command="{Binding StartSimulationCommand}">Start</Button>
+                        <Button Grid.Row="0" Grid.Column="1" Margin="5" Command="{Binding PauseSimulationCommand}">Pause</Button>
+                        <Button Grid.Row="0" Grid.Column="2" Margin="5" Command="{Binding PerformStepCommand}">Step</Button>
+                        <Button Grid.Row="0" Grid.Column="3" Margin="5" Command="{Binding ResetSimulationCommand}" >Reset</Button>
                     </Grid>
+                    <StackPanel Orientation="Horizontal" Margin="5 0 0 0">
+                        <TextBlock Grid.Column="0" TextAlignment="Left" VerticalAlignment="Center" FontSize="10">Simulation Step</TextBlock>
+                        <TextBlock Grid.Column="1" MinWidth="15" Text="{Binding Path=SimulationStep}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0" TextAlignment="Left" ></TextBlock>
+                    </StackPanel>
                 </StackPanel>
-                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
-                    <Frame  Content="{Binding Path=DetailPage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" NavigationUIVisibility="Hidden"></Frame>
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden" Margin="0 10 0 0">
+                    <Frame  Content="{Binding Path=DetailPage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" NavigationUIVisibility="Hidden"/>
                 </ScrollViewer>
             </Grid>
             <Canvas Grid.Column="1" Name="DrawCanvas" 

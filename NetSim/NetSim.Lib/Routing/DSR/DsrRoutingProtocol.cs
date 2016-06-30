@@ -30,5 +30,10 @@ namespace NetSim.Lib.Routing.DSR
         {
             throw new NotImplementedException();
         }
+
+        protected override string GetRoutingData()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

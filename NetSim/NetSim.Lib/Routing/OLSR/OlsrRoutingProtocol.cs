@@ -151,6 +151,15 @@ namespace NetSim.Lib.Routing.OLSR
         }
 
         /// <summary>
+        /// Gets the routing data.
+        /// </summary>
+        /// <returns></returns>
+        protected override string GetRoutingData()
+        {
+            return $"{Table}\n\nOne-Hop Neighbor\nId Type\n{OneHopNeighborTable}\nTwo-Hop Neighbor\nId Trough\n{TwoHopNeighborTable}";
+        }
+
+        /// <summary>
         /// Broadcasts the hello messages.
         /// </summary>
         private void BroadcastHelloMessages()
@@ -182,9 +191,22 @@ namespace NetSim.Lib.Routing.OLSR
                 //update two hop neighbors
                 foreach (string twohopneighbor in message.Neighbors)
                 {
+                    //if twohop neighbor is also one hop neighbor ignore entry 
+                    if(OneHopNeighborTable.GetEntryFor(twohopneighbor) != null)
+                    {
+                        continue;
+                    }
+
+                    // if two hop neighbor is this client id itself - ingore entry
+                    if (twohopneighbor.Equals(this.Client.Id))
+                    {
+                        continue;
+                    }
+
+                    //search twohop neighbor entry
                     var twoHopBeighbor = TwoHopNeighborTable.GetEntryFor(twohopneighbor);
 
-                    //upate one hop neighbors
+                    //upate two hop neighbors table
                     if (twoHopBeighbor == null)
                     {
                         // if neighbor not exists add it 

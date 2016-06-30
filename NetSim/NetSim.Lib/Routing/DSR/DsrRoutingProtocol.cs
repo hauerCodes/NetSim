@@ -95,8 +95,15 @@ namespace NetSim.Lib.Routing.DSR
                 }
                 else
                 {
-                    //if route not found start route discovery
+                    // if route not found and route discovery is not started for this message
+                    if(!queuedMessage.IsRouteDiscoveryStarted)
+                    {
+                        // mark as started
+                        queuedMessage.IsRouteDiscoveryStarted = true;
 
+                        //broadcast to all neighbors
+                        Client.BroadcastMessage(new DsrRreqMessage() { });
+                    }
 
                     // and enqueue message again
                     OutputQueue.Enqueue(queuedMessage);
@@ -118,34 +125,24 @@ namespace NetSim.Lib.Routing.DSR
                 {
                     var message = Client.InputQueue.Dequeue();
 
-                    // if message is AodvRreqMessage message
+                    // if message is DsrRreqMessage message
                     if (message is DsrRreqMessage)
                     {
-                        //// client table
-                        //var dsdvTable = Table as DsdvTable;
+                        DsrRreqMessage reqMessage = message as DsrRreqMessage;
 
-                        //// ReSharper disable once InvertIf
-                        //if (dsdvTable != null)
-                        //{
-                        //    if (dsdvTable.HandleUpdate(message.Sender, (message as DsdvUpdateMessage).UpdateTable))
-                        //    {
-                        //        topologyChangeUpdate = true;
-                        //    }
-                        //}
+
+                        //check if message destination is current node 
+                        if (reqMessage.Receiver.Equals(this.Client.Id))
+                        {
+                            //send back rrep mesage the reverse way with found route 
+                        }
                     }
                     else if (message is DsrRrepMessage)
                     {
-                        //// client table
-                        //var dsdvTable = Table as DsdvTable;
+                        DsrRrepMessage repMessage = message as DsrRrepMessage;
 
-                        //// ReSharper disable once InvertIf
-                        //if (dsdvTable != null)
-                        //{
-                        //    if (dsdvTable.HandleUpdate(message.Sender, (message as DsdvUpdateMessage).UpdateTable))
-                        //    {
-                        //        topologyChangeUpdate = true;
-                        //    }
-                        //}
+                        // forward message
+
                     }
 
                     else if (message is DsrRrerMessage)
@@ -162,7 +159,7 @@ namespace NetSim.Lib.Routing.DSR
                         //    }
                         //}
                     }
-                    else
+                    else if (message is DsrDataMessage)
                     {
                         // forward message if client is not reciever
                         if (!message.Receiver.Equals(this.Client.Id))
@@ -173,6 +170,10 @@ namespace NetSim.Lib.Routing.DSR
                         {
                             Client.ReceiveData(message);
                         }
+                    }
+                    else
+                    { 
+                        
                     }
                 }
             }

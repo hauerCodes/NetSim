@@ -9,7 +9,9 @@ using NetSim.Lib.Simulator;
 namespace NetSim.Lib.Routing.DSR
 {
     /// <summary>
-    /// 
+    /// The DSR Route Request Message
+    /// This message is used to search route to the destination Id within this message.
+    /// The routes gets stored in the nodes list along the found route.
     /// </summary>
     /// <seealso cref="NetSim.Lib.Simulator.NetSimMessage" />
     public class DsrRreqMessage : NetSimMessage

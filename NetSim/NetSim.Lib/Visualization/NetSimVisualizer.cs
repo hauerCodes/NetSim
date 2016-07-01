@@ -157,7 +157,8 @@ namespace NetSim.Lib.Visualization
         private static Storyboard CreateMessageAnimation(NetSimConnection edge, NetSimMessage message, MessageControl uimessage)
         {
             INetSimVisualizeableItem receiver = (edge.EndPointA.Id.Equals(message.NextReceiver) ? edge.EndPointA : edge.EndPointB) as INetSimVisualizeableItem;
-            INetSimVisualizeableItem sender = (edge.EndPointA.Id.Equals(message.Sender) ? edge.EndPointA : edge.EndPointB) as INetSimVisualizeableItem;
+            //INetSimVisualizeableItem sender = (edge.EndPointA.Id.Equals(message.Sender) ? edge.EndPointA : edge.EndPointB) as INetSimVisualizeableItem;
+            INetSimVisualizeableItem sender = ((receiver == edge.EndPointA) ? edge.EndPointB : edge.EndPointA) as INetSimVisualizeableItem;
 
             if (receiver == null || sender == null)
             {
@@ -296,10 +297,10 @@ namespace NetSim.Lib.Visualization
         {
             if (CurrentSelectedItem != null && node.Id.Equals(CurrentSelectedItem.Id))
             {
-                return CreateClientNode(node, Brushes.DodgerBlue);
+                return CreateClientNode(node, Brushes.LightSkyBlue);
             }
 
-            return CreateClientNode(node, Brushes.DeepSkyBlue);
+            return CreateClientNode(node, Brushes.CornflowerBlue);
         }
 
         /// <summary>
@@ -311,10 +312,10 @@ namespace NetSim.Lib.Visualization
         {
             if (CurrentSelectedItem != null && node.Id.Equals(CurrentSelectedItem.Id))
             {
-                return CreateClientNode(node, Brushes.Coral);
+                return CreateClientNode(node, Brushes.LightSalmon);
             }
 
-            return CreateClientNode(node, Brushes.DarkOrange);
+            return CreateClientNode(node, Brushes.OrangeRed);
         }
 
         /// <summary>
@@ -328,7 +329,7 @@ namespace NetSim.Lib.Visualization
             {
                 if (node.Id.Equals(CurrentSelectedItem.Id))
                 {
-                    return CreateClientNode(node, Brushes.Plum);
+                    return CreateClientNode(node, Brushes.Thistle);
                 }
 
                 OlsrRoutingProtocol currentSelectedNodeProtocol = CurrentSelectedItem.RoutingProtocol as OlsrRoutingProtocol;

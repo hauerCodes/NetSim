@@ -37,7 +37,7 @@ namespace NetSim.Lib.Routing.DSR
         /// </summary>
         /// <param name="requestId">The request identifier.</param>
         /// <returns></returns>
-        public bool HasChachedRequest(int requestId)
+        public bool HasCachedRequest(int requestId)
         {
             return ChachedRequests.Contains(requestId);
         }

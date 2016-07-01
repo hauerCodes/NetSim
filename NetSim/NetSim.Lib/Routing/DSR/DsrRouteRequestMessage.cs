@@ -14,12 +14,12 @@ namespace NetSim.Lib.Routing.DSR
     /// The routes gets stored in the nodes list along the found route.
     /// </summary>
     /// <seealso cref="NetSim.Lib.Simulator.NetSimMessage" />
-    public class DsrRreqMessage : NetSimMessage
+    public class DsrRouteRequestMessage : NetSimMessage
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DsrRreqMessage" /> class.
+        /// Initializes a new instance of the <see cref="DsrRouteRequestMessage" /> class.
         /// </summary>
-        public DsrRreqMessage()
+        public DsrRouteRequestMessage()
         {
             this.Nodes = new List<string>();
         }
@@ -46,7 +46,7 @@ namespace NetSim.Lib.Routing.DSR
         /// <returns></returns>
         public override object Clone()
         {
-            return new DsrRreqMessage()
+            return new DsrRouteRequestMessage()
             {
                 Id = this.Id,
                 RequestId = this.RequestId,

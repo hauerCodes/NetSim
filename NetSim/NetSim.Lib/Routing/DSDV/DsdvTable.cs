@@ -125,6 +125,9 @@ namespace NetSim.Lib.Routing.DSDV
                                 else
                                 {
                                     dsdvLocalRouteEntry.Metric = dsdvUpdateRoute.Metric;
+
+                                    SetAllRoutesNotReachableForDisconnectedNextHop(dsdvLocalRouteEntry.NextHop);
+
                                 }
                                 dsdvLocalRouteEntry.SequenceNr = (DsdvSequence)dsdvUpdateRoute.SequenceNr.Clone();
                                 updated = true;
@@ -136,6 +139,23 @@ namespace NetSim.Lib.Routing.DSDV
             }
 
             return updated;
+        }
+
+        /// <summary>
+        /// Sets all routes not reachable for next hop.
+        /// </summary>
+        /// <param name="nextHop">The next hop.</param>
+        public void SetAllRoutesNotReachableForDisconnectedNextHop(string nextHop)
+        {
+            foreach(var netSimTableEntry in Entries.Where(e => e.NextHop.Equals(nextHop) && !e.Destination.Equals(e.NextHop)))
+            {
+                var entry = (DsdvTableEntry)netSimTableEntry;
+
+                entry.Metric = NotReachable;
+                //increment sequence nr - outside of "destination" node
+                entry.SequenceNr.SequenceNr++;
+
+            }
         }
 
         /// <summary>

@@ -24,7 +24,6 @@ namespace NetSim.Lib.Routing.DSDV
         /// The offline links
         /// </summary>
         private List<string> offlineLinks;
-
         
         /// <summary>
         /// Initializes a new instance of the <see cref="DsdvRoutingProtocol"/> class.
@@ -32,9 +31,6 @@ namespace NetSim.Lib.Routing.DSDV
         /// <param name="client">The client.</param>
         public DsdvRoutingProtocol(NetSimClient client) : base(client) { }
 
-        
-
-        
         /// <summary>
         /// Gets or sets the current sequence.
         /// </summary>
@@ -42,8 +38,6 @@ namespace NetSim.Lib.Routing.DSDV
         /// The current sequence.
         /// </value>
         public DsdvSequence CurrentSequence { get; set; }
-
-        
 
         /// <summary>
         /// Initializes this instance.
@@ -218,11 +212,12 @@ namespace NetSim.Lib.Routing.DSDV
                 // update metric to not reachable
                 routeEntry.Metric = NotReachable;
 
-                // NOTE: only point where not the destination changes a sequence number
+                // NOTE: point where not the destination changes a sequence number
                 var dsdvTableEntry = routeEntry as DsdvTableEntry;
                 if (dsdvTableEntry != null)
                 {
                     dsdvTableEntry.SequenceNr.SequenceNr += 1;
+                    (this.Table as DsdvTable)?.SetAllRoutesNotReachableForDisconnectedNextHop(dsdvTableEntry.NextHop);
                 }
             }
 

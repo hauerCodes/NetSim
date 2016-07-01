@@ -25,14 +25,6 @@ namespace NetSim.Lib.Simulator
         public NetSimMessage Message { get; set; }
 
         /// <summary>
-        /// Gets or sets the route for the message.
-        /// </summary>
-        /// <value>
-        /// The route.
-        /// </value>
-        public NetSimTableEntry Route { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether this instance is route discovery started.
         /// </summary>
         /// <value>

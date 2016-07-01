@@ -15,7 +15,6 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         private event Action ConnectionStateUpdate;
 
-        
         /// <summary>
         /// Initializes a new instance of the <see cref="NetSimConnection"/> class.
         /// </summary>
@@ -25,9 +24,6 @@ namespace NetSim.Lib.Simulator
             this.PendingMessages = new Queue<NetSimMessage>();
         }
 
-        
-
-        
         /// <summary>
         /// Gets or sets the pending messages.
         /// </summary>
@@ -87,9 +83,6 @@ namespace NetSim.Lib.Simulator
         /// </value>
         public bool IsTransmitting => PendingMessages.Count > 0;
 
-        
-
-        
         /// <summary>
         /// Occurs when client state is updated due routing or other events.
         /// </summary>
@@ -105,8 +98,6 @@ namespace NetSim.Lib.Simulator
             }
         }
 
-        
-
         /// <summary>
         /// Starts the transport message.
         /// </summary>
@@ -120,6 +111,22 @@ namespace NetSim.Lib.Simulator
                 PendingMessages.Enqueue(message);
                 OnStateUpdated();
             }
+        }
+
+        /// <summary>
+        /// Starts the transport message.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <param name="receiverEndPoint">The receiver end point.</param>
+        public void StartTransportMessage(NetSimMessage message, string receiverEndPoint)
+        {
+            // hack set the "next" receiver 
+            // compared with ethernet frame - mac address
+            // only nessary for that the connection class knows which end to transmit message
+            message.NextReceiver = receiverEndPoint;
+
+            // start message transport
+            StartTransportMessage(message);
         }
 
         /// <summary>

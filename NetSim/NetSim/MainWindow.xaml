@@ -6,7 +6,7 @@
         xmlns:converter="clr-namespace:NetSim.Converter"
         xmlns:simulator="clr-namespace:NetSim.Lib.Simulator;assembly=NetSim.Lib"
         mc:Ignorable="d"
-        Title="MainWindow" MinHeight="450" MinWidth="700" Height="450" Width="700">
+        Title="NetSim - Routing Protocol Simulator" MinHeight="450" MinWidth="700" Height="450" Width="700">
     <Window.Resources>
         <converter:ProtocolTypeToBoolConverter x:Key="protocolConverter"/>
     </Window.Resources>
@@ -23,6 +23,13 @@
                 <MenuItem IsCheckable="True" IsChecked="{Binding Path=ProtocolType, Converter={StaticResource protocolConverter}, Mode=TwoWay, ConverterParameter={x:Static simulator:NetSimProtocolType.OLSR}}" Header="OLSR"></MenuItem>
                 <MenuItem IsCheckable="True" IsChecked="{Binding Path=ProtocolType, Converter={StaticResource protocolConverter}, Mode=TwoWay, ConverterParameter={x:Static simulator:NetSimProtocolType.AODV}}" Header="AODV"></MenuItem>
                 <MenuItem IsCheckable="True" IsChecked="{Binding Path=ProtocolType, Converter={StaticResource protocolConverter}, Mode=TwoWay, ConverterParameter={x:Static simulator:NetSimProtocolType.DSR}}" Header="DSR"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="Help">
+                <MenuItem Header="Network Create"></MenuItem>
+                <MenuItem Header="Simulation Control"></MenuItem>
+                <MenuItem Header="Routing Protocol Details"></MenuItem>
+                <Separator></Separator>
+                <MenuItem Header="About"></MenuItem>
             </MenuItem>
         </Menu>
         <Grid>

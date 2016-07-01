@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -29,7 +28,6 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         private StringBuilder clientData;
 
-        
         /// <summary>
         /// Initializes a new instance of the <see cref="NetSimClient"/> class.
         /// </summary>
@@ -46,9 +44,6 @@ namespace NetSim.Lib.Simulator
             this.Connections = new Dictionary<string, NetSimConnection>();
         }
 
-        
-
-        
         /// <summary>
         /// Gets or sets the connections.
         /// </summary>
@@ -108,9 +103,6 @@ namespace NetSim.Lib.Simulator
         /// </value>
         public string CurrentData => clientData.ToString();
 
-        
-
-        
         /// <summary>
         /// Occurs when client state is updated due routing or other events.
         /// </summary>
@@ -130,8 +122,6 @@ namespace NetSim.Lib.Simulator
         /// Occurs when a property is changed.
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
-
-        
 
         /// <summary>
         /// Initializes the protocol.
@@ -169,17 +159,22 @@ namespace NetSim.Lib.Simulator
         /// Broadcasts the message.
         /// </summary>
         /// <param name="message">The message.</param>
-        public void BroadcastMessage(NetSimMessage message)
+        /// <param name="overrideSenderReceiver">if set to <c>true</c> [override sender receiver].</param>
+        public void BroadcastMessage(NetSimMessage message, bool overrideSenderReceiver = true)
         {
             foreach(var connection in Connections)
             {
                 //create copy of message
                 NetSimMessage localCopy = (NetSimMessage)message.Clone();
-                
+
                 // insert receiver id 
-                localCopy.Receiver = connection.Key;
+                if (overrideSenderReceiver)
+                {
+                    localCopy.Receiver = connection.Key;
+                    localCopy.Sender = Id;
+                }
+
                 localCopy.NextReceiver = connection.Key;
-                localCopy.Sender = Id;
 
                 //transport message
                 connection.Value.StartTransportMessage(localCopy);

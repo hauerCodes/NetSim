@@ -22,12 +22,7 @@ namespace NetSim.Lib.Simulator
         /// <returns></returns>
         public override object Clone()
         {
-            return new DataMessage()
-            {
-                Sender = this.Sender,
-                Receiver = this.Receiver,
-                Data = this.Data
-            };
+            return CopyTo(new DataMessage() { Data = this.Data });
         }
 
         /// <summary>

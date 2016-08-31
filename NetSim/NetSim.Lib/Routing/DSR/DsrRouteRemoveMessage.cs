@@ -24,12 +24,12 @@ namespace NetSim.Lib.Routing.DSR
         /// <returns></returns>
         public override object Clone()
         {
-            return new DsrRouteRemoveMessage()
+            var clone = new DsrRouteRemoveMessage()
             {
-                Sender = this.Sender,
-                Receiver = this.Receiver,
                 NotReachableNode = this.NotReachableNode
             };
+
+            return CopyTo(clone);
         }
     }
 }

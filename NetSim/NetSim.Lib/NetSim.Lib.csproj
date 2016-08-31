@@ -92,8 +92,10 @@
     <Compile Include="Routing\OLSR\OlsrState.cs" />
     <Compile Include="Routing\OLSR\OlsrTableEntry.cs" />
     <Compile Include="Routing\RoutingProtocolFactory.cs" />
+    <Compile Include="Simulator\ConnectionFrameMessage.cs" />
     <Compile Include="Simulator\DataMessage.cs" />
     <Compile Include="Simulator\INetSimConnectionEndpoint.cs" />
+    <Compile Include="Simulator\NetSimMessageTransmissionStep.cs" />
     <Compile Include="Simulator\NetSimQueuedMessage.cs" />
     <Compile Include="Simulator\NetSimSequence.cs" />
     <Compile Include="Storage\SimulationStorage.cs" />

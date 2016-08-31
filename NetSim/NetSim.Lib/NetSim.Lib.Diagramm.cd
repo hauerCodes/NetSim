@@ -4,19 +4,11 @@
     <Position X="14" Y="3.25" Width="2" />
     <InheritanceLine Type="NetSim.Lib.Simulator.NetSimItem" FixedToPoint="true">
       <Path>
-        <Point X="7.5" Y="2.747" />
-        <Point X="7.5" Y="6" />
-        <Point X="14" Y="6" />
+        <Point X="7.5" Y="2.555" />
+        <Point X="7.5" Y="5.5" />
+        <Point X="14" Y="5.5" />
       </Path>
     </InheritanceLine>
-    <AssociationLine Name="InputQueue" Type="NetSim.Lib.Simulator.NetSimMessage" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="14" Y="7.875" />
-        <Point X="13.625" Y="7.875" />
-        <Point X="13.625" Y="7.881" />
-        <Point X="8.5" Y="7.881" />
-      </Path>
-    </AssociationLine>
     <TypeIdentifier>
       <HashCode>AgAAEAAAAAAAAAEAMCAAAAgAgTAAAIAQAAAgBDAAAgA=</HashCode>
       <FileName>Simulator\NetSimClient.cs</FileName>
@@ -30,17 +22,24 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="NetSim.Lib.Simulator.NetSimMessage">
-    <Position X="6.5" Y="6.75" Width="2" />
+    <Position X="6.5" Y="5.75" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAEAAAAAAAAAAAIABA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAEAAEAAAAAAAAEAIAAAAAAAAAIIBA=</HashCode>
       <FileName>Simulator\NetSimMessage.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.1" />
   </Class>
   <Class Name="NetSim.Lib.Visualization.NetSimVisualizer">
-    <Position X="21" Y="1" Width="3" />
+    <Position X="22" Y="0.75" Width="3" />
+    <AssociationLine Name="CurrentSelectedItem" Type="NetSim.Lib.Simulator.NetSimClient" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="23.094" Y="5.767" />
+        <Point X="23.094" Y="6.25" />
+        <Point X="16" Y="6.25" />
+      </Path>
+    </AssociationLine>
     <TypeIdentifier>
-      <HashCode>ACUEgAAEAABkAIAABAAAAAAAAAAAAAEAAAgAQIAIACA=</HashCode>
+      <HashCode>ACUEgAgEAABkAIAABAAAAAAAAAAAAAEAAAwAQIAKgCA=</HashCode>
       <FileName>Visualization\NetSimVisualizer.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -83,7 +82,7 @@
       </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAABIBQAAAEAAAAIAAAACAAAACAAIAAAAAAgA=</HashCode>
+      <HashCode>AAAAAAAAABIBQAAAEAAAAIAAAACAAAACAAIAAABAAgA=</HashCode>
       <FileName>Simulator\NetSimConnection.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -97,12 +96,15 @@
       <HashCode>AAACAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Simulator\NetSimItem.cs</FileName>
     </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Location" />
+    </ShowAsAssociation>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="NetSim.Lib.Routing.DSDV.DsdvTable">
     <Position X="20" Y="10" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAABAgAAAAAAAAAEAAAAAAAAAAAIBAAAAAAAAAAAABA=</HashCode>
+      <HashCode>AAABAgAAAAAAAAAEAAAAAAAAAAAIBAACAAAAAAAAABA=</HashCode>
       <FileName>Routing\DSDV\DsdvTable.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -170,10 +172,20 @@
   </Class>
   <Class Name="NetSim.Lib.Simulator.NetSimSimulator">
     <Position X="17.25" Y="1" Width="2.25" />
+    <AssociationLine Name="protocol" Type="NetSim.Lib.Simulator.NetSimProtocolType" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="19.5" Y="1.875" />
+        <Point X="20.5" Y="1.875" />
+        <Point X="20.5" Y="2.75" />
+      </Path>
+    </AssociationLine>
     <TypeIdentifier>
       <HashCode>AAAAIAAAAAAAAAAAICAAAAhAgBAAQIAUQAACRCEAAAA=</HashCode>
       <FileName>Simulator\NetSimSimulator.cs</FileName>
     </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="protocol" />
+    </ShowAsAssociation>
     <ShowAsCollectionAssociation>
       <Property Name="Clients" />
       <Property Name="Connections" />
@@ -212,7 +224,7 @@
   <Class Name="NetSim.Lib.Routing.DSR.DsrRoutingProtocol">
     <Position X="18" Y="13.25" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAgAAAAAAAQAEACAAAAgBAAAAAAAAAAAAKAAAgAA=</HashCode>
+      <HashCode>AAAAAxAAIAAgCQAcACAAAAiZAAQgCAAgAAAALAAAgAQ=</HashCode>
       <FileName>Routing\DSR\DsrRoutingProtocol.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -234,14 +246,14 @@
       <NewMemberFileName>Routing\AODV\AodvRrepMessage.cs</NewMemberFileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NetSim.Lib.Routing.DSR.DsrTableEntry" Collapsed="true">
+  <Class Name="NetSim.Lib.Routing.DSR.DsrTableEntry">
     <Position X="20.75" Y="15.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>Routing\DSR\DsrTableEntry.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NetSim.Lib.Routing.OLSR.OlsrTableEntry" Collapsed="true">
+  <Class Name="NetSim.Lib.Routing.OLSR.OlsrTableEntry">
     <Position X="27.5" Y="15.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
@@ -249,7 +261,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NetSim.Lib.Routing.AODV.AodvHelloMessage">
-    <Position X="5.5" Y="9.5" Width="1.75" />
+    <Position X="5.5" Y="9.75" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>Routing\AODV\AodvHelloMessage.cs</FileName>
@@ -279,50 +291,31 @@
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
   <Class Name="NetSim.Lib.Routing.DSR.DsrCacheEntry">
-    <Position X="18" Y="16.75" Width="2" />
+    <Position X="18" Y="20" Width="2" />
     <TypeIdentifier>
-      <HashCode>BAACAAAAAAAAAAAEAAAAAAAAAAAAgAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAACAAAAAAAAAAAEAAAAAAAAAAAAiAAAAAAAAAAAAAA=</HashCode>
       <FileName>Routing\DSR\DsrCacheEntry.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NetSim.Lib.Routing.DSR.DsrRrepMessage">
-    <Position X="3" Y="11.75" Width="2" />
-    <InheritanceLine Type="NetSim.Lib.Simulator.NetSimMessage" ManuallyRouted="true" FixedToPoint="true">
-      <Path>
-        <Point X="7.5" Y="9.011" />
-        <Point X="7.5" Y="9.2" />
-        <Point X="2.735" Y="9.2" />
-        <Point X="2.735" Y="12.875" />
-        <Point X="3" Y="12.875" />
-      </Path>
-    </InheritanceLine>
+  <Class Name="NetSim.Lib.Routing.DSR.DsrRouteResponseMessage">
+    <Position X="3" Y="12" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAIAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAgBA=</HashCode>
-      <FileName>Routing\DSR\DsrRrepMessage.cs</FileName>
+      <HashCode>AAAAAAAAIAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
+      <FileName>Routing\DSR\DsrRouteResponseMessage.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NetSim.Lib.Routing.DSR.DsrRreqMessage">
-    <Position X="3" Y="9.5" Width="2" />
+  <Class Name="NetSim.Lib.Routing.DSR.DsrRouteRequestMessage">
+    <Position X="3" Y="9.75" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAgAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
-      <FileName>Routing\DSR\DsrRreqMessage.cs</FileName>
+      <HashCode>AAAgAAAAAAAAAAQEAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
+      <FileName>Routing\DSR\DsrRouteRequestMessage.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NetSim.Lib.Routing.DSR.DsrRrerMessage">
-    <Position X="3" Y="14.25" Width="2" />
-    <InheritanceLine Type="NetSim.Lib.Simulator.NetSimMessage" ManuallyRouted="true" FixedToPoint="true">
-      <Path>
-        <Point X="7.5" Y="9.011" />
-        <Point X="7.5" Y="9.172" />
-        <Point X="2.705" Y="9.172" />
-        <Point X="2.705" Y="14.39" />
-        <Point X="3" Y="14.39" />
-        <Point X="3" Y="14.5" />
-      </Path>
-    </InheritanceLine>
+  <Class Name="NetSim.Lib.Routing.DSR.DsrRouteRemoveMessage">
+    <Position X="3" Y="14.5" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
-      <FileName>Routing\DSR\DsrRrerMessage.cs</FileName>
+      <FileName>Routing\DSR\DsrRouteRemoveMessage.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NetSim.Lib.Routing.OLSR.OlsrHelloMessage">
@@ -333,37 +326,41 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NetSim.Lib.Routing.OLSR.OlsrNeighborTable">
-    <Position X="30" Y="6" Width="2" />
+    <Position X="10" Y="19.75" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAgAAACAAAACAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Routing\OLSR\OlsrNeighborTable.cs</FileName>
     </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Entries" />
+    </ShowAsCollectionAssociation>
   </Class>
   <Class Name="NetSim.Lib.Routing.OLSR.OlsrNeighborTableEntry">
-    <Position X="28" Y="1.5" Width="2.25" />
+    <Position X="10" Y="22.25" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAEEAAAAAAAAAAAAIAAAAAAQAAAAAA=</HashCode>
       <FileName>Routing\OLSR\OlsrNeighborTableEntry.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NetSim.Lib.Routing.RoutingProtocolFactory">
-    <Position X="17.25" Y="7.75" Width="2" />
+    <Position X="17" Y="9.75" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Routing\RoutingProtocolFactory.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NetSim.Lib.Simulator.DataMessage">
-    <Position X="2.75" Y="6.75" Width="2" />
+  <Class Name="NetSim.Lib.Simulator.ConnectionFrameMessage">
+    <Position X="3.75" Y="6.75" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAABAAAAAAAAAAABA=</HashCode>
-      <FileName>Simulator\DataMessage.cs</FileName>
+      <HashCode>AAAAAAAgAAAAAAAEABAAAAAABAAAAAAAAAAAAAAAABA=</HashCode>
+      <FileName>Simulator\ConnectionFrameMessage.cs</FileName>
+      <NewMemberFileName>Simulator\DataMessage.cs</NewMemberFileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NetSim.Lib.Simulator.NetSimQueuedMessage">
-    <Position X="28" Y="6" Width="1.75" />
+    <Position X="28.5" Y="6.5" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAIAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAIAAAAAA=</HashCode>
       <FileName>Simulator\NetSimQueuedMessage.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -376,14 +373,14 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="NetSim.Lib.Visualization.NetSimLocation">
-    <Position X="32.5" Y="1.25" Width="1.5" />
+    <Position X="4.5" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAA=</HashCode>
       <FileName>Visualization\NetSimLocation.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Interface Name="NetSim.Lib.Visualization.IDrawableNetSimSimulator">
-    <Position X="25.75" Y="1" Width="1.5" />
+    <Position X="26.25" Y="1" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAQCAAAAA=</HashCode>
       <FileName>Visualization\IDrawableNetSimSimulator.cs</FileName>
@@ -397,28 +394,28 @@
     </TypeIdentifier>
   </Interface>
   <Interface Name="NetSim.Lib.Visualization.INetSimVisualizeableItem">
-    <Position X="4.25" Y="1" Width="2" />
+    <Position X="3.75" Y="1" Width="2" />
     <TypeIdentifier>
       <HashCode>AAACAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Visualization\INetSimVisualizeableItem.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Enum Name="NetSim.Lib.Routing.OLSR.OlsrState">
-    <Position X="10.25" Y="18.25" Width="2" />
+    <Position X="10.25" Y="18" Width="2" />
     <TypeIdentifier>
       <HashCode>EAAQAAAAAAAAAAAAAAAABAAAACAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Routing\OLSR\OlsrState.cs</FileName>
     </TypeIdentifier>
   </Enum>
   <Enum Name="NetSim.Lib.Simulator.NetSimDestination">
-    <Position X="28" Y="4.25" Width="1.5" />
+    <Position X="28.5" Y="8.75" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AgAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Simulator\NetSimDestination.cs</FileName>
     </TypeIdentifier>
   </Enum>
   <Enum Name="NetSim.Lib.Simulator.NetSimProtocolType">
-    <Position X="29.75" Y="4.25" Width="1.5" />
+    <Position X="19.75" Y="2.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAIAAAABAAAAgAAAAAAAAAAACAAAA=</HashCode>
       <FileName>Simulator\NetSimProtocolType.cs</FileName>

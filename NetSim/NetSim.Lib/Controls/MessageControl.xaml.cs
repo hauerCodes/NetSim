@@ -20,6 +20,9 @@ namespace NetSim.Lib.Controls
     /// </summary>
     public partial class MessageControl : UserControl
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MessageControl"/> class.
+        /// </summary>
         public MessageControl()
         {
             InitializeComponent();

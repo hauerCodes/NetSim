@@ -8,8 +8,16 @@ using NetSim.Lib.Simulator;
 
 namespace NetSim.Lib.Routing.AODV
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.NetSimTableEntry" />
     public class AodvTableEntry : NetSimTableEntry
     {
+        /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        /// <returns></returns>
         public override object Clone()
         {
             return new AodvTableEntry()

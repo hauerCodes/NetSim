@@ -7,8 +7,7 @@
       mc:Ignorable="d" 
       d:DesignHeight="300" d:DesignWidth="300"
       Title="ConnectionPage">
-
-    <Grid Margin="5">
+    <Grid Margin="5" Background="White">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition/>
@@ -27,8 +26,8 @@
             <CheckBox IsChecked="{Binding Path=Connection.IsOffline}"></CheckBox>
             <TextBlock Margin="5 0 0 0" Text="{Binding Path=Connection.IsOffline}"></TextBlock>
         </StackPanel>
-        <TextBlock Grid.Row="2" Grid.Column="0">Current Messages</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold" >Current Messages</TextBlock>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" FontFamily="Consolas" Text="{Binding Path=CurrentMessages}"></TextBlock>
+        <ListBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" FontFamily="Consolas" ItemsSource="{Binding Path=CurrentMessages}"></ListBox>
     </Grid>
 </Page>

@@ -35,17 +35,19 @@ namespace NetSim.ViewModel
         /// <value>
         /// The current messages.
         /// </value>
-        public string CurrentMessages
+        public List<string> CurrentMessages
         {
             get
             {
-                StringBuilder builder = new StringBuilder();
-                foreach(var message in this.Connection.PendingMessages)
-                {
-                    builder.AppendLine(message.ToString());
-                }
+                return this.Connection.PendingMessages.Select(m => m.ToString()).ToList(); 
 
-                return builder.ToString();
+                //StringBuilder builder = new StringBuilder();
+                //foreach(var message in this.Connection.PendingMessages)
+                //{
+                //    builder.AppendLine(message.ToString());
+                //}
+
+                //return builder.ToString();
             }
         }
     }

@@ -8,11 +8,21 @@ using NetSim.Lib.Simulator;
 
 namespace NetSim.Lib.Routing.AODV
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.NetSimMessage" />
     public class AodvHelloMessage : NetSimMessage
     {
+        /// <summary>
+        /// Creates a new object that is a copy of the current instance.
+        /// </summary>
+        /// <returns>
+        /// A new object that is a copy of this instance.
+        /// </returns>
         public override object Clone()
         {
-            return new AodvHelloMessage() { Receiver = this.Receiver, Sender = this.Sender };
+            return CopyTo(new AodvHelloMessage());
         }
     }
 }

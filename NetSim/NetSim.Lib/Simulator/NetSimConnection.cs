@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NetSim.Lib.Simulator
 {
@@ -22,6 +23,7 @@ namespace NetSim.Lib.Simulator
         {
             this.IsOffline = false;
             this.PendingMessages = new Queue<NetSimMessage>();
+            this.TransmittedMessages = new List<NetSimMessage>();
         }
 
         /// <summary>
@@ -31,6 +33,14 @@ namespace NetSim.Lib.Simulator
         /// The pending messages.
         /// </value>
         public Queue<NetSimMessage> PendingMessages { get; set; }
+
+        /// <summary>
+        /// Gets or sets the transmitted messages.
+        /// </summary>
+        /// <value>
+        /// The transmitted messages.
+        /// </value>
+        public List<NetSimMessage> TransmittedMessages { get; set; }
 
         /// <summary>
         /// Gets or sets the end point a.
@@ -84,6 +94,14 @@ namespace NetSim.Lib.Simulator
         public bool IsTransmitting => PendingMessages.Count > 0;
 
         /// <summary>
+        /// Gets a value indicating whether this instance is cleanup necessary.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is cleanup necessary; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsCleanupNecessary => TransmittedMessages.Any(tm => tm.TransmissionStep == NetSimMessageTransmissionStep.Receiving);
+
+        /// <summary>
         /// Occurs when client state is updated due routing or other events.
         /// </summary>
         public event Action StateUpdated
@@ -102,8 +120,17 @@ namespace NetSim.Lib.Simulator
         /// Starts the transport message.
         /// </summary>
         /// <param name="message">The message.</param>
-        public void StartTransportMessage(NetSimMessage message)
+        /// <param name="receiverEndPoint">The receiver end point.</param>
+        public void StartTransportMessage(NetSimMessage message, string receiverEndPoint)
         {
+            // hack set the "next" receiver 
+            // compared with ethernet frame - mac address
+            // only necessary for the connection class knows which end to transmit message
+            message.NextReceiver = receiverEndPoint;
+
+            message.TransmissionStep = NetSimMessageTransmissionStep.Sending;
+
+            // start message transport
             if (EndPointA == null || EndPointB == null || IsOffline) return;
 
             if (EndPointA.Id.Equals(message.NextReceiver) || EndPointB.Id.Equals(message.NextReceiver))
@@ -114,42 +141,50 @@ namespace NetSim.Lib.Simulator
         }
 
         /// <summary>
-        /// Starts the transport message.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        /// <param name="receiverEndPoint">The receiver end point.</param>
-        public void StartTransportMessage(NetSimMessage message, string receiverEndPoint)
-        {
-            // hack set the "next" receiver 
-            // compared with ethernet frame - mac address
-            // only nessary for that the connection class knows which end to transmit message
-            message.NextReceiver = receiverEndPoint;
-
-            // start message transport
-            StartTransportMessage(message);
-        }
-
-        /// <summary>
         /// Ends the transport messages.
         /// </summary>
         public void EndTransportMessages()
         {
-            while(PendingMessages.Count > 0 )
+            // remove all transmitted message that are done
+            var doneList =
+                TransmittedMessages.Where(m => m.TransmissionStep == NetSimMessageTransmissionStep.Done).ToList();
+            doneList.ForEach(m => TransmittedMessages.Remove(m));
+
+            // mark all already transmitted messages that are in receicing mode as done
+            TransmittedMessages
+                .Where(m => m.TransmissionStep == NetSimMessageTransmissionStep.Receiving).ToList()
+                .ForEach(m => m.TransmissionStep = NetSimMessageTransmissionStep.Done);
+
+            OnStateUpdated();
+
+            // send messages to receiver endpoint
+            while (PendingMessages.Count > 0)
             {
                 var message = PendingMessages.Dequeue();
+
+                // mark each message as transmission receiving (triggers the receiving animation)
+                if (message.TransmissionStep == NetSimMessageTransmissionStep.Sending)
+                {
+                    message.TransmissionStep = NetSimMessageTransmissionStep.Receiving;
+                }
 
                 if (EndPointA != null && message.NextReceiver.Equals(EndPointA.Id))
                 {
                     EndPointA.ReceiveMessage(message);
-                    OnStateUpdated();
+                    // OnStateUpdated();
                 }
 
                 if (EndPointB != null && message.NextReceiver.Equals(EndPointB.Id))
                 {
                     EndPointB.ReceiveMessage(message);
-                    OnStateUpdated();
+                    // OnStateUpdated();
                 }
+
+                // add received message to transmitted message for visualization
+                TransmittedMessages.Add(message);
             }
+
+            OnStateUpdated();
         }
 
         /// <summary>

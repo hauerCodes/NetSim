@@ -52,12 +52,12 @@ namespace NetSim.Lib.Routing.DSR
         /// <returns></returns>
         public override object Clone()
         {
-            return new DsrRouteResponseMessage()
+            var clone = new DsrRouteResponseMessage()
             {
-                Sender = this.Sender,
-                Receiver = this.Receiver,
                 Route = new List<string>(this.Route)
             };
+
+            return CopyTo(clone);
         }
     }
 }

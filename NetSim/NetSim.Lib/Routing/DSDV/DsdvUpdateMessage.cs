@@ -24,12 +24,12 @@ namespace NetSim.Lib.Routing.DSDV
         /// <returns></returns>
         public override object Clone()
         {
-            return new DsdvUpdateMessage()
+            var clone = new DsdvUpdateMessage()
             {
-                Sender = this.Sender,
-                Receiver = this.Receiver,
                 UpdateTable = (DsdvTable)UpdateTable.Clone()
             };
+
+            return CopyTo(clone);
         }
 
         /// <summary>

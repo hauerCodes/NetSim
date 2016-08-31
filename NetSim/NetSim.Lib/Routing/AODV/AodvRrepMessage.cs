@@ -12,7 +12,7 @@ namespace NetSim.Lib.Routing.AODV
     {
         public override object Clone()
         {
-            return new AodvRrepMessage() { Receiver = this.Receiver, Sender = this.Sender };
+            return CopyTo(new AodvRrepMessage());
         }
     }
 }

@@ -130,10 +130,14 @@ namespace NetSim.Lib.Simulator
         public void InitializeProtocol(NetSimProtocolType protocolType)
         {
             // if client is already intialized - then this is a reset
-            if(IsInitialized)
+            if (IsInitialized)
             {
                 //clear pending messages in connections
-                Connections.Values.ToList().ForEach(c => { c.PendingMessages.Clear(); });
+                Connections.Values.ToList().ForEach(c =>
+                {
+                    c.PendingMessages.Clear();
+                    c.TransmittedMessages.Clear();
+                });
             }
 
             // (re)set step counter
@@ -162,10 +166,13 @@ namespace NetSim.Lib.Simulator
         /// <param name="overrideSenderReceiver">if set to <c>true</c> [override sender receiver].</param>
         public void BroadcastMessage(NetSimMessage message, bool overrideSenderReceiver = true)
         {
-            foreach(var connection in Connections)
+            foreach (var connection in Connections)
             {
                 //create copy of message
                 NetSimMessage localCopy = (NetSimMessage)message.Clone();
+
+                // reset transmission step - because this message gets forwarded 
+                localCopy.TransmissionStep = NetSimMessageTransmissionStep.Sending;
 
                 // insert receiver id 
                 if (overrideSenderReceiver)
@@ -177,7 +184,7 @@ namespace NetSim.Lib.Simulator
                 localCopy.NextReceiver = connection.Key;
 
                 //transport message
-                connection.Value.StartTransportMessage(localCopy);
+                connection.Value.StartTransportMessage(localCopy, connection.Key);
             }
         }
 

@@ -30,11 +30,15 @@ namespace NetSim.Lib.Visualization
         private readonly Canvas drawCanvas;
 
         /// <summary>
+        /// The message states
+        /// </summary>
+        private readonly Dictionary<string, NetSimMessageTransmissionStep> messageStates;
+
+        /// <summary>
         /// The current selected item
         /// </summary>
         private NetSimClient currentSelectedItem;
 
-        
         /// <summary>
         /// Initializes a new instance of the <see cref="NetSimVisualizer"/> class.
         /// </summary>
@@ -44,13 +48,11 @@ namespace NetSim.Lib.Visualization
         {
             this.simulator = simulator;
             this.drawCanvas = drawCanvas;
+            this.messageStates = new Dictionary<string, NetSimMessageTransmissionStep>();
 
             simulator.SimulatorUpdated += SimulatorUpdated;
         }
 
-        
-
-        
         /// <summary>
         /// Gets or sets the current selected item.
         /// </summary>
@@ -70,8 +72,6 @@ namespace NetSim.Lib.Visualization
             }
         }
 
-        
-
         /// <summary>
         /// Refreshes this instance.
         /// </summary>
@@ -89,7 +89,7 @@ namespace NetSim.Lib.Visualization
         }
 
         /// <summary>
-        /// Visualizes the state of the current.
+        /// Visualizes the current state of simulation.
         /// </summary>
         private void VisualizeCurrentState()
         {
@@ -104,8 +104,20 @@ namespace NetSim.Lib.Visualization
 
                     drawCanvas.Children.Add(uiedge);
 
+                    if (!edge.IsOffline)
+                    {
+                        // create the end animation for transmitted messages that are in receiving step
+                        foreach (
+                            var message in edge.TransmittedMessages.Where(
+                                    m => m.TransmissionStep == NetSimMessageTransmissionStep.Receiving))
+                        {
+                            AddMessage(edge, message);
+                        }
+                    }
+
                     if (edge.IsTransmitting && !edge.IsOffline)
                     {
+                        // create the sending animation for transmitting messages
                         foreach (var message in edge.PendingMessages)
                         {
                             AddMessage(edge, message);
@@ -130,21 +142,117 @@ namespace NetSim.Lib.Visualization
         /// <param name="message">The message.</param>
         private void AddMessage(NetSimConnection edge, NetSimMessage message)
         {
+            INetSimVisualizeableItem receiver;
+            INetSimVisualizeableItem sender;
+
+            // get message receiver and sender
+            GetMessageReceiverSender(edge, message, out receiver, out sender);
+
             var uimessage = new MessageControl { Width = 15, Height = 15, Tag = edge, MessagePath = { Tag = edge } };
 
-            int top = (edge.EndPointA.Location.Top + edge.EndPointB.Location.Top) / 2;
-            int left = (edge.EndPointA.Location.Left + edge.EndPointB.Location.Left) / 2;
+            //set message to sender location
+            int top = sender.Location.Top;
+            int left = sender.Location.Left;
 
+            if (IsMessageSendingAnimationDone(message.Id))
+            {
+                //calculate middle between A and B
+                top = (edge.EndPointA.Location.Top + edge.EndPointB.Location.Top) / 2;
+                left = (edge.EndPointA.Location.Left + edge.EndPointB.Location.Left) / 2;
+            }
+
+            // add meesage to this position
             Canvas.SetLeft(uimessage, left);
             Canvas.SetTop(uimessage, top);
 
             drawCanvas.Children.Add(uimessage);
 
-            var storyBoard = CreateMessageAnimation(edge, message, uimessage);
+            Storyboard storyBoard = null;
+
+            if (message.TransmissionStep == NetSimMessageTransmissionStep.Sending)
+            {
+                if (!IsMessageSendingAnimationDone(message.Id))
+                {
+                    storyBoard = CreateMessageAnimation(edge, message, uimessage, NetSimMessageTransmissionStep.Sending);
+                    //messageStates[message.Id] = NetSimMessageTransmissionStep.Sending;
+                }
+            }
+            else
+            {
+                if (!IsMessageReceivingAnimationDone(message.Id))
+                {
+                    storyBoard = CreateMessageAnimation(edge, message, uimessage, NetSimMessageTransmissionStep.Receiving);
+                    //messageStates[message.Id] = NetSimMessageTransmissionStep.Receiving;
+                }
+            }
+
+            if (storyBoard == null) return;
+
+            // when the animation has finished - mark animation as done 
+            // note: animation gets created multiple times - but only at last "redraw"
+            // it has time to finish 
+            storyBoard.Completed += (s, e) =>
+            {
+                messageStates[message.Id] = message.TransmissionStep;
+            };
 
             uimessage.BeginStoryboard(storyBoard);
 
+            //start the animation
             storyBoard.Begin();
+
+        }
+
+        /// <summary>
+        /// Gets the sender receiver.
+        /// </summary>
+        /// <param name="edge">The edge.</param>
+        /// <param name="message">The message.</param>
+        /// <param name="receiver">The receiver.</param>
+        /// <param name="sender">The sender.</param>
+        private static void GetMessageReceiverSender(NetSimConnection edge, NetSimMessage message, out INetSimVisualizeableItem receiver, out INetSimVisualizeableItem sender)
+        {
+            receiver = (edge.EndPointA.Id.Equals(message.NextReceiver) ? edge.EndPointA : edge.EndPointB) as INetSimVisualizeableItem;
+            sender = ((receiver == edge.EndPointA) ? edge.EndPointB : edge.EndPointA) as INetSimVisualizeableItem;
+        }
+
+        /// <summary>
+        /// Determines whether if the message receiving animation
+        /// is done for the specified message identifier.
+        /// </summary>
+        /// <param name="messageId">The message identifier.</param>
+        /// <returns>
+        ///   <c>true</c> if the  message receiving animation is done
+        ///   for the specified message identifier;
+        ///   otherwise, <c>false</c>.
+        /// </returns>
+        private bool IsMessageReceivingAnimationDone(string messageId)
+        {
+            if (!messageStates.ContainsKey(messageId))
+            {
+                return false;
+            }
+
+            return (messageStates[messageId] == NetSimMessageTransmissionStep.Receiving);
+        }
+
+        /// <summary>
+        /// Determines whether if the message sending animation is done for the specified message identifier.
+        /// </summary>
+        /// <param name="messageId">The message identifier.</param>
+        /// <returns>
+        ///    <c>true</c> if the  message sending animation is done
+        ///   for the specified message identifier;
+        ///   otherwise, <c>false</c>.
+        /// </returns>
+        private bool IsMessageSendingAnimationDone(string messageId)
+        {
+            if (!messageStates.ContainsKey(messageId))
+            {
+                return false;
+            }
+
+            return (messageStates[messageId] == NetSimMessageTransmissionStep.Sending);
         }
 
         /// <summary>
@@ -153,12 +261,16 @@ namespace NetSim.Lib.Visualization
         /// <param name="edge">The edge.</param>
         /// <param name="message">The message.</param>
         /// <param name="uimessage">The uimessage.</param>
+        /// <param name="step">The step.</param>
         /// <returns></returns>
-        private static Storyboard CreateMessageAnimation(NetSimConnection edge, NetSimMessage message, MessageControl uimessage)
+        private static Storyboard CreateMessageAnimation(NetSimConnection edge, NetSimMessage message, MessageControl uimessage, NetSimMessageTransmissionStep step)
         {
-            INetSimVisualizeableItem receiver = (edge.EndPointA.Id.Equals(message.NextReceiver) ? edge.EndPointA : edge.EndPointB) as INetSimVisualizeableItem;
-            //INetSimVisualizeableItem sender = (edge.EndPointA.Id.Equals(message.Sender) ? edge.EndPointA : edge.EndPointB) as INetSimVisualizeableItem;
-            INetSimVisualizeableItem sender = ((receiver == edge.EndPointA) ? edge.EndPointB : edge.EndPointA) as INetSimVisualizeableItem;
+            INetSimVisualizeableItem receiver;
+            INetSimVisualizeableItem sender;
+            GetMessageReceiverSender(edge, message, out receiver, out sender);
+
+            int middleTop = (edge.EndPointA.Location.Top + edge.EndPointB.Location.Top) / 2;
+            int middleLeft = (edge.EndPointA.Location.Left + edge.EndPointB.Location.Left) / 2;
 
             if (receiver == null || sender == null)
             {
@@ -166,19 +278,29 @@ namespace NetSim.Lib.Visualization
                 return new Storyboard();
             }
 
-            DoubleAnimation animationTop = new DoubleAnimation()
-            {
-                From = sender.Location.Top,
-                To = receiver.Location.Top,
-                Duration = TimeSpan.FromSeconds(1)
-            };
+            DoubleAnimation animationTop = new DoubleAnimation { Duration = TimeSpan.FromSeconds(0.7) };
+            DoubleAnimation animationLeft = new DoubleAnimation { Duration = TimeSpan.FromSeconds(0.7) };
 
-            DoubleAnimation animationLeft = new DoubleAnimation()
+            if (step == NetSimMessageTransmissionStep.Sending)
             {
-                From = sender.Location.Left,
-                To = receiver.Location.Left,
-                Duration = TimeSpan.FromSeconds(1)
-            };
+                //animationTop.BeginTime = new TimeSpan(0, 0, 0, 1, 0);
+                animationTop.From = sender.Location.Top;
+                animationTop.To = middleTop;
+
+                //animationLeft.BeginTime = new TimeSpan(0, 0, 0, 1, 0);
+                animationLeft.From = sender.Location.Left;
+                animationLeft.To = middleLeft;
+            }
+            else
+            {
+                animationTop.From = middleTop;
+                animationTop.To = receiver.Location.Top;
+                animationTop.Duration = TimeSpan.FromMilliseconds(700);
+
+                animationLeft.From = middleLeft;
+                animationLeft.To = receiver.Location.Left;
+                animationLeft.Duration = TimeSpan.FromMilliseconds(700);
+            }
 
             Storyboard board = new Storyboard();
             board.Children.Add(animationLeft);
@@ -360,6 +482,7 @@ namespace NetSim.Lib.Visualization
         /// Creates the client node.
         /// </summary>
         /// <param name="node">The node.</param>
+        /// <param name="color">The color.</param>
         /// <returns></returns>
         private UIElement CreateClientNode(NetSimClient node, Brush color)
         {
@@ -391,6 +514,6 @@ namespace NetSim.Lib.Visualization
             return grid;
         }
 
-
     }
+
 }

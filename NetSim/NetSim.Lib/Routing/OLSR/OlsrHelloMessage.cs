@@ -32,7 +32,9 @@ namespace NetSim.Lib.Routing.OLSR
         /// <returns></returns>
         public override object Clone()
         {
-            return new OlsrHelloMessage() { Neighbors = new List<string>(Neighbors) };
+            var clone = new OlsrHelloMessage() { Neighbors = new List<string>(Neighbors) };
+
+            return CopyTo(clone);
         }
 
         /// <summary>

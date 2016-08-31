@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 
 using NetSim.Lib.Annotations;
 using NetSim.Lib.Simulator;
@@ -34,7 +35,6 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         private NetSimProtocolType protocol;
 
-        
         /// <summary>
         /// Initializes a new instance of the <see cref="NetSimSimulator"/> class.
         /// </summary>
@@ -46,9 +46,6 @@ namespace NetSim.Lib.Simulator
             IsInitialized = false;
         }
 
-        
-
-        
         /// <summary>
         /// Occurs when the simulator updates.
         /// </summary>
@@ -69,9 +66,6 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        
-
-        
         /// <summary>
         /// Gets or sets the clients.
         /// </summary>
@@ -145,7 +139,7 @@ namespace NetSim.Lib.Simulator
             }
         }
 
-        
+
 
         /// <summary>
         /// Adds the client.
@@ -241,12 +235,19 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         public void PerformSimulationStep()
         {
-            //end the transmittion of messages started in the previous step
-            EndTransmittingMessages();
-
-            foreach (var client in Clients.OrderBy(x => Guid.NewGuid()))
+            // if connection has pending mesasges to deliver - do this first
+            if (Connections.Any(c => c.IsTransmitting))
             {
-                client.PerformSimulationStep();
+                //end the transmittion of messages started in the previous step
+                EndTransmittingMessages();
+            }
+            else
+            {
+                // otherwise perform simulation steps
+                foreach (var client in Clients.OrderBy(x => Guid.NewGuid()))
+                {
+                    client.PerformSimulationStep();
+                }
             }
 
             StepCounter++;
@@ -257,7 +258,7 @@ namespace NetSim.Lib.Simulator
         /// </summary>
         private void EndTransmittingMessages()
         {
-            foreach (var connection in Connections.Where(c => c.IsTransmitting))
+            foreach (var connection in Connections)
             {
                 connection.EndTransportMessages();
             }

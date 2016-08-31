@@ -65,7 +65,13 @@ namespace NetSim.Lib.Routing.DSR
         /// </returns>
         public override object Clone()
         {
-            return new DsrFrameMessage() { Route = new List<string>(Route), Data = (NetSimMessage)Data.Clone() };
+            var clone = new DsrFrameMessage()
+            {
+                Route = new List<string>(Route),
+                Data = (NetSimMessage)Data.Clone()
+            };
+
+            return CopyTo(clone);
         }
     }
 }

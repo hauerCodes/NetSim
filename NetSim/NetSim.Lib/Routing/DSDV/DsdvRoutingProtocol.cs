@@ -122,10 +122,7 @@ namespace NetSim.Lib.Routing.DSDV
         {
             string nextHopId = GetRoute(message.Receiver);
 
-            //"hack" to determine the receiver endpoint of message
-            message.NextReceiver = nextHopId;
-
-            Client.Connections[nextHopId].StartTransportMessage(message);
+            Client.Connections[nextHopId].StartTransportMessage(message, nextHopId);
         }
 
         /// <summary>

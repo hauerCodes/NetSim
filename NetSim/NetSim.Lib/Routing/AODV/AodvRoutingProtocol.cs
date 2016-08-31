@@ -69,10 +69,7 @@ namespace NetSim.Lib.Routing.AODV
                 // if route found - send the message via the connection
                 if (!string.IsNullOrEmpty(nextHopId))
                 {
-                    //"hack" to determine the receiver endpoint of message
-                    queuedMessage.Message.NextReceiver = nextHopId;
-
-                    Client.Connections[nextHopId].StartTransportMessage(queuedMessage.Message);
+                    Client.Connections[nextHopId].StartTransportMessage(queuedMessage.Message, nextHopId);
                 }
                 else
                 {

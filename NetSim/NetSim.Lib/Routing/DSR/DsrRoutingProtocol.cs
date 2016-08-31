@@ -333,7 +333,7 @@ namespace NetSim.Lib.Routing.DSR
             reqMessage.Nodes.Add(this.Client.Id);
 
             //if this node was sender of request - ignore
-            if (reqMessage.Sender.Equals(this.Client.Id))
+            if(IsOwnRequest(reqMessage))
             {
                 return;
             }
@@ -357,6 +357,18 @@ namespace NetSim.Lib.Routing.DSR
 
             // forward message to outgoing messages
             SendMessage(reqMessage);
+        }
+
+        /// <summary>
+        /// Determines whether the given dsr rreq message is a own request.
+        /// </summary>
+        /// <param name="reqMessage">The req message.</param>
+        /// <returns>
+        ///   <c>true</c> if is own request; otherwise, <c>false</c>.
+        /// </returns>
+        private bool IsOwnRequest(DsrRouteRequestMessage reqMessage)
+        {
+            return reqMessage.Nodes.Count > 0 && reqMessage.Nodes[0].Equals(this.Client.Id);
         }
 
         /// <summary>

@@ -46,14 +46,19 @@ namespace NetSim.Lib.Routing.DSR
         /// <returns></returns>
         public override object Clone()
         {
-            return new DsrRouteRequestMessage()
+            var clone = new DsrRouteRequestMessage()
             {
                 Id = this.Id,
                 RequestId = this.RequestId,
-                Sender = this.Sender,
-                Receiver = this.Receiver,
                 Nodes = new List<string>(this.Nodes)
             };
+
+            return CopyTo(clone);
+        }
+
+        public override string ToString()
+        {
+            return base.ToString();
         }
     }
 }

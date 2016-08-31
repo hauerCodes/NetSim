@@ -557,7 +557,7 @@ namespace NetSim.ViewModel
 
                 if (isRunSimluation)
                 {
-                    Thread.Sleep(TimeSpan.FromSeconds(1.1));
+                    Thread.Sleep(TimeSpan.FromSeconds(1.4));
                 }
             }
         }

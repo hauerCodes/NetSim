@@ -26,9 +26,6 @@ namespace NetSim.Lib.Simulator
             this.Entries = new List<NetSimTableEntry>();
         }
 
-        
-
-        
         /// <summary>
         /// Occurs when table gets updated.
         /// </summary>
@@ -45,9 +42,6 @@ namespace NetSim.Lib.Simulator
 
         }
 
-        
-
-        
         /// <summary>
         /// Gets or sets the entries.
         /// </summary>
@@ -55,8 +49,6 @@ namespace NetSim.Lib.Simulator
         /// The entries.
         /// </value>
         public List<NetSimTableEntry> Entries { get; set; }
-
-        
 
         /// <summary>
         /// Should be called when table gets updated.

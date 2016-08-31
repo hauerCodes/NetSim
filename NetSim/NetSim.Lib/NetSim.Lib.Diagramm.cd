@@ -130,7 +130,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NetSim.Lib.Routing.DSDV.DsdvTableEntry">
-    <Position X="25.25" Y="15.75" Width="1.5" />
+    <Position X="24.25" Y="15.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAABAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>Routing\DSDV\DsdvTableEntry.cs</FileName>
@@ -208,7 +208,7 @@
     </ShowAsAssociation>
   </Class>
   <Class Name="NetSim.Lib.Routing.AODV.AodvTableEntry">
-    <Position X="23" Y="15.75" Width="1.5" />
+    <Position X="22.5" Y="15.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>Routing\AODV\AodvTableEntry.cs</FileName>
@@ -249,12 +249,12 @@
   <Class Name="NetSim.Lib.Routing.DSR.DsrTableEntry">
     <Position X="20.75" Y="15.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAEAEAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>Routing\DSR\DsrTableEntry.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NetSim.Lib.Routing.OLSR.OlsrTableEntry">
-    <Position X="27.5" Y="15.75" Width="1.5" />
+    <Position X="26.25" Y="15.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>Routing\OLSR\OlsrTableEntry.cs</FileName>
@@ -352,7 +352,7 @@
   <Class Name="NetSim.Lib.Simulator.ConnectionFrameMessage">
     <Position X="3.75" Y="6.75" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAgAAAAAAAEABAAAAAABAAAAAAAAAAAAAAAABA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAABAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>Simulator\ConnectionFrameMessage.cs</FileName>
       <NewMemberFileName>Simulator\DataMessage.cs</NewMemberFileName>
     </TypeIdentifier>
@@ -377,6 +377,13 @@
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAAAAAAAA=</HashCode>
       <FileName>Visualization\NetSimLocation.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NetSim.Lib.Simulator.DataMessage">
+    <Position X="9.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAABAAAAAAAAAAABA=</HashCode>
+      <FileName>Simulator\DataMessage.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Interface Name="NetSim.Lib.Visualization.IDrawableNetSimSimulator">

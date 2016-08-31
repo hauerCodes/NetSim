@@ -107,8 +107,7 @@ namespace NetSim.Lib.Visualization
                     if (!edge.IsOffline)
                     {
                         // create the end animation for transmitted messages that are in receiving step
-                        foreach (
-                            var message in edge.TransmittedMessages.Where(
+                        foreach (var message in edge.TransmittedMessages.Where(
                                     m => m.TransmissionStep == NetSimMessageTransmissionStep.Receiving))
                         {
                             AddMessage(edge, message);

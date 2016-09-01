@@ -25,6 +25,16 @@ namespace NetSim.Lib.Routing.AODV
         public int RequestId { get; set; }
 
         /// <summary>
+        /// Gets or sets the last hop.
+        /// Note: This Info has to be saved to determine from 
+        /// which interface or hop this message has been sent 
+        /// </summary>
+        /// <value>
+        /// The last hop.
+        /// </value>
+        public string LastHop { get; set; }
+
+        /// <summary>
         /// Gets or sets the hop count.
         /// </summary>
         /// <value>
@@ -52,6 +62,7 @@ namespace NetSim.Lib.Routing.AODV
             {
                 RequestId = this.RequestId,
                 HopCount = this.HopCount,
+                LastHop = this.LastHop,
                 SenderSequenceNr = (AodvSequence)this.SenderSequenceNr.Clone()
             };
 
@@ -66,8 +77,16 @@ namespace NetSim.Lib.Routing.AODV
         /// </returns>
         public override string ToString()
         {
-            return $"{base.ToString()}\n| Request: {RequestId}\n| HopCount: {HopCount}\n"
-                   + $"| Sender SequenceNr: {SenderSequenceNr}+[/{this.GetType().Name}]";
+            StringBuilder builder = new StringBuilder();
+
+            builder.AppendLine(base.ToString());
+            builder.AppendFormat("| Request: {0}\n", RequestId);
+            builder.AppendFormat("| HopCount: {0}\n", HopCount);
+            builder.AppendFormat("| LastHop: {0}\n", LastHop);
+            builder.AppendFormat("| Sender SequenceNr: {0}\n", SenderSequenceNr);
+            builder.AppendLine($"+[/{this.GetType().Name}]");
+
+            return builder.ToString();
         }
     }
 }

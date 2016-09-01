@@ -9,12 +9,12 @@ using NetSim.Lib.Simulator.Components;
 
 namespace NetSim.Lib.Routing.DSR
 {
-    public class DsrRouteResponseMessage : NetSimMessage
+    public class DsrRouteReplyMessage : NetSimMessage
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DsrRouteResponseMessage"/> class.
+        /// Initializes a new instance of the <see cref="DsrRouteReplyMessage"/> class.
         /// </summary>
-        public DsrRouteResponseMessage()
+        public DsrRouteReplyMessage()
         {
             this.Route = new List<string>();
         }
@@ -52,7 +52,7 @@ namespace NetSim.Lib.Routing.DSR
         /// <returns></returns>
         public override object Clone()
         {
-            var clone = new DsrRouteResponseMessage()
+            var clone = new DsrRouteReplyMessage()
             {
                 Route = new List<string>(this.Route)
             };

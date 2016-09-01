@@ -75,22 +75,20 @@
     </Compile>
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Routing\AODV\AodvRouteErrorMessage.cs" />
-    <Compile Include="Routing\AODV\AodvRouteResponseMessage.cs" />
+    <Compile Include="Routing\AODV\AodvRouteReplyMessage.cs" />
     <Compile Include="Routing\AODV\AodvRouteRequestMessage.cs" />
     <Compile Include="Routing\AODV\AodvHelloMessage.cs" />
     <Compile Include="Routing\AODV\AodvRoutingProtocol.cs" />
     <Compile Include="Routing\AODV\AodvTableEntry.cs" />
-    <Compile Include="Routing\AODV\AodvReverseRoutingTable.cs" />
-    <Compile Include="Routing\AODV\AodvReverseRoutingTableEntry.cs" />
     <Compile Include="Routing\AODV\AodvSequence.cs" />
     <Compile Include="Routing\DSDV\DsdvRoutingProtocol.cs" />
     <Compile Include="Routing\DSDV\DsdvSequence.cs" />
-    <Compile Include="Routing\DSR\DsrCacheEntry.cs" />
+    <Compile Include="Simulator\Messages\NetSimRequestCacheEntry.cs" />
     <Compile Include="Routing\DSR\DsrFrameMessage.cs" />
     <Compile Include="Routing\Helpers\MessageHandlerAttribute.cs" />
     <Compile Include="Routing\DSR\DsrRoutingProtocol.cs" />
-    <Compile Include="Routing\DSR\DsrRouteRemoveMessage.cs" />
-    <Compile Include="Routing\DSR\DsrRouteResponseMessage.cs" />
+    <Compile Include="Routing\DSR\DsrRouteErrorMessage.cs" />
+    <Compile Include="Routing\DSR\DsrRouteReplyMessage.cs" />
     <Compile Include="Routing\DSR\DsrRouteRequestMessage.cs" />
     <Compile Include="Routing\DSR\DsrTableEntry.cs" />
     <Compile Include="Routing\Helpers\MessageHandlerResolver.cs" />

@@ -9,7 +9,7 @@ using NetSim.Lib.Simulator.Components;
 
 namespace NetSim.Lib.Routing.AODV
 {
-    public class AodvRouteResponseMessage : NetSimMessage
+    public class AodvRouteReplyMessage : NetSimMessage
     {
         /// <summary>
         /// Gets or sets the hop count.
@@ -20,6 +20,24 @@ namespace NetSim.Lib.Routing.AODV
         public int HopCount { get; set; }
 
         /// <summary>
+        /// Gets or sets the last hop.
+        /// Note: This Info has to be saved to determine from 
+        /// which interface or hop this message has been sent 
+        /// </summary>
+        /// <value>
+        /// The last hop.
+        /// </value>
+        public string LastHop { get; set; }
+
+        /// <summary>
+        /// Gets or sets the sequence nr.
+        /// </summary>
+        /// <value>
+        /// The sequence nr.
+        /// </value>
+        public AodvSequence ReceiverSequenceNr { get; set; }
+
+        /// <summary>
         /// Creates a new object that is a copy of the current instance.
         /// </summary>
         /// <returns>
@@ -27,9 +45,10 @@ namespace NetSim.Lib.Routing.AODV
         /// </returns>
         public override object Clone()
         {
-            return CopyTo(new AodvRouteResponseMessage()
+            return CopyTo(new AodvRouteReplyMessage()
             {
-                HopCount = this.HopCount
+                HopCount = this.HopCount,
+                ReceiverSequenceNr = (AodvSequence)this.ReceiverSequenceNr.Clone()
             });
         }
 

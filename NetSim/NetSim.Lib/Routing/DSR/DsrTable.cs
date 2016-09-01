@@ -30,7 +30,7 @@ namespace NetSim.Lib.Routing.DSR
         /// Handles the response.
         /// </summary>
         /// <param name="message">The message.</param>
-        public void HandleResponse(DsrRouteResponseMessage message)
+        public void HandleResponse(DsrRouteReplyMessage message)
         {
             // search for a route for this destination
             var entry = GetRouteFor(message.Sender);

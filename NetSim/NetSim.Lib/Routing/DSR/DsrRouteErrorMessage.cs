@@ -9,7 +9,7 @@ using NetSim.Lib.Simulator.Components;
 
 namespace NetSim.Lib.Routing.DSR
 {
-    public class DsrRouteRemoveMessage : NetSimMessage
+    public class DsrRouteErrorMessage : NetSimMessage
     {
         /// <summary>
         /// Gets or sets the not reachable node.
@@ -25,7 +25,7 @@ namespace NetSim.Lib.Routing.DSR
         /// <returns></returns>
         public override object Clone()
         {
-            var clone = new DsrRouteRemoveMessage()
+            var clone = new DsrRouteErrorMessage()
             {
                 NotReachableNode = this.NotReachableNode
             };

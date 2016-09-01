@@ -44,7 +44,7 @@ namespace NetSim.Lib.Routing.DSR
         /// <value>
         /// The request cache.
         /// </value>
-        public List<DsrCacheEntry> RequestCache { get; private set; }
+        public List<NetSimRequestCacheEntry> RequestCache { get; private set; }
 
         /// <summary>
         /// Gets or sets the current request identifier.
@@ -66,7 +66,7 @@ namespace NetSim.Lib.Routing.DSR
             this.Table = new DsrTable();
 
             //intialize request cache
-            this.RequestCache = new List<DsrCacheEntry>();
+            this.RequestCache = new List<NetSimRequestCacheEntry>();
 
             // intialize request id for route request identification 
             this.CurrentRequestId = 1;
@@ -252,14 +252,14 @@ namespace NetSim.Lib.Routing.DSR
         }
 
         /// <summary>
-        /// Handles the outgoing DsrRouteResponseMessage.
+        /// Handles the outgoing DsrRouteReplyMessage.
         /// dsrrouterespone - forward the reverse route way
         /// </summary>
         /// <param name="queuedMessage">The queued message.</param>
-        [MessageHandler(typeof(DsrRouteResponseMessage), Outgoing = true)]
-        private void OutgoingDsrRouteResponseMessageHandler(NetSimQueuedMessage queuedMessage)
+        [MessageHandler(typeof(DsrRouteReplyMessage), Outgoing = true)]
+        private void OutgoingDsrRouteReplyMessageHandler(NetSimQueuedMessage queuedMessage)
         {
-            var responseMessage = (DsrRouteResponseMessage)queuedMessage.Message;
+            var responseMessage = (DsrRouteReplyMessage)queuedMessage.Message;
 
             // get the next hop id from the route info saved within this message
             string nextHopId = responseMessage.GetNextReverseHop(Client.Id);
@@ -279,10 +279,10 @@ namespace NetSim.Lib.Routing.DSR
         ///Handles the outgoing DSR remove route messages.
         /// </summary>
         /// <param name="queuedMessage">The queued message.</param>
-        [MessageHandler(typeof(DsrRouteRemoveMessage), Outgoing = true)]
+        [MessageHandler(typeof(DsrRouteErrorMessage), Outgoing = true)]
         private void OutgoingDsrRouteRemoveMessageHandler(NetSimQueuedMessage queuedMessage)
         {
-            var removeMessage = (DsrRouteRemoveMessage)queuedMessage.Message;
+            var removeMessage = (DsrRouteErrorMessage)queuedMessage.Message;
 
             throw new NotImplementedException();
         }
@@ -346,7 +346,7 @@ namespace NetSim.Lib.Routing.DSR
             if (reqMessage.Receiver.Equals(this.Client.Id))
             {
                 //send back rrep mesage the reverse way with found route 
-                var response = new DsrRouteResponseMessage()
+                var response = new DsrRouteReplyMessage()
                 {
                     Receiver = reqMessage.Sender,
                     Sender = Client.Id,
@@ -383,10 +383,10 @@ namespace NetSim.Lib.Routing.DSR
         /// Handles the  Incomings the DSR route response message.
         /// </summary>
         /// <param name="message">The message.</param>
-        [MessageHandler(typeof(DsrRouteResponseMessage), Outgoing = false)]
-        private void IncomingDsrRouteResponseMessageHandler(NetSimMessage message)
+        [MessageHandler(typeof(DsrRouteReplyMessage), Outgoing = false)]
+        private void IncomingDsrRouteReplyMessageHandler(NetSimMessage message)
         {
-            DsrRouteResponseMessage repMessage = (DsrRouteResponseMessage)message;
+            DsrRouteReplyMessage repMessage = (DsrRouteReplyMessage)message;
 
             //check if the respone is for this node
             if (repMessage.Receiver.Equals(Client.Id))
@@ -407,8 +407,8 @@ namespace NetSim.Lib.Routing.DSR
         /// Handles the  Incommings the DSR route remove message.
         /// </summary>
         /// <param name="message">The message.</param>
-        [MessageHandler(typeof(DsrRouteRemoveMessage), Outgoing = false)]
-        private void IncomingDsrRouteRemoveMessageHandler(NetSimMessage message)
+        [MessageHandler(typeof(DsrRouteErrorMessage), Outgoing = false)]
+        private void IncomingDsrRouteErrorMessageHandler(NetSimMessage message)
         {
             throw new NotImplementedException();
         }
@@ -444,9 +444,9 @@ namespace NetSim.Lib.Routing.DSR
         {
             List<Type> dsrTypes = new List<Type>()
             {
-                typeof(DsrRouteResponseMessage),
+                typeof(DsrRouteReplyMessage),
                 typeof(DsrRouteRequestMessage),
-                typeof(DsrRouteRemoveMessage),
+                typeof(DsrRouteErrorMessage),
                 typeof(DsrFrameMessage)
             };
 
@@ -474,7 +474,7 @@ namespace NetSim.Lib.Routing.DSR
 
             if (nodeCache == null)
             {
-                nodeCache = new DsrCacheEntry() { Id = reqMessage.Sender };
+                nodeCache = new NetSimRequestCacheEntry() { Id = reqMessage.Sender };
 
                 RequestCache.Add(nodeCache);
             }

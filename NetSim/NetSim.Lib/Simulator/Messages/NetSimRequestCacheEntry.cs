@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace NetSim.Lib.Routing.DSR
+namespace NetSim.Lib.Simulator.Messages
 {
-    public class DsrCacheEntry
+    public class NetSimRequestCacheEntry
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DsrCacheEntry"/> class.
+        /// Initializes a new instance of the <see cref="NetSimRequestCacheEntry"/> class.
         /// </summary>
-        public DsrCacheEntry()
+        public NetSimRequestCacheEntry()
         {
             this.ChachedRequests = new List<int>();
         }

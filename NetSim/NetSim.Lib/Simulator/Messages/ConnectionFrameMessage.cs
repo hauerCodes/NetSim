@@ -54,7 +54,7 @@ namespace NetSim.Lib.Simulator.Messages
         public override string ToString()
         {
             return $"[{this.GetType().Name} ({Sender} -> {Receiver})]"
-                   + $"\n{InnerMessage}[/{this.GetType().Name}]";
+                   + $"\n{InnerMessage}\n[/{this.GetType().Name}]";
         }
     }
 }

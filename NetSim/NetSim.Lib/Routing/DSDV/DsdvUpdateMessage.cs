@@ -58,7 +58,7 @@ namespace NetSim.Lib.Routing.DSDV
                 builder.AppendLine($"| {dsdvEntry.Destination,4} {dsdvEntry.Metric,6} {dsdvEntry.SequenceNr,5}");
             }
 
-            builder.AppendLine($"+[/{this.GetType().Name}]");
+            builder.Append($"+[/{this.GetType().Name}]");
 
             return builder.ToString();
         }

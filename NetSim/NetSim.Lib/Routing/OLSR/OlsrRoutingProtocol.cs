@@ -88,7 +88,6 @@ namespace NetSim.Lib.Routing.OLSR
             // call base initialization (stepcounter and data)
             base.Initialize();
 
-
             //intialize local neighbor tables
             this.OneHopNeighborTable = new OlsrNeighborTable();
             this.TwoHopNeighborTable = new OlsrNeighborTable();
@@ -288,11 +287,16 @@ namespace NetSim.Lib.Routing.OLSR
                 // e.g. IncomingDsrRouteRequestMessageHandler
                 var method = handlerResolver.GetHandlerMethod(message.GetType(), false);
 
-                //call handler
-                method?.Invoke(this, new object[] { message });
-
-                // if method not found - use default method to handle message (e.g. data mesage)
-                DefaultIncomingMessageHandler(message);
+                if (method != null)
+                {
+                    //call handler
+                    method.Invoke(this, new object[] { message });
+                }
+                else
+                {
+                    // if method not found - use default method to handle message (e.g. data mesage)
+                    DefaultIncomingMessageHandler(message);
+                }
             }
         }
 

@@ -228,22 +228,22 @@ namespace NetSim.Lib.Routing.DSR
             }
             else
             {
-                // broadcast route error to neighbors
-                //Client.BroadcastMessage(new DsrRouteErrorMessage()
-                //{
-                //    Sender = Client.Id,
-                //    NotReachableNode = nextHop,
-                //});
+                // broadcast route error to neighbors - Neighbors remove every route with sender -> notreachable in path
+                Client.BroadcastMessage(new DsrRouteErrorMessage()
+                {
+                    Sender = Client.Id,
+                    NotReachableNode = nextHop,
+                });
 
-                // send route error to sender with path in message
+                // send route error to sender with back path in message - receiver removes every route with sender - notreachable in path
                 SendMessage(new DsrRouteErrorMessage()
                 {
                     Sender = Client.Id,
                     Receiver = frameMessage.Sender,
                     Route = frameMessage.Route,
-                    NotReachableNode = nextHop
+                    NotReachableNode = nextHop,
+                    FailedMessage = frameMessage.Data
                 });
-
             }
         }
 
@@ -282,7 +282,12 @@ namespace NetSim.Lib.Routing.DSR
             }
             else
             {
-                // broadcast route error to neighbors
+                // broadcast to all neighbors that route is down
+                Client.BroadcastMessage(new DsrRouteErrorMessage()
+                {
+                    Sender = Client.Id,
+                    NotReachableNode = nextHopId,
+                });
             }
         }
 
@@ -379,8 +384,6 @@ namespace NetSim.Lib.Routing.DSR
 
             // TODO Check if route to the end destination for request is cached
 
-
-
             // forward message to outgoing messages
             SendMessage(reqMessage);
         }
@@ -428,7 +431,29 @@ namespace NetSim.Lib.Routing.DSR
         [MessageHandler(typeof(DsrRouteErrorMessage), Outgoing = false)]
         private void IncomingDsrRouteErrorMessageHandler(NetSimMessage message)
         {
-            throw new NotImplementedException();
+            DsrRouteErrorMessage errorMessage = (DsrRouteErrorMessage)message;
+
+            //check if the respone is for this node
+            if (errorMessage.Receiver.Equals(Client.Id))
+            {
+                var dsrTable = Table as DsrTable;
+
+                //delete the routes defined by the error message from table
+                dsrTable?.HandleError(errorMessage.Sender, errorMessage.NotReachableNode);
+
+                // check if error has failed message
+                if (errorMessage.FailedMessage != null)
+                {
+                    // try to retransmit the failed message - start route discovery again
+                    SendMessage(errorMessage.FailedMessage);
+                }
+
+            }
+            else
+            {
+                // forward message
+                SendMessage(errorMessage);
+            }
         }
 
         /// <summary>

@@ -36,7 +36,7 @@ namespace NetSim.Lib.Routing.DSR
             var entry = GetRouteFor(message.Sender);
 
             // if no route found or the metric of the found route is bigger
-            if(entry == null || entry.Metric > message.Route.Count)
+            if (entry == null || entry.Metric > message.Route.Count)
             {
                 this.Entries.Add(new DsrTableEntry()
                 {
@@ -44,6 +44,44 @@ namespace NetSim.Lib.Routing.DSR
                     Metric = message.Route.Count,
                     Route = new List<string>(message.Route)
                 });
+            }
+        }
+
+        /// <summary>
+        /// Handles the response.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="notReachableNode">The not reachable node.</param>
+        public void HandleError(string sender, string notReachableNode)
+        {
+            // search entries where message sender and message notreachable are in path (direct connected)
+            foreach (var netSimTableEntry in Entries.Where(e => ((DsrTableEntry)e).Route.Contains(notReachableNode)).ToList())
+            {
+                var entry = (DsrTableEntry)netSimTableEntry;
+
+                int index = entry.Route.IndexOf(notReachableNode);
+
+                if (index - 1 < 0)
+                    continue;
+
+                if (entry.Route[index - 1].Equals(sender))
+                {
+                    RemoveRoute(entry.Destination);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Removes the route.
+        /// </summary>
+        /// <param name="destination">The destination.</param>
+        private void RemoveRoute(string destination)
+        {
+            var entry = GetRouteFor(destination);
+
+            if (entry != null)
+            {
+                this.Entries.Remove(entry);
             }
         }
 

@@ -29,6 +29,14 @@ namespace NetSim.Lib.Routing.DSR
         public string NotReachableNode { get; set; }
 
         /// <summary>
+        /// Gets or sets the failed message.
+        /// </summary>
+        /// <value>
+        /// The failed message.
+        /// </value>
+        public NetSimMessage FailedMessage { get; set; }
+
+        /// <summary>
         /// Gets the next reverse hop.
         /// </summary>
         /// <param name="currentNodeId">The current node identifier.</param>
@@ -56,10 +64,49 @@ namespace NetSim.Lib.Routing.DSR
             var clone = new DsrRouteErrorMessage()
             {
                 NotReachableNode = this.NotReachableNode,
-                Route = new List<string>(this.Route)
+                FailedMessage = (NetSimMessage)this.FailedMessage?.Clone()
             };
+
+            if (this.Route != null)
+            {
+                clone.Route = new List<string>(this.Route);
+            }
+
+            //if (this.FailedMessage != null)
+            //{
+            //    clone.FailedMessage = (NetSimMessage)this.FailedMessage.Clone();
+            //}
 
             return CopyTo(clone);
         }
+
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder();
+
+            builder.AppendFormat(base.ToString());
+            builder.AppendFormat("| NotReachable:{0}\n", NotReachableNode);
+
+            if (Route != null && Route.Count > 0)
+            {
+                builder.AppendFormat("| Route:{0}\n", string.Join(",", Route));
+            }
+
+            if (FailedMessage != null)
+            {
+                builder.AppendFormat("| FailedMessage:\n #| {0}\n", FailedMessage.ToString());
+            }
+
+            builder.AppendFormat("+[/{0}]", this.GetType().Name);
+
+            return builder.ToString();
+        }
+
     }
 }

@@ -229,9 +229,20 @@ namespace NetSim.Lib.Routing.DSR
             else
             {
                 // broadcast route error to neighbors
+                //Client.BroadcastMessage(new DsrRouteErrorMessage()
+                //{
+                //    Sender = Client.Id,
+                //    NotReachableNode = nextHop,
+                //});
 
-
-                // start route search again for this message
+                // send route error to sender with path in message
+                SendMessage(new DsrRouteErrorMessage()
+                {
+                    Sender = Client.Id,
+                    Receiver = frameMessage.Sender,
+                    Route = frameMessage.Route,
+                    NotReachableNode = nextHop
+                });
 
             }
         }
@@ -272,7 +283,7 @@ namespace NetSim.Lib.Routing.DSR
             else
             {
                 // broadcast route error to neighbors
-            } 
+            }
         }
 
         /// <summary>
@@ -280,11 +291,18 @@ namespace NetSim.Lib.Routing.DSR
         /// </summary>
         /// <param name="queuedMessage">The queued message.</param>
         [MessageHandler(typeof(DsrRouteErrorMessage), Outgoing = true)]
-        private void OutgoingDsrRouteRemoveMessageHandler(NetSimQueuedMessage queuedMessage)
+        private void OutgoingDsrRouteErrorMessageHandler(NetSimQueuedMessage queuedMessage)
         {
-            var removeMessage = (DsrRouteErrorMessage)queuedMessage.Message;
+            var errorMessage = (DsrRouteErrorMessage)queuedMessage.Message;
 
-            throw new NotImplementedException();
+            // get the next hop id from the route info saved within this message
+            string nextHopId = errorMessage.GetNextReverseHop(Client.Id);
+
+            if (!Client.Connections[nextHopId].IsOffline)
+            {
+                // start message transport
+                Client.Connections[nextHopId].StartTransportMessage(errorMessage, this.Client.Id, nextHopId);
+            }
         }
 
         /// <summary>

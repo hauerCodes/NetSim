@@ -118,14 +118,9 @@ namespace NetSim.Lib.Simulator.Components
         /// <param name="receiverEndPoint">The receiver end point.</param>
         public void StartTransportMessage(NetSimMessage message, string senderEndPoint, string receiverEndPoint)
         {
-            var frameMessage = WrapMessage(message, senderEndPoint, receiverEndPoint);
-
-            //TODO
-            // hack set the "next" receiver 
             // compared with ethernet frame - mac address
             // only necessary for the connection class knows which end to transmit message
-            //message.NextReceiver = receiverEndPoint;
-            //message.TransmissionStep = NetSimMessageTransmissionStep.Sending;
+            var frameMessage = WrapMessage(message, senderEndPoint, receiverEndPoint);
 
             // start message transport
             if (EndPointA == null || EndPointB == null || IsOffline) return;

@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 using NetSim.Lib.Simulator;
+using NetSim.Lib.Simulator.Components;
 
 namespace NetSim.Lib.Routing.AODV
 {
-    public class AodvRreqMessage : NetSimMessage
+    public class AodvRouteErrorMessage : NetSimMessage
     {
 
         /// <summary>
@@ -19,7 +20,7 @@ namespace NetSim.Lib.Routing.AODV
         /// </returns>
         public override object Clone()
         {
-            return CopyTo(new AodvRreqMessage());
+            return CopyTo(new AodvRouteRequestMessage());
         }
     }
 }

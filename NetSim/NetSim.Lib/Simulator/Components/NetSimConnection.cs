@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NetSim.Lib.Simulator
+using NetSim.Lib.Simulator.Messages;
+
+namespace NetSim.Lib.Simulator.Components
 {
     public class NetSimConnection : NetSimItem
     {
@@ -22,8 +24,8 @@ namespace NetSim.Lib.Simulator
         public NetSimConnection()
         {
             this.IsOffline = false;
-            this.PendingMessages = new Queue<NetSimMessage>();
-            this.TransmittedMessages = new List<NetSimMessage>();
+            this.PendingMessages = new Queue<ConnectionFrameMessage>();
+            this.TransmittedMessages = new List<ConnectionFrameMessage>();
         }
 
         /// <summary>
@@ -32,7 +34,7 @@ namespace NetSim.Lib.Simulator
         /// <value>
         /// The pending messages.
         /// </value>
-        public Queue<NetSimMessage> PendingMessages { get; set; }
+        public Queue<ConnectionFrameMessage> PendingMessages { get; set; }
 
         /// <summary>
         /// Gets or sets the transmitted messages.
@@ -40,7 +42,7 @@ namespace NetSim.Lib.Simulator
         /// <value>
         /// The transmitted messages.
         /// </value>
-        public List<NetSimMessage> TransmittedMessages { get; set; }
+        public List<ConnectionFrameMessage> TransmittedMessages { get; set; }
 
         /// <summary>
         /// Gets or sets the end point a.
@@ -94,14 +96,6 @@ namespace NetSim.Lib.Simulator
         public bool IsTransmitting => PendingMessages.Count > 0;
 
         /// <summary>
-        /// Gets a value indicating whether this instance is cleanup necessary.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if this instance is cleanup necessary; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsCleanupNecessary => TransmittedMessages.Any(tm => tm.TransmissionStep == NetSimMessageTransmissionStep.Receiving);
-
-        /// <summary>
         /// Occurs when client state is updated due routing or other events.
         /// </summary>
         public event Action StateUpdated
@@ -120,24 +114,57 @@ namespace NetSim.Lib.Simulator
         /// Starts the transport message.
         /// </summary>
         /// <param name="message">The message.</param>
+        /// <param name="senderEndPoint">The sender end point.</param>
         /// <param name="receiverEndPoint">The receiver end point.</param>
-        public void StartTransportMessage(NetSimMessage message, string receiverEndPoint)
+        public void StartTransportMessage(NetSimMessage message, string senderEndPoint, string receiverEndPoint)
         {
+            var frameMessage = WrapMessage(message, senderEndPoint, receiverEndPoint);
+
+            //TODO
             // hack set the "next" receiver 
             // compared with ethernet frame - mac address
             // only necessary for the connection class knows which end to transmit message
-            message.NextReceiver = receiverEndPoint;
-
-            message.TransmissionStep = NetSimMessageTransmissionStep.Sending;
+            //message.NextReceiver = receiverEndPoint;
+            //message.TransmissionStep = NetSimMessageTransmissionStep.Sending;
 
             // start message transport
             if (EndPointA == null || EndPointB == null || IsOffline) return;
 
-            if (EndPointA.Id.Equals(message.NextReceiver) || EndPointB.Id.Equals(message.NextReceiver))
+            if (EndPointA.Id.Equals(frameMessage.Receiver) || EndPointB.Id.Equals(frameMessage.Receiver))
             {
-                PendingMessages.Enqueue(message);
+                PendingMessages.Enqueue(frameMessage);
                 OnStateUpdated();
             }
+        }
+
+        /// <summary>
+        /// Wraps the message in the connection frame.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <param name="senderEndPoint">The sender end point.</param>
+        /// <param name="receiverEndPoint">The receiver end point.</param>
+        /// <returns></returns>
+        private ConnectionFrameMessage WrapMessage(NetSimMessage message, string senderEndPoint, string receiverEndPoint)
+        {
+            ConnectionFrameMessage frame = new ConnectionFrameMessage
+            {
+                InnerMessage = message,
+                Sender = senderEndPoint,
+                Receiver = receiverEndPoint,
+                TransmissionStep = NetSimMessageTransmissionStep.Sending
+            };
+
+            return frame;
+        }
+
+        /// <summary>
+        /// Unwraps the message from the connection frame.
+        /// </summary>
+        /// <param name="frame">The frame.</param>
+        /// <returns></returns>
+        private NetSimMessage UnWrapMessage(ConnectionFrameMessage frame)
+        {
+            return frame.InnerMessage;
         }
 
         /// <summary>
@@ -155,33 +182,31 @@ namespace NetSim.Lib.Simulator
                 .Where(m => m.TransmissionStep == NetSimMessageTransmissionStep.Receiving).ToList()
                 .ForEach(m => m.TransmissionStep = NetSimMessageTransmissionStep.Done);
 
-            OnStateUpdated();
-
             // send messages to receiver endpoint
             while (PendingMessages.Count > 0)
             {
-                var message = PendingMessages.Dequeue();
+                ConnectionFrameMessage frame = PendingMessages.Dequeue() as ConnectionFrameMessage;
+
+                if (frame == null) continue;
 
                 // mark each message as transmission receiving (triggers the receiving animation)
-                if (message.TransmissionStep == NetSimMessageTransmissionStep.Sending)
+                if (frame.TransmissionStep == NetSimMessageTransmissionStep.Sending)
                 {
-                    message.TransmissionStep = NetSimMessageTransmissionStep.Receiving;
+                    frame.TransmissionStep = NetSimMessageTransmissionStep.Receiving;
                 }
 
-                if (EndPointA != null && message.NextReceiver.Equals(EndPointA.Id))
+                if (EndPointA != null && frame.Receiver.Equals(EndPointA.Id))
                 {
-                    EndPointA.ReceiveMessage(message);
-                    // OnStateUpdated();
+                    EndPointA.ReceiveMessage(UnWrapMessage(frame));
                 }
 
-                if (EndPointB != null && message.NextReceiver.Equals(EndPointB.Id))
+                if (EndPointB != null && frame.Receiver.Equals(EndPointB.Id))
                 {
-                    EndPointB.ReceiveMessage(message);
-                    // OnStateUpdated();
+                    EndPointB.ReceiveMessage(UnWrapMessage(frame));
                 }
 
                 // add received message to transmitted message for visualization
-                TransmittedMessages.Add(message);
+                TransmittedMessages.Add(frame);
             }
 
             OnStateUpdated();

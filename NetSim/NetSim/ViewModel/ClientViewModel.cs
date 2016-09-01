@@ -9,6 +9,8 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 
 using NetSim.Lib.Simulator;
+using NetSim.Lib.Simulator.Components;
+using NetSim.Lib.Simulator.Messages;
 
 namespace NetSim.ViewModel
 {
@@ -20,6 +22,11 @@ namespace NetSim.ViewModel
         private ICommand sendMessageCommand;
 
         /// <summary>
+        /// The delete clien command
+        /// </summary>
+        private ICommand deleteClientCommand;
+
+        /// <summary>
         /// The send message destination
         /// </summary>
         private string sendMessageDestination;
@@ -29,7 +36,6 @@ namespace NetSim.ViewModel
         /// </summary>
         private string sendMessageData;
 
-        
         /// <summary>
         /// Initializes a new instance of the <see cref="ClientViewModel"/> class.
         /// </summary>
@@ -40,9 +46,6 @@ namespace NetSim.ViewModel
             this.SendMessageData = "Data";
             InitializeCommands();
         }
-
-        
-
         
         /// <summary>
         /// Gets the client.
@@ -51,6 +54,12 @@ namespace NetSim.ViewModel
         /// The client.
         /// </value>
         public NetSimClient Client { get; }
+
+        /// <summary>
+        /// Occurs when the deletion of the client is requested.
+        /// Note: http://bit.ly/2bRCkbI
+        /// </summary>
+        public event EventHandler<NetSimClient> DeleteClientEvent;
 
         /// <summary>
         /// Gets or sets the send message destination.
@@ -86,9 +95,6 @@ namespace NetSim.ViewModel
             }
         }
 
-        
-
-        
         /// <summary>
         /// Gets or sets the start simulation command.
         /// </summary>
@@ -108,15 +114,32 @@ namespace NetSim.ViewModel
             }
         }
 
-        
+        /// <summary>
+        /// Gets or sets the delte client command.
+        /// </summary>
+        /// <value>
+        /// The delte client command.
+        /// </value>
+        public ICommand DeleteClientCommand
+        {
+            get
+            {
+                return deleteClientCommand;
+            }
+            set
+            {
+                this.deleteClientCommand = value;
+                RaisePropertyChanged();
+            }
+        }
 
-        
         /// <summary>
         /// Initializes the commands.
         /// </summary>
         private void InitializeCommands()
         {
             this.SendMessageCommand = new RelayCommand(ExecuteSendMessage, CanExecuteSendMessage);
+            this.DeleteClientCommand = new RelayCommand(OnDeleteClient);
         }
 
         /// <summary>
@@ -141,6 +164,12 @@ namespace NetSim.ViewModel
             return (!string.IsNullOrEmpty(this.SendMessageDestination) && !string.IsNullOrEmpty(this.SendMessageData));
         }
 
-        
+        /// <summary>
+        /// Called when delete client event.
+        /// </summary>
+        protected virtual void OnDeleteClient()
+        {
+            DeleteClientEvent?.Invoke(this, this.Client);
+        }
     }
 }

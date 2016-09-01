@@ -34,6 +34,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="PresentationFramework.Aero" />
@@ -70,57 +74,62 @@
       <DependentUpon>MessageControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="Routing\AODV\AodvRrepMessage.cs" />
-    <Compile Include="Routing\AODV\AodvRreqMessage.cs" />
+    <Compile Include="Routing\AODV\AodvRouteErrorMessage.cs" />
+    <Compile Include="Routing\AODV\AodvRouteResponseMessage.cs" />
+    <Compile Include="Routing\AODV\AodvRouteRequestMessage.cs" />
     <Compile Include="Routing\AODV\AodvHelloMessage.cs" />
     <Compile Include="Routing\AODV\AodvRoutingProtocol.cs" />
     <Compile Include="Routing\AODV\AodvTableEntry.cs" />
+    <Compile Include="Routing\AODV\AodvReverseRoutingTable.cs" />
+    <Compile Include="Routing\AODV\AodvReverseRoutingTableEntry.cs" />
+    <Compile Include="Routing\AODV\AodvSequence.cs" />
     <Compile Include="Routing\DSDV\DsdvRoutingProtocol.cs" />
     <Compile Include="Routing\DSDV\DsdvSequence.cs" />
     <Compile Include="Routing\DSR\DsrCacheEntry.cs" />
     <Compile Include="Routing\DSR\DsrFrameMessage.cs" />
-    <Compile Include="Routing\DSR\DsrMessageHandlerAttribute.cs" />
+    <Compile Include="Routing\Helpers\MessageHandlerAttribute.cs" />
     <Compile Include="Routing\DSR\DsrRoutingProtocol.cs" />
     <Compile Include="Routing\DSR\DsrRouteRemoveMessage.cs" />
     <Compile Include="Routing\DSR\DsrRouteResponseMessage.cs" />
     <Compile Include="Routing\DSR\DsrRouteRequestMessage.cs" />
     <Compile Include="Routing\DSR\DsrTableEntry.cs" />
+    <Compile Include="Routing\Helpers\MessageHandlerResolver.cs" />
+    <Compile Include="Routing\OLSR\OlsrTopologyControlMessage.cs" />
     <Compile Include="Routing\OLSR\OlsrHelloMessage.cs" />
     <Compile Include="Routing\OLSR\OlsrNeighborTable.cs" />
     <Compile Include="Routing\OLSR\OlsrNeighborTableEntry.cs" />
     <Compile Include="Routing\OLSR\OlsrRoutingProtocol.cs" />
     <Compile Include="Routing\OLSR\OlsrState.cs" />
     <Compile Include="Routing\OLSR\OlsrTableEntry.cs" />
-    <Compile Include="Routing\RoutingProtocolFactory.cs" />
-    <Compile Include="Simulator\ConnectionFrameMessage.cs" />
-    <Compile Include="Simulator\DataMessage.cs" />
+    <Compile Include="Routing\Helpers\RoutingProtocolFactory.cs" />
+    <Compile Include="Simulator\Messages\ConnectionFrameMessage.cs" />
+    <Compile Include="Simulator\Messages\DataMessage.cs" />
     <Compile Include="Simulator\INetSimConnectionEndpoint.cs" />
-    <Compile Include="Simulator\NetSimMessageTransmissionStep.cs" />
-    <Compile Include="Simulator\NetSimQueuedMessage.cs" />
-    <Compile Include="Simulator\NetSimSequence.cs" />
+    <Compile Include="Simulator\Messages\NetSimMessageTransmissionStep.cs" />
+    <Compile Include="Simulator\Messages\NetSimQueuedMessage.cs" />
+    <Compile Include="Simulator\Messages\NetSimSequence.cs" />
     <Compile Include="Storage\SimulationStorage.cs" />
     <Compile Include="Storage\StorageConnection.cs" />
     <Compile Include="Storage\StorageClient.cs" />
     <Compile Include="Storage\StorageNetwork.cs" />
     <Compile Include="Visualization\INetSimVisualizeableItem.cs" />
-    <Compile Include="Simulator\NetSimRoutingProtocol.cs" />
+    <Compile Include="Simulator\Components\NetSimRoutingProtocol.cs" />
     <Compile Include="Routing\AODV\AodvTable.cs" />
     <Compile Include="Routing\DSDV\DsdvTable.cs" />
     <Compile Include="Routing\DSDV\DsdvTableEntry.cs" />
     <Compile Include="Routing\DSDV\DsdvUpdateMessage.cs" />
     <Compile Include="Routing\DSR\DsrTable.cs" />
-    <Compile Include="Simulator\NetSimDestination.cs" />
     <Compile Include="Simulator\NetSimProtocolType.cs" />
-    <Compile Include="Simulator\NetSimTableEntry.cs" />
+    <Compile Include="Simulator\Components\NetSimTableEntry.cs" />
     <Compile Include="Routing\OLSR\OlsrTable.cs" />
     <Compile Include="Visualization\IDrawableNetSimSimulator.cs" />
-    <Compile Include="Simulator\NetSimItem.cs" />
-    <Compile Include="Simulator\NetSimClient.cs" />
-    <Compile Include="Simulator\NetSimConnection.cs" />
+    <Compile Include="Simulator\Components\NetSimItem.cs" />
+    <Compile Include="Simulator\Components\NetSimClient.cs" />
+    <Compile Include="Simulator\Components\NetSimConnection.cs" />
     <Compile Include="Visualization\NetSimLocation.cs" />
-    <Compile Include="Simulator\NetSimMessage.cs" />
+    <Compile Include="Simulator\Components\NetSimMessage.cs" />
     <Compile Include="Simulator\NetSimSimulator.cs" />
-    <Compile Include="Simulator\NetSimTable.cs" />
+    <Compile Include="Simulator\Components\NetSimTable.cs" />
     <Compile Include="Visualization\NetSimVisualizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

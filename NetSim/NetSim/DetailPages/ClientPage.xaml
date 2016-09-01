@@ -8,47 +8,29 @@
       d:DesignHeight="300" d:DesignWidth="300"
       Title="ClientPage">
 
-    <Grid Margin="10,5,5,5" Background="White">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <TextBlock Grid.Column="0" Grid.Row="0" FontWeight="Bold" >Client</TextBlock>
-        <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding Path=Client.Id}" ></TextBlock>
-        <TextBlock Grid.Column="0" Grid.Row="1" Margin="0 0 0 10" >Client Step</TextBlock>
-        <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding Path=Client.StepCounter}" ></TextBlock>
-
-        <TextBlock Grid.Column="0" Grid.Row="2" FontWeight="Bold" >Send Message</TextBlock>
-        <Grid  Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2">
+    <Border Margin="5,5,5,5" BorderBrush="DarkGray" BorderThickness="2">
+        <Grid  Background="White" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
-                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Column="0" Grid.Row="0" Margin="5 0" >Destination</TextBlock>
-            <TextBlock Grid.Column="1" Grid.Row="0" Margin="5 0">Data</TextBlock>
-            <TextBox Grid.Row="1" Grid.Column="0" Margin="5 0"  Text="{Binding Path=SendMessageDestination, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-            <TextBox Grid.Row="1" Grid.Column="1" Margin="5 0" Text="{Binding Path=SendMessageData, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-            <Button Grid.Column="2" Grid.Row="1" Margin="5 0 5 0" Command="{Binding SendMessageCommand}">Send</Button>
-        </Grid>
+            <TextBlock Grid.Column="0" Grid.Row="0" FontWeight="Bold" >Client</TextBlock>
+            <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding Path=Client.Id}" ></TextBlock>
+            <TextBlock Grid.Column="0" Grid.Row="1" Margin="0 0 0 10" >Client Step</TextBlock>
+            <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding Path=Client.StepCounter}" ></TextBlock>
 
-        <TextBlock Grid.Column="0" Grid.Row="4" Margin="0 5 0 0" FontWeight="Bold" >Table</TextBlock>
-        <TextBlock Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="2" Text="{Binding Path=Client.RoutingProtocol.RoutingData}" FontFamily="Consolas" ></TextBlock>
-        <TextBlock Grid.Column="0" Grid.Row="6" Margin="0 5 0 0" FontWeight="Bold" >Data</TextBlock>
-        <TextBlock Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="2" Text="{Binding Path=Client.CurrentData}" FontFamily="Consolas" ></TextBlock>
-    </Grid>
+            <TextBlock Grid.Column="0" Grid.Row="2" Margin="0 5 0 0" FontWeight="Bold" >Table</TextBlock>
+            <TextBlock Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding Path=Client.RoutingProtocol.RoutingData}" FontFamily="Consolas" ></TextBlock>
+            <TextBlock Grid.Column="0" Grid.Row="4" Margin="0 5 0 0" FontWeight="Bold" >Received Data</TextBlock>
+            <TextBlock Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="2" Text="{Binding Path=Client.CurrentData}" FontFamily="Consolas" ></TextBlock>
+        </Grid>
+    </Border>
 </Page>

@@ -22,7 +22,7 @@ namespace NetSim.DetailPages
     /// <summary>
     /// Interaction logic for ClientPage.xaml
     /// </summary>
-    public partial class ClientPage : Page
+    public partial class ControlClientPage : Page
     {
         /// <summary>
         /// The client
@@ -30,13 +30,18 @@ namespace NetSim.DetailPages
         private NetSimClient client;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ClientPage"/> class.
+        /// Initializes a new instance of the <see cref="ControlClientPage"/> class.
         /// </summary>
-        public ClientPage()
+        public ControlClientPage()
         {
             InitializeComponent();
-
         }
+
+        /// <summary>
+        /// Occurs when the deletion of the client is requested.
+        /// Note: http://bit.ly/2bRCkbI
+        /// </summary>
+        public event EventHandler<NetSimClient> DeleteClientEvent;
 
         /// <summary>
         /// Gets or sets the client.
@@ -53,8 +58,19 @@ namespace NetSim.DetailPages
             set
             {
                 client = value;
-                this.DataContext = new ClientViewModel(client);
+                var viewModel = new ClientViewModel(client);
+
+                viewModel.DeleteClientEvent += (sender, e) => OnDeleteClient();
+                this.DataContext = viewModel;
             }
+        }
+
+        /// <summary>
+        /// Called when delete client event.
+        /// </summary>
+        protected virtual void OnDeleteClient()
+        {
+            DeleteClientEvent?.Invoke(this, this.Client);
         }
     }
 }

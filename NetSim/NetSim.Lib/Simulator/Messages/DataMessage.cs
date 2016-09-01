@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace NetSim.Lib.Simulator
+using NetSim.Lib.Simulator.Components;
+
+namespace NetSim.Lib.Simulator.Messages
 {
     public class DataMessage : NetSimMessage
     {
@@ -33,7 +32,7 @@ namespace NetSim.Lib.Simulator
         /// </returns>
         public override string ToString()
         {
-            return $"{base.ToString()}\n{this.Data}";
+            return $"{base.ToString()}\n| {this.Data}\n+[/{this.GetType().Name}]";
         }
     }
 }

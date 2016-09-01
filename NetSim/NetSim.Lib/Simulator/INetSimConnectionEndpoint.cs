@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 
+using NetSim.Lib.Simulator.Components;
 using NetSim.Lib.Visualization;
 
 namespace NetSim.Lib.Simulator

@@ -14,6 +14,8 @@ using NetSim.Lib.Routing.DSDV;
 using NetSim.Lib.Routing.DSR;
 using NetSim.Lib.Routing.OLSR;
 using NetSim.Lib.Simulator;
+using NetSim.Lib.Simulator.Components;
+using NetSim.Lib.Simulator.Messages;
 
 namespace NetSim.Lib.Visualization
 {
@@ -139,7 +141,7 @@ namespace NetSim.Lib.Visualization
         /// </summary>
         /// <param name="edge">The edge.</param>
         /// <param name="message">The message.</param>
-        private void AddMessage(NetSimConnection edge, NetSimMessage message)
+        private void AddMessage(NetSimConnection edge, ConnectionFrameMessage message)
         {
             INetSimVisualizeableItem receiver;
             INetSimVisualizeableItem sender;
@@ -209,9 +211,10 @@ namespace NetSim.Lib.Visualization
         /// <param name="message">The message.</param>
         /// <param name="receiver">The receiver.</param>
         /// <param name="sender">The sender.</param>
-        private static void GetMessageReceiverSender(NetSimConnection edge, NetSimMessage message, out INetSimVisualizeableItem receiver, out INetSimVisualizeableItem sender)
+        private static void GetMessageReceiverSender(NetSimConnection edge, ConnectionFrameMessage message, out INetSimVisualizeableItem receiver, out INetSimVisualizeableItem sender)
         {
-            receiver = (edge.EndPointA.Id.Equals(message.NextReceiver) ? edge.EndPointA : edge.EndPointB) as INetSimVisualizeableItem;
+            //receiver = (edge.EndPointA.Id.Equals(message.NextReceiver) ? edge.EndPointA : edge.EndPointB) as INetSimVisualizeableItem;
+            receiver = (edge.EndPointA.Id.Equals(message.Receiver) ? edge.EndPointA : edge.EndPointB) as INetSimVisualizeableItem;
             sender = ((receiver == edge.EndPointA) ? edge.EndPointB : edge.EndPointA) as INetSimVisualizeableItem;
         }
 
@@ -262,7 +265,7 @@ namespace NetSim.Lib.Visualization
         /// <param name="uimessage">The uimessage.</param>
         /// <param name="step">The step.</param>
         /// <returns></returns>
-        private static Storyboard CreateMessageAnimation(NetSimConnection edge, NetSimMessage message, MessageControl uimessage, NetSimMessageTransmissionStep step)
+        private static Storyboard CreateMessageAnimation(NetSimConnection edge, ConnectionFrameMessage message, MessageControl uimessage, NetSimMessageTransmissionStep step)
         {
             INetSimVisualizeableItem receiver;
             INetSimVisualizeableItem sender;
@@ -277,16 +280,14 @@ namespace NetSim.Lib.Visualization
                 return new Storyboard();
             }
 
-            DoubleAnimation animationTop = new DoubleAnimation { Duration = TimeSpan.FromSeconds(0.7) };
-            DoubleAnimation animationLeft = new DoubleAnimation { Duration = TimeSpan.FromSeconds(0.7) };
+            DoubleAnimation animationTop = new DoubleAnimation { Duration = TimeSpan.FromSeconds(0.5) };
+            DoubleAnimation animationLeft = new DoubleAnimation { Duration = TimeSpan.FromSeconds(0.5) };
 
             if (step == NetSimMessageTransmissionStep.Sending)
             {
-                //animationTop.BeginTime = new TimeSpan(0, 0, 0, 1, 0);
                 animationTop.From = sender.Location.Top;
                 animationTop.To = middleTop;
 
-                //animationLeft.BeginTime = new TimeSpan(0, 0, 0, 1, 0);
                 animationLeft.From = sender.Location.Left;
                 animationLeft.To = middleLeft;
             }
@@ -294,11 +295,9 @@ namespace NetSim.Lib.Visualization
             {
                 animationTop.From = middleTop;
                 animationTop.To = receiver.Location.Top;
-                animationTop.Duration = TimeSpan.FromMilliseconds(700);
-
+                
                 animationLeft.From = middleLeft;
                 animationLeft.To = receiver.Location.Left;
-                animationLeft.Duration = TimeSpan.FromMilliseconds(700);
             }
 
             Storyboard board = new Storyboard();
@@ -457,6 +456,12 @@ namespace NetSim.Lib.Visualization
 
                 if (currentSelectedNodeProtocol != null)
                 {
+                    //is mpr neighbor
+                    if (currentSelectedNodeProtocol.IsMprNeighbor(node.Id))
+                    {
+                        return CreateClientNode(node, Brushes.SteelBlue, true);
+                    }
+
                     //is n(1 hop) neigbor
                     if (currentSelectedNodeProtocol.IsOneHopNeighbor(node.Id))
                     {
@@ -469,7 +474,7 @@ namespace NetSim.Lib.Visualization
                         return CreateClientNode(node, Brushes.PowderBlue);
                     }
 
-                    //is mpr neighbor
+                    
                 }
 
             }
@@ -482,8 +487,9 @@ namespace NetSim.Lib.Visualization
         /// </summary>
         /// <param name="node">The node.</param>
         /// <param name="color">The color.</param>
+        /// <param name="highlightBorder">if set to <c>true</c> highlight the border.</param>
         /// <returns></returns>
-        private UIElement CreateClientNode(NetSimClient node, Brush color)
+        private UIElement CreateClientNode(NetSimClient node, Brush color, bool highlightBorder = false)
         {
             var grid = new Grid { Tag = node };
             var ellipse = new Ellipse
@@ -495,6 +501,14 @@ namespace NetSim.Lib.Visualization
                 Tag = node,
                 ToolTip = node.RoutingProtocol?.Table?.ToString()
             };
+
+            if (node.IsOffline || highlightBorder)
+            {
+                ellipse.StrokeThickness = 4;
+
+                ellipse.Stroke = highlightBorder ? Brushes.DarkOrange : Brushes.Red;
+                ellipse.StrokeDashArray = new DoubleCollection(new List<double>() { 2, 2 });
+            }
 
             var textBlock = new TextBlock
             {

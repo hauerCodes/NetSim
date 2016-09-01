@@ -7,9 +7,11 @@ using System.Text;
 
 using NetSim.Lib.Annotations;
 using NetSim.Lib.Routing;
+using NetSim.Lib.Routing.Helpers;
+using NetSim.Lib.Simulator.Messages;
 using NetSim.Lib.Visualization;
 
-namespace NetSim.Lib.Simulator
+namespace NetSim.Lib.Simulator.Components
 {
     public class NetSimClient : NetSimItem, INotifyPropertyChanged, INetSimConnectionEndpoint
     {
@@ -29,6 +31,11 @@ namespace NetSim.Lib.Simulator
         private StringBuilder clientData;
 
         /// <summary>
+        /// The is offline
+        /// </summary>
+        private bool isOffline;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="NetSimClient"/> class.
         /// </summary>
         /// <param name="id">The identifier.</param>
@@ -40,6 +47,7 @@ namespace NetSim.Lib.Simulator
             this.stepCounter = 0;
             this.clientData = new StringBuilder();
             this.IsInitialized = false;
+            this.IsOffline = false;
             this.InputQueue = new Queue<NetSimMessage>();
             this.Connections = new Dictionary<string, NetSimConnection>();
         }
@@ -94,6 +102,34 @@ namespace NetSim.Lib.Simulator
         /// <c>true</c> if this instance is initialized; otherwise, <c>false</c>.
         /// </value>
         public bool IsInitialized { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is offline.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is offline; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsOffline
+        {
+            get
+            {
+                return isOffline;
+            }
+            set
+            {
+                isOffline = value;
+
+                if(!(Connections?.Values?.Count > 0))
+                {
+                    return;
+                }
+
+                foreach (var connection in Connections.Values)
+                {
+                    connection.IsOffline = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the current data.
@@ -171,9 +207,6 @@ namespace NetSim.Lib.Simulator
                 //create copy of message
                 NetSimMessage localCopy = (NetSimMessage)message.Clone();
 
-                // reset transmission step - because this message gets forwarded 
-                localCopy.TransmissionStep = NetSimMessageTransmissionStep.Sending;
-
                 // insert receiver id 
                 if (overrideSenderReceiver)
                 {
@@ -181,10 +214,13 @@ namespace NetSim.Lib.Simulator
                     localCopy.Sender = Id;
                 }
 
-                localCopy.NextReceiver = connection.Key;
+                //TODO
+                // reset transmission step - because this message gets forwarded 
+                //localCopy.TransmissionStep = NetSimMessageTransmissionStep.Sending;
+                //localCopy.NextReceiver = connection.Key;
 
                 //transport message
-                connection.Value.StartTransportMessage(localCopy, connection.Key);
+                connection.Value.StartTransportMessage(localCopy, this.Id, connection.Key);
             }
         }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NetSim.Lib.Simulator
+namespace NetSim.Lib.Simulator.Components
 {
     public abstract class NetSimTable : ICloneable
     {

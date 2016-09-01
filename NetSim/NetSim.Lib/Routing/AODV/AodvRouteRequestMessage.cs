@@ -7,23 +7,14 @@ using System.Threading.Tasks;
 using NetSim.Lib.Simulator;
 using NetSim.Lib.Simulator.Components;
 
-namespace NetSim.Lib.Routing.DSR
+namespace NetSim.Lib.Routing.AODV
 {
     /// <summary>
-    /// The DSR Route Request Message
-    /// This message is used to search route to the destination Id within this message.
-    /// The routes gets stored in the nodes list along the found route.
+    /// 
     /// </summary>
-    /// <seealso cref="NetSimMessage" />
-    public class DsrRouteRequestMessage : NetSimMessage
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimMessage" />
+    public class AodvRouteRequestMessage : NetSimMessage
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DsrRouteRequestMessage" /> class.
-        /// </summary>
-        public DsrRouteRequestMessage()
-        {
-            this.Nodes = new List<string>();
-        }
 
         /// <summary>
         /// Gets or sets the request identifier.
@@ -34,23 +25,34 @@ namespace NetSim.Lib.Routing.DSR
         public int RequestId { get; set; }
 
         /// <summary>
-        /// Gets or sets the nodes.
+        /// Gets or sets the hop count.
         /// </summary>
         /// <value>
-        /// The nodes.
+        /// The hop count.
         /// </value>
-        public List<string> Nodes { get; set; }
+        public int HopCount { get; set; }
 
         /// <summary>
-        /// Clones this instance.
+        /// Gets or sets the sequence nr.
         /// </summary>
-        /// <returns></returns>
+        /// <value>
+        /// The sequence nr.
+        /// </value>
+        public AodvSequence SenderSequenceNr { get; set; }
+
+        /// <summary>
+        /// Creates a new object that is a copy of the current instance.
+        /// </summary>
+        /// <returns>
+        /// A new object that is a copy of this instance.
+        /// </returns>
         public override object Clone()
         {
-            var clone = new DsrRouteRequestMessage()
+            var clone = new AodvRouteRequestMessage()
             {
                 RequestId = this.RequestId,
-                Nodes = new List<string>(this.Nodes)
+                HopCount = this.HopCount,
+                SenderSequenceNr = (AodvSequence)this.SenderSequenceNr.Clone()
             };
 
             return CopyTo(clone);
@@ -64,8 +66,8 @@ namespace NetSim.Lib.Routing.DSR
         /// </returns>
         public override string ToString()
         {
-            return $"{base.ToString()}\n| Nodes:{string.Join(",", Nodes)}\n"
-                   + $"| Request:{RequestId}\n+[/{this.GetType().Name}]";
+            return $"{base.ToString()}\n| Request: {RequestId}\n| HopCount: {HopCount}\n"
+                   + $"| Sender SequenceNr: {SenderSequenceNr}+[/{this.GetType().Name}]";
         }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using NetSim.Lib.Simulator;
+using NetSim.Lib.Simulator.Components;
 
 namespace NetSim.Lib.Routing.DSR
 {
@@ -18,9 +20,31 @@ namespace NetSim.Lib.Routing.DSR
             this.Entries.Add(new DsrTableEntry()
             {
                 Destination = destination,
-                NextHop = nextHop,
-                Metric = metric
+                Metric = metric,
+                //NextHop = nextHop,
+                Route = new List<string>() { nextHop }
             });
+        }
+
+        /// <summary>
+        /// Handles the response.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        public void HandleResponse(DsrRouteResponseMessage message)
+        {
+            // search for a route for this destination
+            var entry = GetRouteFor(message.Sender);
+
+            // if no route found or the metric of the found route is bigger
+            if(entry == null || entry.Metric > message.Route.Count)
+            {
+                this.Entries.Add(new DsrTableEntry()
+                {
+                    Destination = message.Sender,
+                    Metric = message.Route.Count,
+                    Route = new List<string>(message.Route)
+                });
+            }
         }
 
         /// <summary>

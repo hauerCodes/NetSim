@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 using NetSim.Lib.Simulator;
 
-namespace NetSim.Lib.Routing.OLSR
+namespace NetSim.Lib.Routing.AODV
 {
-    public class OlsrNeighborTable
+    public class AodvReverseRoutingTable
     {
-        
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="OlsrNeighborTable"/> class.
+        /// Initializes a new instance of the <see cref="OlsrNeighborTable" /> class.
         /// </summary>
-        public OlsrNeighborTable()
+        public AodvReverseRoutingTable()
         {
-            this.Entries = new List<OlsrNeighborTableEntry>();
+            this.Entries = new List<AodvReverseRoutingTableEntry>();
         }
 
         /// <summary>
@@ -25,14 +25,14 @@ namespace NetSim.Lib.Routing.OLSR
         /// <value>
         /// The entries.
         /// </value>
-        public List<OlsrNeighborTableEntry> Entries { get; set; }
+        public List<AodvReverseRoutingTableEntry> Entries { get; set; }
 
         /// <summary>
         /// Gets the entry for.
         /// </summary>
         /// <param name="searchId">The search identifier.</param>
         /// <returns></returns>
-        public OlsrNeighborTableEntry GetEntryFor(string searchId)
+        public AodvReverseRoutingTableEntry GetEntryFor(string searchId)
         {
             return Entries.FirstOrDefault(e => e.NeighborId.Equals(searchId));
         }
@@ -44,7 +44,7 @@ namespace NetSim.Lib.Routing.OLSR
         /// <param name="accessThrough">The access though.</param>
         public void AddEntry(string sender, string accessThrough = null)
         {
-            var entry = new OlsrNeighborTableEntry()
+            var entry = new AodvReverseRoutingTableEntry()
             {
                 NeighborId = sender,
                 IsMultiPointRelay = false

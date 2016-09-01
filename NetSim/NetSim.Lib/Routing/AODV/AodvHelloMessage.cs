@@ -5,13 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 
 using NetSim.Lib.Simulator;
+using NetSim.Lib.Simulator.Components;
 
 namespace NetSim.Lib.Routing.AODV
 {
     /// <summary>
     /// 
     /// </summary>
-    /// <seealso cref="NetSim.Lib.Simulator.NetSimMessage" />
+    /// <seealso cref="NetSimMessage" />
     public class AodvHelloMessage : NetSimMessage
     {
         /// <summary>

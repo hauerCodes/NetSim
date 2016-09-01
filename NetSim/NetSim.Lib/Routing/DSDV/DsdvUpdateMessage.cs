@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using NetSim.Lib.Simulator;
+using NetSim.Lib.Simulator.Components;
 
 namespace NetSim.Lib.Routing.DSDV
 {
@@ -43,8 +44,7 @@ namespace NetSim.Lib.Routing.DSDV
             StringBuilder builder = new StringBuilder();
 
             builder.AppendLine(base.ToString());
-            builder.AppendLine("--- Content ---");
-            builder.AppendLine($"Dest Metric SeqNr");
+            builder.AppendLine($"| Dest Metric SeqNr");
 
             foreach (var entry in UpdateTable.Entries)
             {
@@ -55,8 +55,10 @@ namespace NetSim.Lib.Routing.DSDV
                     continue;
                 }
 
-                builder.AppendLine($"{dsdvEntry.Destination,4} {dsdvEntry.Metric,6} {dsdvEntry.SequenceNr,5}");
+                builder.AppendLine($"| {dsdvEntry.Destination,4} {dsdvEntry.Metric,6} {dsdvEntry.SequenceNr,5}");
             }
+
+            builder.AppendLine($"+[/{this.GetType().Name}]");
 
             return builder.ToString();
         }

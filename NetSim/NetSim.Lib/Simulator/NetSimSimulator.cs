@@ -9,6 +9,7 @@ using System.Threading;
 
 using NetSim.Lib.Annotations;
 using NetSim.Lib.Simulator;
+using NetSim.Lib.Simulator.Components;
 using NetSim.Lib.Visualization;
 
 namespace NetSim.Lib.Simulator
@@ -171,6 +172,34 @@ namespace NetSim.Lib.Simulator
         }
 
         /// <summary>
+        /// Removes the client.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
+        public bool RemoveClient(string id)
+        {
+            var delClient = this.Clients.FirstOrDefault(c => c.Id.Equals(id));
+
+            if (delClient == null)
+            {
+                return false;
+            }
+
+            var connectionListCopy = delClient.Connections.Values.ToList();
+
+            // delete all connections from and to client
+            foreach (var delconnection in connectionListCopy)
+            {
+                RemoveConnection(delconnection.EndPointA.Id, delconnection.EndPointB.Id);
+            }
+
+            // delete the client
+            this.Clients.Remove(delClient);
+
+            return true;
+        }
+
+        /// <summary>
         /// Adds the connection.
         /// </summary>
         /// <param name="from">From.</param>
@@ -208,6 +237,39 @@ namespace NetSim.Lib.Simulator
             toClient.Connections.Add(from, connection);
 
             OnUpdated();
+
+            return true;
+        }
+
+        /// <summary>
+        /// Removes the connection.
+        /// EndPointA and B can be switched!
+        /// </summary>
+        /// <param name="endPointA">The end point a.</param>
+        /// <param name="endPointB">The end point b.</param>
+        /// <returns></returns>
+        public bool RemoveConnection(string endPointA, string endPointB)
+        {
+            NetSimClient endPointAClient = Clients.FirstOrDefault(c => c.Id.Equals(endPointA));
+            NetSimClient endPointBClient = Clients.FirstOrDefault(c => c.Id.Equals(endPointB));
+
+            if (endPointAClient == null || endPointBClient == null)
+            {
+                return false;
+            }
+
+            var delConnection =
+                Connections.FirstOrDefault(c => c.EndPointA.Id.Equals(endPointA) && c.EndPointB.Id.Equals(endPointB)) ?? 
+                Connections.FirstOrDefault(c => c.EndPointA.Id.Equals(endPointB) && c.EndPointB.Id.Equals(endPointA));
+
+            if(delConnection == null)
+            {
+                return false;
+            }
+
+            endPointAClient.Connections.Remove(endPointB);
+            endPointBClient.Connections.Remove(endPointA);
+            this.Connections.Remove(delConnection);
 
             return true;
         }

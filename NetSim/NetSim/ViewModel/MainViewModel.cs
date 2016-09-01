@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -20,11 +21,14 @@ using Microsoft.Win32;
 
 using NetSim.DetailPages;
 using NetSim.Lib.Simulator;
+using NetSim.Lib.Simulator.Components;
+using NetSim.Lib.Storage;
 using NetSim.Lib.Visualization;
 // ReSharper disable ExplicitCallerInfoArgument
 
 namespace NetSim.ViewModel
 {
+    [SuppressMessage("ReSharper", "TryCastAlwaysSucceeds")]
     public class MainViewModel : ViewModelBase
     {
         /// <summary>
@@ -41,6 +45,11 @@ namespace NetSim.ViewModel
         /// The is run simluation
         /// </summary>
         private bool isRunSimluation;
+
+        /// <summary>
+        /// The storage client
+        /// </summary>
+        private readonly SimulationStorage simulationStorage;
 
         /// <summary>
         /// The simluation lock object
@@ -114,6 +123,7 @@ namespace NetSim.ViewModel
         public MainViewModel(Canvas drawCanvas)
         {
             this.DrawCanvas = drawCanvas;
+            this.simulationStorage = new SimulationStorage();
             this.Simulator = new NetSimSimulator();
             this.Visualizer = new NetSimVisualizer(Simulator, drawCanvas);
 
@@ -232,6 +242,8 @@ namespace NetSim.ViewModel
             }
             set
             {
+                var oldValue = currentViewedItem;
+
                 currentViewedItem = value;
                 Debug.WriteLine(value != null ? $"CurrentViewed:{value.Id}" : $"CurrentViewed: -");
 
@@ -241,8 +253,15 @@ namespace NetSim.ViewModel
                     this.Visualizer.CurrentSelectedItem = client;
                 }
 
+                // update every time to display new informations (e.g. messages, tables)
                 RaisePropertyChanged();
                 RaisePropertyChanged(nameof(DetailPage));
+
+
+                if (currentViewedItem == null || !currentViewedItem.Equals(oldValue))
+                {
+                    RaisePropertyChanged(nameof(ControlPage));
+                }
             }
         }
 
@@ -266,6 +285,49 @@ namespace NetSim.ViewModel
                 if (currentViewedItem is NetSimConnection)
                 {
                     return new ConnectionPage() { Connection = currentViewedItem as NetSimConnection };
+                }
+
+                return null;
+            }
+
+        }
+
+        /// <summary>
+        /// Gets the control page.
+        /// </summary>
+        /// <value>
+        /// The control page.
+        /// </value>
+        public Page ControlPage
+        {
+            get
+            {
+                if (currentViewedItem == null) return null;
+
+                if (currentViewedItem is NetSimClient)
+                {
+                    var controlClientPage = new ControlClientPage() { Client = currentViewedItem as NetSimClient };
+                    controlClientPage.DeleteClientEvent += (sender, e) =>
+                    {
+                        Simulator.RemoveClient(e.Id);
+                        Visualizer.Refresh();
+                    };
+
+                    return controlClientPage;
+
+                }
+
+                if (currentViewedItem is NetSimConnection)
+                {
+                    var controlConnectionPage = new ControlConnectionPage() { Connection = currentViewedItem as NetSimConnection };
+                    controlConnectionPage.DeleteConnectionEvent +=
+                        (sender, e) =>
+                        {
+                            Simulator.RemoveConnection(e.EndPointA.Id, e.EndPointB.Id);
+                            Visualizer.Refresh();
+                        };
+
+                    return controlConnectionPage;
                 }
 
                 return null;
@@ -466,12 +528,60 @@ namespace NetSim.ViewModel
                 Filter = "netsim files(*.netsim)|*.netsim|All files (*.*)|*.*"
             };
 
-            if (openFileDialog.ShowDialog() == true)
-            {
-                MessageBox.Show(openFileDialog.FileName);
-                //todo
-            }
+            if (openFileDialog.ShowDialog() != true) return;
 
+            var fallbackSimulator = this.Simulator;
+            var fallbackVisualizer = this.Visualizer;
+
+            try
+            {
+                ExecutePauseSimulation();
+
+                var simulationInstance = simulationStorage.LoadNetwork(openFileDialog.FileName,
+                    (network) =>
+                    {
+                        var simulator = new NetSimSimulator();
+
+                        foreach (var client in network.Clients)
+                        {
+                            simulator.AddClient(client.Id, client.Left, client.Top);
+                        }
+
+                        foreach (var connection in network.Connections)
+                        {
+                            simulator.AddConnection(connection.EndpointA, connection.EndpointB, connection.Metric);
+                        }
+
+                        return simulator;
+                    });
+
+                this.Simulator = (NetSimSimulator)simulationInstance;
+                this.Visualizer = new NetSimVisualizer(Simulator, DrawCanvas);
+                this.Simulator.PropertyChanged += OnSimulatorPropertyChangedEventHandler;
+
+                // initialize simulator
+                this.Simulator.InitializeProtocol(ProtocolType);
+
+                if (Simulator.Clients.Count > 0)
+                {
+                    this.nextNodeName = Simulator.Clients.Max(c => c.Id)[0];
+                    this.nextNodeName++;
+                }
+                else
+                {
+                    this.nextNodeName = 'A';
+                }
+
+                Visualizer.Refresh();
+                CheckCanExecuteCommands();
+            }
+            catch (Exception ex)
+            {
+                this.Simulator = fallbackSimulator;
+                this.Visualizer = fallbackVisualizer;
+
+                Trace.TraceError(ex.Message);
+            }
         }
 
         /// <summary>
@@ -487,10 +597,15 @@ namespace NetSim.ViewModel
                 FileName = $"NetworkSave_{DateTime.Now.ToString("ddMMyyyy")}",
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (openFileDialog.ShowDialog() != true) return;
+
+            try
             {
-                MessageBox.Show(openFileDialog.FileName);
-                //todo
+                simulationStorage.SaveNetwork(openFileDialog.FileName, Simulator);
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError(ex.Message);
             }
         }
 
@@ -531,9 +646,17 @@ namespace NetSim.ViewModel
 
             Simulator.PerformSimulationStep();
 
-            UpdateCurrentViewedItem();
+            try
+            {
+                UpdateCurrentViewedItem();
 
-            CheckCanExecuteCommands();
+                CheckCanExecuteCommands();
+            }
+            catch
+            {
+                //ignored
+            }
+
         }
 
         /// <summary>
@@ -557,7 +680,7 @@ namespace NetSim.ViewModel
 
                 if (isRunSimluation)
                 {
-                    Thread.Sleep(TimeSpan.FromSeconds(1.4));
+                    Thread.Sleep(TimeSpan.FromSeconds(0.55));
                 }
             }
         }
@@ -579,26 +702,54 @@ namespace NetSim.ViewModel
             CheckCanExecuteCommands();
         }
 
+        /// <summary>
+        /// Determines whether this instance [can execute pause simulation].
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> if this instance [can execute pause simulation]; otherwise, <c>false</c>.
+        /// </returns>
         private bool CanExecutePauseSimulation()
         {
             return SimulatorNetworkCreated() && isRunSimluation;
         }
 
+        /// <summary>
+        /// Determines whether this instance [can execute start simulation].
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> if this instance [can execute start simulation]; otherwise, <c>false</c>.
+        /// </returns>
         private bool CanExecuteStartSimulation()
         {
             return SimulatorNetworkCreated() && !isRunSimluation;
         }
 
+        /// <summary>
+        /// Determines whether this instance [can execute reset simulation].
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> if this instance [can execute reset simulation]; otherwise, <c>false</c>.
+        /// </returns>
         private bool CanExecuteResetSimulation()
         {
             return SimulatorNetworkCreated();
         }
 
+        /// <summary>
+        /// Determines whether this instance [can execute simulation step].
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> if this instance [can execute simulation step]; otherwise, <c>false</c>.
+        /// </returns>
         private bool CanExecuteSimulationStep()
         {
             return SimulatorNetworkCreated() && !isRunSimluation;
         }
 
+        /// <summary>
+        /// Simulators the network created.
+        /// </summary>
+        /// <returns></returns>
         private bool SimulatorNetworkCreated()
         {
             return Simulator.Clients.Count > 0 && Simulator.Connections.Count > 0;

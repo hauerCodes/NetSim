@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 
 using NetSim.Lib.Simulator;
+using NetSim.Lib.Simulator.Components;
 
 namespace NetSim.Lib.Routing.DSDV
 {

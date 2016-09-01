@@ -7,25 +7,25 @@ using System.Threading.Tasks;
 using NetSim.Lib.Simulator;
 using NetSim.Lib.Simulator.Components;
 
-namespace NetSim.Lib.Routing.DSR
+namespace NetSim.Lib.Routing.OLSR
 {
-    public class DsrTableEntry : NetSimTableEntry
+    public class OlsrTopologyControlMessage : NetSimMessage
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DsrTableEntry"/> class.
+        /// Initializes a new instance of the <see cref="OlsrTopologyControlMessage"/> class.
         /// </summary>
-        public DsrTableEntry()
+        public OlsrTopologyControlMessage()
         {
-            this.Route = new List<string>();
+            this.Neighbors = new List<string>();
         }
 
         /// <summary>
-        /// Gets or sets the route.
+        /// Gets or sets the neighbors.
         /// </summary>
         /// <value>
-        /// The route.
+        /// The neighbors.
         /// </value>
-        public List<string> Route { get; set; }
+        public List<string> Neighbors { get; set; }
 
         /// <summary>
         /// Clones this instance.
@@ -33,7 +33,9 @@ namespace NetSim.Lib.Routing.DSR
         /// <returns></returns>
         public override object Clone()
         {
-            return new DsrTableEntry() { Destination = Destination, Route = new List<string>(this.Route) };
+            var clone = new OlsrHelloMessage() { Neighbors = new List<string>(Neighbors) };
+
+            return CopyTo(clone);
         }
 
         /// <summary>
@@ -44,7 +46,14 @@ namespace NetSim.Lib.Routing.DSR
         /// </returns>
         public override string ToString()
         {
-            return !IsReachable ? $"{Destination,4} {"---",6}" : $"{Destination,4} {String.Join(",", Route)}";
+            StringBuilder builder = new StringBuilder();
+
+            builder.AppendLine(base.ToString());
+            builder.AppendLine("--- Content ---");
+
+            builder.AppendLine(string.Join(" ", Neighbors));
+
+            return builder.ToString();
         }
     }
 }

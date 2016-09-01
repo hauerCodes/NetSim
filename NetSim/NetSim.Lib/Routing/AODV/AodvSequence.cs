@@ -4,24 +4,24 @@ using System.Linq;
 using NetSim.Lib.Simulator;
 using NetSim.Lib.Simulator.Messages;
 
-namespace NetSim.Lib.Routing.DSDV
+namespace NetSim.Lib.Routing.AODV
 {
     /// <summary>
     /// 
     /// </summary>
-    public class DsdvSequence : NetSimSequence, IEquatable<DsdvSequence>, IComparable<DsdvSequence>
+    public class AodvSequence : NetSimSequence, IEquatable<AodvSequence>, IComparable<AodvSequence>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DsdvSequence"/> class.
+        /// Initializes a new instance of the <see cref="AodvSequence"/> class.
         /// </summary>
-        public DsdvSequence() { }
+        public AodvSequence() { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DsdvSequence"/> class.
+        /// Initializes a new instance of the <see cref="AodvSequence"/> class.
         /// </summary>
         /// <param name="sequenceId">The sequence identifier.</param>
         /// <param name="sequenceNr">The sequence nr.</param>
-        public DsdvSequence(string sequenceId, int sequenceNr) : base(sequenceId, sequenceNr)
+        public AodvSequence(string sequenceId, int sequenceNr) : base(sequenceId, sequenceNr)
         { }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace NetSim.Lib.Routing.DSDV
         /// </summary>
         /// <param name="other">The other.</param>
         /// <returns></returns>
-        public bool Equals(DsdvSequence other)
+        public bool Equals(AodvSequence other)
         {
             return base.Equals(other);
         }
@@ -38,10 +38,16 @@ namespace NetSim.Lib.Routing.DSDV
         /// Compares to.
         /// </summary>
         /// <param name="other">The other.</param>
-        /// <returns></returns>
+        /// <returns>
+        /// A value that indicates the relative order of the objects being compared. 
+        /// The return value has the following meanings: Value Meaning Less than zero This object is less than the
+        ///  <paramref name="other" /> parameter.Zero 
+        /// This object is equal to <paramref name="other" />. 
+        /// Greater than zero This object is greater than <paramref name="other" />.
+        /// </returns>
         /// <exception cref="System.ArgumentNullException"></exception>
         /// <exception cref="System.InvalidOperationException">Can't compare this sequences.</exception>
-        public int CompareTo(DsdvSequence other)
+        public int CompareTo(AodvSequence other)
         {
             return base.CompareTo(other);
         }
@@ -52,7 +58,7 @@ namespace NetSim.Lib.Routing.DSDV
         /// <returns></returns>
         public override object Clone()
         {
-            return new DsdvSequence(this.SequenceId, this.SequenceNr);
+            return new AodvSequence(this.SequenceId, this.SequenceNr);
         }
 
     }

@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace NetSim.Lib.Simulator
+namespace NetSim.Lib.Simulator.Messages
 {
     public class NetSimSequence : IEquatable<NetSimSequence>, IComparable<NetSimSequence>, ICloneable
     {
@@ -87,7 +84,7 @@ namespace NetSim.Lib.Simulator
         /// <returns></returns>
         public virtual object Clone()
         {
-            return new NetSimSequence() { SequenceId = this.SequenceId, SequenceNr = this.SequenceNr };
+            return new NetSimSequence(this.SequenceId, this.SequenceNr);
         }
 
         /// <summary>

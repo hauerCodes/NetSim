@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using NetSim.Lib.Simulator;
+using NetSim.Lib.Simulator.Components;
 
 namespace NetSim.Lib.Routing.DSDV
 {
@@ -24,7 +25,7 @@ namespace NetSim.Lib.Routing.DSDV
         /// The offline links
         /// </summary>
         private List<string> offlineLinks;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DsdvRoutingProtocol"/> class.
         /// </summary>
@@ -60,7 +61,7 @@ namespace NetSim.Lib.Routing.DSDV
             var localTableRef = (DsdvTable)this.Table;
 
             // create current (initial) sequence nr (ID-000)
-            this.CurrentSequence = new DsdvSequence() { SequenceId = this.Client.Id, SequenceNr = 0 };
+            this.CurrentSequence = new DsdvSequence(this.Client.Id, 0);
 
             // self routing entry with metric 0 and initial sequence nr
             localTableRef.AddInitialRouteEntry(Client.Id, Client.Id, 0, CurrentSequence);
@@ -81,6 +82,7 @@ namespace NetSim.Lib.Routing.DSDV
             if (topologyChangeUpdate)
             {
                 UpdateRoutesForOfflineConnections();
+                UpdateRoutesForDeletedConnections();
             }
 
             // if update needed or periocid update
@@ -122,7 +124,7 @@ namespace NetSim.Lib.Routing.DSDV
         {
             string nextHopId = GetRoute(message.Receiver);
 
-            Client.Connections[nextHopId].StartTransportMessage(message, nextHopId);
+            Client.Connections[nextHopId].StartTransportMessage(message, this.Client.Id, nextHopId);
         }
 
         /// <summary>
@@ -142,7 +144,7 @@ namespace NetSim.Lib.Routing.DSDV
         {
             bool topologyChangeUpdate = false;
 
-            // check if alle routees for offline connections are marked as not reachable
+            // check if alle routes for offline connections are marked as not reachable
             foreach (var connection in Client.Connections.Where(c => c.Value.IsOffline && !offlineLinks.Contains(c.Key)))
             {
                 // connection.key is the "to" destination
@@ -165,25 +167,16 @@ namespace NetSim.Lib.Routing.DSDV
                 }
             }
 
-            ////check all routes marked as not reachable - update if connection is no longer offline
-            //foreach (var route in Table.Entries.Where(e => e.Metric == NotReachable))
-            //{
-            //    // if route is not a direct connection
-            //    if (!Client.Connections.ContainsKey(route.Destination))
-            //    {
-            //        continue;
-            //    }
-
-            //    // if connection is not offline update the metric of route - bring route/connection back online
-            //    if (!Client.Connections[route.Destination].IsOffline)
-            //    {
-            //        route.Metric = 1;
-            //        topologyChangeUpdate = true;
-            //    }
-            //}
-
-            // check if a direct connections exists which has no route entry
+            // check if a direct connections exists which has no route entry -> new connection
             if (Client.Connections.Any(c => Table.GetRouteFor(c.Key) == null))
+            {
+                topologyChangeUpdate = true;
+            }
+
+            // check if a direct connections does'nt exist which has an direct route entry -> deleted connection
+            if (Table.Entries
+                .Where(e => e.Destination.Equals(e.NextHop) && !e.Destination.Equals(this.Client.Id))
+                .Any(e => !Client.Connections.ContainsKey(e.Destination)))
             {
                 topologyChangeUpdate = true;
             }
@@ -227,6 +220,28 @@ namespace NetSim.Lib.Routing.DSDV
                 }
             }
 
+        }
+
+        /// <summary>
+        /// Updates the routes for deleted connections.
+        /// </summary>
+        /// <exception cref="NotImplementedException"></exception>
+        private void UpdateRoutesForDeletedConnections()
+        {
+            // foreach direct connected route 
+            foreach (var routeEntry in Table.Entries.Where(e => e.Destination.Equals(e.NextHop) && e.Destination != this.Client.Id))
+            {
+                // if the route does exists - contine to next route entry
+                if (Client.Connections.ContainsKey(routeEntry.Destination)) continue;
+
+                // if the route does'nt exist
+                var dsdvTableEntry = routeEntry as DsdvTableEntry;
+                if (dsdvTableEntry == null) continue;
+
+                // NOTE: point where not the destination changes a sequence number
+                dsdvTableEntry.SequenceNr.SequenceNr += 1;
+                (this.Table as DsdvTable)?.SetAllRoutesNotReachableForDisconnectedNextHop(dsdvTableEntry.NextHop);
+            }
         }
 
         /// <summary>

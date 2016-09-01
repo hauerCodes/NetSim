@@ -3,7 +3,7 @@ using System.Linq;
 
 using NetSim.Lib.Visualization;
 
-namespace NetSim.Lib.Simulator
+namespace NetSim.Lib.Simulator.Components
 {
     /// <summary>
     /// 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace NetSim.Lib.Simulator
+namespace NetSim.Lib.Simulator.Messages
 {
     /// <summary>
     /// 

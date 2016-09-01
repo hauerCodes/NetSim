@@ -4,18 +4,28 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using NetSim.Lib.Routing.Helpers;
 using NetSim.Lib.Simulator;
+using NetSim.Lib.Simulator.Components;
+using NetSim.Lib.Simulator.Messages;
 
 namespace NetSim.Lib.Routing.AODV
 {
     public class AodvRoutingProtocol : NetSimRoutingProtocol
     {
-        
+        /// <summary>
+        /// The message handler resolver instance.
+        /// </summary>
+        private readonly MessageHandlerResolver handlerResolver;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AodvRoutingProtocol"/> class.
         /// </summary>
         /// <param name="client">The client.</param>
-        public AodvRoutingProtocol(NetSimClient client) : base(client) { }
+        public AodvRoutingProtocol(NetSimClient client) : base(client)
+        {
+            handlerResolver = new MessageHandlerResolver(this.GetType());
+        }
 
         /// <summary>
         /// Gets the output queue.
@@ -25,6 +35,25 @@ namespace NetSim.Lib.Routing.AODV
         /// </value>
         public Queue<NetSimQueuedMessage> OutputQueue { get; private set; }
 
+        /// <summary>
+        /// Gets or sets the current request identifier.
+        /// </summary>
+        /// <value>
+        /// The current request identifier.
+        /// </value>
+        public int CurrentRequestId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the current sequence.
+        /// </summary>
+        /// <value>
+        /// The current sequence.
+        /// </value>
+        public AodvSequence CurrentSequence { get; set; }
+
+        /// <summary>
+        /// Initializes this instance.
+        /// </summary>
         public override void Initialize()
         {
             // call base initialization (stepcounter and data)
@@ -35,6 +64,12 @@ namespace NetSim.Lib.Routing.AODV
 
             //intialize outgoing messages
             this.OutputQueue = new Queue<NetSimQueuedMessage>();
+
+            // intialize request id for route request identification 
+            this.CurrentRequestId = 1;
+
+            // create current (initial) sequence nr (ID-000)
+            this.CurrentSequence = new AodvSequence(this.Client.Id, 0);
 
             // local table reference casted to the right type
             var localTableRef = (AodvTable)this.Table;
@@ -69,7 +104,7 @@ namespace NetSim.Lib.Routing.AODV
                 // if route found - send the message via the connection
                 if (!string.IsNullOrEmpty(nextHopId))
                 {
-                    Client.Connections[nextHopId].StartTransportMessage(queuedMessage.Message, nextHopId);
+                    Client.Connections[nextHopId].StartTransportMessage(queuedMessage.Message, this.Client.Id, nextHopId);
                 }
                 else
                 {
@@ -91,8 +126,8 @@ namespace NetSim.Lib.Routing.AODV
                 {
                     var message = Client.InputQueue.Dequeue();
 
-                    // if message is AodvRreqMessage message
-                    if (message is AodvRreqMessage)
+                    // if message is AodvRouteRequestMessage message
+                    if (message is AodvRouteRequestMessage)
                     {
                         //// client table
                         //var dsdvTable = Table as DsdvTable;
@@ -106,7 +141,7 @@ namespace NetSim.Lib.Routing.AODV
                         //    }
                         //}
                     }
-                    else if (message is AodvRrepMessage)
+                    else if (message is AodvRouteResponseMessage)
                     {
                         //// client table
                         //var dsdvTable = Table as DsdvTable;

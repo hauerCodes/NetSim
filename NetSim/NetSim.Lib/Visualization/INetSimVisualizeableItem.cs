@@ -7,6 +7,12 @@ namespace NetSim.Lib.Visualization
 {
     public interface INetSimVisualizeableItem
     {
+        /// <summary>
+        /// Gets or sets the identifier.
+        /// </summary>
+        /// <value>
+        /// The identifier.
+        /// </value>
         string Id { get; set; }
 
         /// <summary>

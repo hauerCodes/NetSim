@@ -14,5 +14,7 @@ namespace NetSim.Lib.Storage
         public int Top { get; set; }
 
         public int Left { get; set; }
+
+        public bool IsOffline { get; set; }
     }
 }

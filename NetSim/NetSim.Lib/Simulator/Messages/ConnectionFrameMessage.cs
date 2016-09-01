@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace NetSim.Lib.Simulator
+using NetSim.Lib.Simulator.Components;
+
+namespace NetSim.Lib.Simulator.Messages
 {
     /// <summary>
     /// This Message is a connection frame message.
@@ -12,7 +11,7 @@ namespace NetSim.Lib.Simulator
     /// When transmitting data via a connection a message gets packaged
     /// into this frame.
     /// </summary>
-    /// <seealso cref="NetSim.Lib.Simulator.NetSimMessage" />
+    /// <seealso cref="NetSimMessage" />
     public class ConnectionFrameMessage : NetSimMessage
     {
         /// <summary>
@@ -22,6 +21,17 @@ namespace NetSim.Lib.Simulator
         /// The data.
         /// </value>
         public NetSimMessage InnerMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the transmission step of this message.
+        /// Intial for the initial sending step - going on wire.
+        /// Transmitting for indicating that the message is on the wire.
+        /// Receiving for indicating that the message is going to be received.
+        /// </summary>
+        /// <value>
+        /// The transmission step.
+        /// </value>
+        public NetSimMessageTransmissionStep TransmissionStep { get; set; } = NetSimMessageTransmissionStep.Sending;
 
         /// <summary>
         /// Clones this instance.
@@ -43,8 +53,8 @@ namespace NetSim.Lib.Simulator
         /// </returns>
         public override string ToString()
         {
-            return $"[{this.GetType().Name}]\n[{Sender} - {Receiver}]"
-                   + $"\n----{InnerMessage}\n----[{this.GetType().Name}]";
+            return $"[{this.GetType().Name} ({Sender} -> {Receiver})]"
+                   + $"\n{InnerMessage}[/{this.GetType().Name}]";
         }
     }
 }

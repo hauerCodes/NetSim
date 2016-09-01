@@ -2,6 +2,7 @@
 using System.Linq;
 
 using NetSim.Lib.Simulator;
+using NetSim.Lib.Simulator.Components;
 
 namespace NetSim.Lib.Routing.OLSR
 {

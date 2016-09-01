@@ -22,7 +22,7 @@ namespace NetSim.DetailPages
     /// <summary>
     /// Interaction logic for ConnectionPage.xaml
     /// </summary>
-    public partial class ConnectionPage : Page
+    public partial class ControlConnectionPage : Page
     {
         /// <summary>
         /// The connection
@@ -32,11 +32,17 @@ namespace NetSim.DetailPages
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionPage"/> class.
         /// </summary>
-        public ConnectionPage()
+        public ControlConnectionPage()
         {
             InitializeComponent();
         }
-        
+
+        /// <summary>
+        /// Occurs when the deletion of the connection is requested.
+        /// Note: http://bit.ly/2bRCkbI - best practice consideration
+        /// </summary>
+        public event EventHandler<NetSimConnection> DeleteConnectionEvent;
+
         /// <summary>
         /// Gets or sets the connection.
         /// </summary>
@@ -52,9 +58,19 @@ namespace NetSim.DetailPages
             set
             {
                 connection = value;
-                this.DataContext = new ConnectionViewModel(connection);
+                var viewmodel = new ConnectionViewModel(connection);
+                viewmodel.DeleteConnectionEvent += (sender, e) => OnDeleteConnection();
+
+                this.DataContext = viewmodel;
             }
         }
-       
+
+        /// <summary>
+        /// Called when the delete connection event should get fired.
+        /// </summary>
+        protected virtual void OnDeleteConnection()
+        {
+            DeleteConnectionEvent?.Invoke(this, this.Connection);
+        }
     }
 }

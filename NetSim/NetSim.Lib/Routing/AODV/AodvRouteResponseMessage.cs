@@ -7,33 +7,30 @@ using System.Threading.Tasks;
 using NetSim.Lib.Simulator;
 using NetSim.Lib.Simulator.Components;
 
-namespace NetSim.Lib.Routing.DSR
+namespace NetSim.Lib.Routing.AODV
 {
-    public class DsrTableEntry : NetSimTableEntry
+    public class AodvRouteResponseMessage : NetSimMessage
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DsrTableEntry"/> class.
-        /// </summary>
-        public DsrTableEntry()
-        {
-            this.Route = new List<string>();
-        }
-
-        /// <summary>
-        /// Gets or sets the route.
+        /// Gets or sets the hop count.
         /// </summary>
         /// <value>
-        /// The route.
+        /// The hop count.
         /// </value>
-        public List<string> Route { get; set; }
+        public int HopCount { get; set; }
 
         /// <summary>
-        /// Clones this instance.
+        /// Creates a new object that is a copy of the current instance.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// A new object that is a copy of this instance.
+        /// </returns>
         public override object Clone()
         {
-            return new DsrTableEntry() { Destination = Destination, Route = new List<string>(this.Route) };
+            return CopyTo(new AodvRouteResponseMessage()
+            {
+                HopCount = this.HopCount
+            });
         }
 
         /// <summary>
@@ -44,7 +41,7 @@ namespace NetSim.Lib.Routing.DSR
         /// </returns>
         public override string ToString()
         {
-            return !IsReachable ? $"{Destination,4} {"---",6}" : $"{Destination,4} {String.Join(",", Route)}";
+            return $"{base.ToString()}\n| HopCount:{HopCount}\n+[/{this.GetType().Name}]";
         }
     }
 }

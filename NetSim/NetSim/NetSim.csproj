@@ -82,6 +82,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Converter\ProtocolTypeToBoolConverter.cs" />
+    <Compile Include="DetailPages\ControlConnectionPage.xaml.cs">
+      <DependentUpon>ControlConnectionPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DetailPages\ControlClientPage.xaml.cs">
+      <DependentUpon>ControlClientPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DetailPages\ClientPage.xaml.cs">
       <DependentUpon>ClientPage.xaml</DependentUpon>
     </Compile>
@@ -92,6 +98,14 @@
     <Compile Include="ViewModel\ClientViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ViewMode.cs" />
+    <Page Include="DetailPages\ControlConnectionPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DetailPages\ControlClientPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="DetailPages\ConnectionPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

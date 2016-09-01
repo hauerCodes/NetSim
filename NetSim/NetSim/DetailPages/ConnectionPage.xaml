@@ -28,6 +28,6 @@
         </StackPanel>
         <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold" >Current Messages</TextBlock>
 
-        <ListBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" FontFamily="Consolas" ItemsSource="{Binding Path=CurrentMessages}"></ListBox>
+        <ListBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" FontFamily="Consolas" ItemsSource="{Binding Path=CurrentMessages}" BorderThickness="0"></ListBox>
     </Grid>
 </Page>

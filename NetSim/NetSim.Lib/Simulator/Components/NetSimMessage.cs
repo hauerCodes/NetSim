@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-using NetSim.Lib.Visualization;
+using NetSim.Lib.Simulator.Messages;
 
-namespace NetSim.Lib.Simulator
+namespace NetSim.Lib.Simulator.Components
 {
     public abstract class NetSimMessage : NetSimItem, ICloneable
     {
@@ -34,26 +32,6 @@ namespace NetSim.Lib.Simulator
         public string Receiver { get; set; }
 
         /// <summary>
-        /// Gets or sets the next receiver of the message 
-        /// between Endpoint A and Endpoint B (NetSimConnection)
-        /// </summary>
-        /// <value>
-        /// The next receiver.
-        /// </value>
-        public string NextReceiver { get; set; }
-
-        /// <summary>
-        /// Gets or sets the transmission step of this message.
-        /// Intial for the initial sending step - going on wire.
-        /// Transmitting for indicating that the message is on the wire.
-        /// Receiving for indicating that the message is going to be received.
-        /// </summary>
-        /// <value>
-        /// The transmission step.
-        /// </value>
-        public NetSimMessageTransmissionStep TransmissionStep { get; set; } = NetSimMessageTransmissionStep.Sending;
-
-        /// <summary>
         /// Copies the base properties of this message instace to the given message.
         /// </summary>
         /// <param name="copyToMessage">The copy to message.</param>
@@ -63,9 +41,7 @@ namespace NetSim.Lib.Simulator
             copyToMessage.Id = this.Id;
             copyToMessage.Sender = this.Sender;
             copyToMessage.Receiver = this.Receiver;
-            copyToMessage.NextReceiver = this.NextReceiver;
-            copyToMessage.TransmissionStep = this.TransmissionStep;
-
+          
             return copyToMessage;
         }
 
@@ -85,7 +61,7 @@ namespace NetSim.Lib.Simulator
         /// </returns>
         public override string ToString()
         {
-            return $"#[{this.GetType().Name}] {Sender} - {Receiver}";
+            return $"+[{this.GetType().Name}({Sender} -> {Receiver})]";
         }
 
         /// <summary>

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using NetSim.Lib.Simulator;
+using NetSim.Lib.Simulator.Components;
 
 namespace NetSim.Lib.Routing.DSR
 {
@@ -72,6 +73,18 @@ namespace NetSim.Lib.Routing.DSR
             };
 
             return CopyTo(clone);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return $"[{this.GetType().Name} ({Sender} -> {Receiver})]"
+                   + $"\n{Data}\n[/{this.GetType().Name}]";
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using NetSim.Lib.Simulator;
+using NetSim.Lib.Simulator.Components;
 
 namespace NetSim.Lib.Routing.DSR
 {
@@ -25,7 +26,6 @@ namespace NetSim.Lib.Routing.DSR
         /// The nodes.
         /// </value>
         public List<string> Route { get; set; }
-
 
         /// <summary>
         /// Gets the next reverse hop.
@@ -58,6 +58,17 @@ namespace NetSim.Lib.Routing.DSR
             };
 
             return CopyTo(clone);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return $"{base.ToString()}\n| Route:{string.Join(",", Route)}\n+[/{this.GetType().Name}]";
         }
     }
 }

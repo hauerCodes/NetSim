@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converter="clr-namespace:NetSim.Converter"
         xmlns:simulator="clr-namespace:NetSim.Lib.Simulator;assembly=NetSim.Lib"
+        xmlns:properties="clr-namespace:NetSim.Properties"
         mc:Ignorable="d"
         Title="NetSim - Routing Protocol Simulator" MinHeight="450" MinWidth="800" Height="450" Width="700">
     <Window.Resources>
@@ -19,10 +20,10 @@
                 <MenuItem Header="Exit" Click="ExitMenuItemClick"></MenuItem>
             </MenuItem>
             <MenuItem Header="Routing">
+                <MenuItem IsCheckable="True" IsChecked="{Binding Path=ProtocolType, Converter={StaticResource protocolConverter}, Mode=TwoWay, ConverterParameter={x:Static simulator:NetSimProtocolType.DSR}}" Header="DSR"></MenuItem>
                 <MenuItem IsCheckable="True" IsChecked="{Binding Path=ProtocolType, Converter={StaticResource protocolConverter}, Mode=TwoWay, ConverterParameter={x:Static simulator:NetSimProtocolType.DSDV}}" Header="DSDV"></MenuItem>
                 <MenuItem IsCheckable="True" IsChecked="{Binding Path=ProtocolType, Converter={StaticResource protocolConverter}, Mode=TwoWay, ConverterParameter={x:Static simulator:NetSimProtocolType.OLSR}}" Header="OLSR"></MenuItem>
                 <MenuItem IsCheckable="True" IsChecked="{Binding Path=ProtocolType, Converter={StaticResource protocolConverter}, Mode=TwoWay, ConverterParameter={x:Static simulator:NetSimProtocolType.AODV}}" Header="AODV"></MenuItem>
-                <MenuItem IsCheckable="True" IsChecked="{Binding Path=ProtocolType, Converter={StaticResource protocolConverter}, Mode=TwoWay, ConverterParameter={x:Static simulator:NetSimProtocolType.DSR}}" Header="DSR"></MenuItem>
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="Network Create"></MenuItem>
@@ -49,10 +50,10 @@
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0" Orientation="Vertical">
                     <TextBlock Margin="5" FontWeight="Bold">Network Creation</TextBlock>
-                    <ToggleButton Margin="5" IsChecked="{Binding IsView, Mode=TwoWay}">
+                    <ToggleButton Margin="5" IsChecked="{Binding IsView, Mode=TwoWay}" ToolTip="{x:Static properties:Resources.ViewMode_Tooltip}" >
                         <StackPanel Orientation="Horizontal">
                             <Path Width="10" Height="10" Stretch="Uniform" Fill="Black" Data="F1 M 477.366,32.4489C 470.432,35.802 462.011,33.0596 458.558,26.3193C 455.103,19.5833 457.927,11.3994 464.867,8.04321C 471.8,4.69006 480.222,7.4342 483.675,14.1729C 487.123,20.9102 484.303,29.0901 477.366,32.4489 Z M 489.398,50.2073L 481.138,34.0914C 488.075,29.3633 490.6,20.2981 486.712,12.7021C 482.423,4.33691 471.967,0.928711 463.351,5.09277C 454.739,9.26074 451.234,19.4209 455.52,27.7913C 459.414,35.3821 468.384,38.8887 476.447,36.3619L 484.703,52.4756C 485.051,53.1487 485.924,53.4045 486.66,53.0488L 488.688,52.0686C 489.427,51.7129 489.742,50.8782 489.398,50.2073 Z " UseLayoutRounding="False"/>
-                            <TextBlock Margin="5 0 0 0">View Mode</TextBlock>
+                            <TextBlock Margin="5 0 0 0">View Details Mode</TextBlock>
                         </StackPanel>
                     </ToggleButton>
                     <Grid>
@@ -60,8 +61,8 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <ToggleButton Grid.Column="0" Margin="5" IsChecked="{Binding IsCreateNode, Mode=TwoWay}">Create Nodes</ToggleButton>
-                        <ToggleButton Grid.Column="1" Margin="5" IsChecked="{Binding IsCreateEdge, Mode=TwoWay}">Create Edges</ToggleButton>
+                        <ToggleButton Grid.Column="0" Margin="5" IsChecked="{Binding IsCreateNode, Mode=TwoWay}" ToolTip="{x:Static properties:Resources.CreateNode_Tooltip}" >Create Nodes</ToggleButton>
+                        <ToggleButton Grid.Column="1" Margin="5" IsChecked="{Binding IsCreateEdge, Mode=TwoWay}" ToolTip="{x:Static properties:Resources.CreateEdge_Tooltip}">Create Edges</ToggleButton>
                     </Grid>
                 </StackPanel>
                 <StackPanel Grid.Row="1" Orientation="Vertical">

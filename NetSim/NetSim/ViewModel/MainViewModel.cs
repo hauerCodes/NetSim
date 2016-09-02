@@ -130,7 +130,7 @@ namespace NetSim.ViewModel
             this.Simulator.PropertyChanged += OnSimulatorPropertyChangedEventHandler;
 
             this.IsView = true;
-            this.ProtocolType = NetSimProtocolType.DSDV;
+            this.ProtocolType = NetSimProtocolType.DSR;
 
             InitializeCommands();
         }

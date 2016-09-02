@@ -221,7 +221,7 @@ namespace NetSim.Lib.Routing.DSR
             // get next hop from in frame message saved route info
             var nextHop = frameMessage.GetNextHop(Client.Id);
 
-            if (!Client.Connections[nextHop].IsOffline)
+            if (IsConnectionReachable(nextHop))
             {
                 // lay message "on" wire - start transmitting via connection
                 Client.Connections[nextHop].StartTransportMessage(frameMessage, this.Client.Id, nextHop);
@@ -275,7 +275,7 @@ namespace NetSim.Lib.Routing.DSR
             // get the next hop id from the route info saved within this message
             string nextHopId = responseMessage.GetNextReverseHop(Client.Id);
 
-            if (!Client.Connections[nextHopId].IsOffline)
+            if (IsConnectionReachable(nextHopId))
             {
                 // start message transport
                 Client.Connections[nextHopId].StartTransportMessage(responseMessage, this.Client.Id, nextHopId);
@@ -303,7 +303,8 @@ namespace NetSim.Lib.Routing.DSR
             // get the next hop id from the route info saved within this message
             string nextHopId = errorMessage.GetNextReverseHop(Client.Id);
 
-            if (!Client.Connections[nextHopId].IsOffline)
+            // if client has this connection (e.g. not deleted) and connection is not offline
+            if (IsConnectionReachable(nextHopId))
             {
                 // start message transport
                 Client.Connections[nextHopId].StartTransportMessage(errorMessage, this.Client.Id, nextHopId);
@@ -538,9 +539,12 @@ namespace NetSim.Lib.Routing.DSR
                     .HasCachedRequest(reqMessaged.RequestId) ?? false;
         }
 
+        /// <summary>
+        /// Gets the routing data.
+        /// </summary>
+        /// <returns></returns>
         protected override string GetRoutingData()
         {
-            //TODO
             return Table.ToString();
         }
     }

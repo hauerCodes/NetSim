@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 using NetSim.Lib.Routing.Helpers;
-using NetSim.Lib.Simulator;
 using NetSim.Lib.Simulator.Components;
 using NetSim.Lib.Simulator.Messages;
+// ReSharper disable UnusedMember.Local
 
 namespace NetSim.Lib.Routing.AODV
 {
@@ -115,22 +115,44 @@ namespace NetSim.Lib.Routing.AODV
                 // get next queued message
                 var queuedMessage = OutputQueue.Dequeue();
 
-                ////search the route (next hop)
-                //string nextHopId = GetRoute(queuedMessage.Message.Receiver);
+                if (IsAodvMessage(queuedMessage.Message))
+                {
+                    // handle "resend" of dsr message intialy send from other node
+                    ForwardAodvMessage(queuedMessage);
+                }
+                else
+                {
+                    //search the route (next hop)
+                    string nextHopId = GetRoute(queuedMessage.Message.Receiver);
+
+                    // if route not found
+                    if (string.IsNullOrEmpty(nextHopId))
+                    {
+                        // try to search the route
+                        HandleRouteDiscoveryForOutgoingMessage(queuedMessage);
+                    }
+                    else
+                    {
+                        // if route was found  - send message along this route
+                        Client.Connections[nextHopId].StartTransportMessage(queuedMessage.Message, this.Client.Id, nextHopId);
+                    }
+                }
+
+
 
                 //// if route found - send the message via the connection
                 //if (!string.IsNullOrEmpty(nextHopId))
                 //{
                 //    Client.Connections[nextHopId].StartTransportMessage(queuedMessage.Message, this.Client.Id, nextHopId);
                 //}
-                //else
-                //{
-                //    //if route not found start route discovery
+                ////else
+                ////{
+                ////    //if route not found start route discovery
 
 
-                //    // and enqueue message again
-                //    OutputQueue.Enqueue(queuedMessage);
-                //}
+                ////    // and enqueue message again
+                ////    OutputQueue.Enqueue(queuedMessage);
+                ////}
                 counter--;
             }
         }
@@ -155,12 +177,32 @@ namespace NetSim.Lib.Routing.AODV
                 // e.g. IncomingDsrRouteRequestMessageHandler
                 var method = handlerResolver.GetHandlerMethod(message.GetType(), false);
 
-                //call handler
-                method?.Invoke(this, new object[] { message });
-
-                // if method not found - use default method to handle message (e.g. data mesage)
-                DefaultIncomingMessageHandler(message);
+                if (method != null)
+                {
+                    //call handler
+                    method.Invoke(this, new object[] { message });
+                }
+                else
+                {
+                    // if method not found - use default method to handle message (e.g. data mesage)
+                    DefaultIncomingMessageHandler(message);
+                }
             }
+        }
+
+        /// <summary>
+        /// Handles the outgoing DSR message.
+        /// Note: Messages handled in this methods where intialy send from another node.
+        /// </summary>
+        /// <param name="queuedMessage">The queued message.</param>
+        private void ForwardAodvMessage(NetSimQueuedMessage queuedMessage)
+        {
+            // searches a handler method with the messagehandler attribute and the 
+            // right message type and for incoming(false) or outgoing (true, default) messages.
+            // e.g. IncomingAodvRouteRequestMessageHandler
+            var method = handlerResolver.GetHandlerMethod(queuedMessage.Message.GetType());
+
+            method?.Invoke(this, new object[] { queuedMessage });
         }
 
         /// <summary>
@@ -190,7 +232,6 @@ namespace NetSim.Lib.Routing.AODV
             OutputQueue.Enqueue(new NetSimQueuedMessage()
             {
                 Message = message,
-                //Route = Table.GetRouteFor(message.Sender),
             });
 
         }
@@ -201,53 +242,28 @@ namespace NetSim.Lib.Routing.AODV
         /// <param name="queuedMessage">The queued message.</param>
         private void HandleRouteDiscoveryForOutgoingMessage(NetSimQueuedMessage queuedMessage)
         {
-            ////search the route for message (also in cache)
-            //var searchedRoute = GetDsrRoute(queuedMessage.Message.Receiver);
+            // if route not found and route discovery is not started for this message
+            if (!queuedMessage.IsRouteDiscoveryStarted)
+            {
+                // mark as started
+                queuedMessage.IsRouteDiscoveryStarted = true;
 
-            //// if route found - send the message via the connection
-            //if (searchedRoute != null)
-            //{
-            //    var sendMessage = queuedMessage.Message;
+                //broadcast to all neighbors
+                Client.BroadcastMessage(new AodvRouteRequestMessage()
+                {
+                    Sender = Client.Id,
+                    Receiver = queuedMessage.Message.Receiver,
+                    RequestId = this.CurrentRequestId,
+                    SenderSequenceNr = (AodvSequence)this.CurrentSequence.Clone(),
+                    LastHop = Client.Id
+                }, false);
 
-            //    //pack message in dsrframemessage and set found route
-            //    var dsrFrame = new DsrFrameMessage()
-            //    {
-            //        Data = (NetSimMessage)sendMessage.Clone(),
-            //        Receiver = sendMessage.Receiver,
-            //        Sender = sendMessage.Sender,
-            //        Route = new List<string>(searchedRoute.Route),
-            //    };
+                //increase route request id
+                this.CurrentRequestId++;
+            }
 
-            //    //determine the next hop of the requested route
-            //    var nextHopId = dsrFrame.GetNextHop(Client.Id);
-
-            //    //lay message on wire - intial send
-            //    Client.Connections[nextHopId].StartTransportMessage(dsrFrame, this.Client.Id, nextHopId);
-            //}
-            //else
-            //{
-            //    // if route not found and route discovery is not started for this message
-            //    if (!queuedMessage.IsRouteDiscoveryStarted)
-            //    {
-            //        // mark as started
-            //        queuedMessage.IsRouteDiscoveryStarted = true;
-
-            //        //broadcast to all neighbors
-            //        Client.BroadcastMessage(new DsrRouteRequestMessage()
-            //        {
-            //            Sender = Client.Id,
-            //            Receiver = queuedMessage.Message.Receiver,
-            //            RequestId = this.CurrentRequestId,
-            //            Nodes = { this.Client.Id }
-            //        }, false);
-
-            //        //increase route request id
-            //        this.CurrentRequestId++;
-            //    }
-
-            //    // and enqueue message again
-            //    OutputQueue.Enqueue(queuedMessage);
-            //}
+            // and enqueue message again
+            OutputQueue.Enqueue(queuedMessage);
         }
 
         /// <summary>
@@ -273,20 +289,22 @@ namespace NetSim.Lib.Routing.AODV
         [MessageHandler(typeof(AodvRouteReplyMessage), Outgoing = true)]
         private void OutgoingAodvRouteReplyMessageHandler(NetSimQueuedMessage queuedMessage)
         {
+            var aodvTable = (AodvTable)Table;
             var responseMessage = (AodvRouteReplyMessage)queuedMessage.Message;
 
             // get the next hop id from the route table (reverse route)
-            //string nextHopId = responseMessage.GetNextReverseHop(Client.Id);
+            string nextHopId = aodvTable.GetRouteFor(responseMessage.Receiver).NextHop;
 
-            //if (!Client.Connections[nextHopId].IsOffline)
-            //{
-            //    // start message transport
-            //    Client.Connections[nextHopId].StartTransportMessage(responseMessage, this.Client.Id, nextHopId);
-            //}
-            //else
-            //{
-            //    // broadcast route error to neighbors
-            //}
+            if (IsConnectionReachable(nextHopId))
+            {
+                // start message transport
+                Client.Connections[nextHopId].StartTransportMessage(responseMessage, this.Client.Id, nextHopId);
+            }
+            else
+            {
+                // broadcast route error to neighbors
+                //TODO
+            }
         }
 
         /// <summary>
@@ -296,8 +314,14 @@ namespace NetSim.Lib.Routing.AODV
         [MessageHandler(typeof(AodvRouteRequestMessage), Outgoing = false)]
         private void IncomingAodvRouteRequestMessageHandler(NetSimMessage message)
         {
-            AodvTable aodvTable = (AodvTable)Table; 
+            AodvTable aodvTable = (AodvTable)Table;
             AodvRouteRequestMessage reqMessage = (AodvRouteRequestMessage)message;
+
+            //if this node was sender of request - ignore
+            if (IsOwnRequest(reqMessage))
+            {
+                return;
+            }
 
             //if duplicate
             if (HasCachedRequest(reqMessage))
@@ -317,13 +341,7 @@ namespace NetSim.Lib.Routing.AODV
 
             // update request message - increase hopcount and update last hop
             reqMessage.LastHop = this.Client.Id;
-            reqMessage.HopCount += 1; 
-
-            //if this node was sender of request - ignore
-            if (IsOwnRequest(reqMessage))
-            {
-                return;
-            }
+            reqMessage.HopCount += 1;
 
             //check if message destination is current node (me)
             if (reqMessage.Receiver.Equals(this.Client.Id))
@@ -333,18 +351,59 @@ namespace NetSim.Lib.Routing.AODV
                 {
                     Receiver = reqMessage.Sender,
                     Sender = Client.Id,
+                    ReceiverSequenceNr = (AodvSequence)this.CurrentSequence.Clone(),
+                    LastHop = Client.Id
                 };
 
                 //enqueue message for sending
                 SendMessage(response);
-
-                return;
             }
+            else
+            {
+                // otherwise forward message 
+                // TODO Check if route to the end destination for request is cached
 
-            // TODO Check if route to the end destination for request is cached
+                // forward message to outgoing messages
+                SendMessage(reqMessage);
+            }
+        }
 
-            // forward message to outgoing messages
-            SendMessage(reqMessage);
+        /// <summary>
+        /// Handles the  Incomings the DSR route response message.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        [MessageHandler(typeof(AodvRouteReplyMessage), Outgoing = false)]
+        private void IncomingAodvRouteReplyMessageHandler(NetSimMessage message)
+        {
+            AodvRouteReplyMessage repMessage = (AodvRouteReplyMessage)message;
+            var aodvTable = Table as AodvTable;
+
+            //TODO if no route enrty exists or new received info is newer than saved
+
+            //save found route to table
+            aodvTable?.AddRouteEntry(repMessage.Sender, repMessage.LastHop,
+                repMessage.HopCount + 1, (AodvSequence)repMessage.ReceiverSequenceNr.Clone());
+
+            //check if the respone is not for this node . then forward
+            if (!repMessage.Receiver.Equals(Client.Id))
+            {
+                // update reply message - increase hopcount and update last hop
+                repMessage.LastHop = this.Client.Id;
+                repMessage.HopCount += 1;
+
+                // forward message
+                SendMessage(repMessage);
+            }
+        }
+
+        /// <summary>
+        /// Handles the  Incommings the DSR route remove message.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        [MessageHandler(typeof(AodvRouteErrorMessage), Outgoing = false)]
+        private void IncomingAodvRouteErrorMessageHandler(NetSimMessage message)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -360,39 +419,21 @@ namespace NetSim.Lib.Routing.AODV
         }
 
         /// <summary>
-        /// Handles the  Incomings the DSR route response message.
+        /// Determines whether if message type is a AODV message type.
         /// </summary>
         /// <param name="message">The message.</param>
-        [MessageHandler(typeof(AodvRouteReplyMessage), Outgoing = false)]
-        private void IncomingAodvRouteReplyMessageHandler(NetSimMessage message)
+        /// <returns></returns>
+        private bool IsAodvMessage(NetSimMessage message)
         {
-            AodvRouteReplyMessage repMessage = (AodvRouteReplyMessage)message;
-
-            //check if the respone is for this node
-            if (repMessage.Receiver.Equals(Client.Id))
+            List<Type> dsrTypes = new List<Type>()
             {
-                var aodvTable = Table as AodvTable;
+                typeof(AodvRouteReplyMessage),
+                typeof(AodvRouteRequestMessage),
+                typeof(AodvRouteErrorMessage)
+            };
 
-                //TODO save found route to table
-                //aodvTable?.HandleResponse(repMessage);
-            }
-            else
-            {
-                //TODO save route entry to table 
-
-                // forward message
-                SendMessage(repMessage);
-            }
-        }
-
-        /// <summary>
-        /// Handles the  Incommings the DSR route remove message.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        [MessageHandler(typeof(AodvRouteErrorMessage), Outgoing = false)]
-        private void IncomingAodvRouteErrorMessageHandler(NetSimMessage message)
-        {
-            throw new NotImplementedException();
+            Type messageType = message.GetType();
+            return dsrTypes.Any(t => t == messageType);
         }
 
         /// <summary>
@@ -432,7 +473,6 @@ namespace NetSim.Lib.Routing.AODV
         /// <returns></returns>
         protected override string GetRoutingData()
         {
-            //TODO
             return Table.ToString();
         }
     }

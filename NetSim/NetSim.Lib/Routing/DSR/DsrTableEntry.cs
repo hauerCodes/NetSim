@@ -44,7 +44,7 @@ namespace NetSim.Lib.Routing.DSR
         /// </returns>
         public override string ToString()
         {
-            return !IsReachable ? $"{Destination,4} {"---",6}" : $"{Destination,4} {String.Join(",", Route)}";
+            return !IsReachable ? $"{Destination,4} {"---",6}" : $"{Destination,4} {Metric,5} {String.Join(",", Route)}";
         }
     }
 }

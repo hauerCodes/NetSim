@@ -111,8 +111,6 @@ namespace NetSim.Lib.Routing.DSDV
                 }
             }
 
-            //HandleOutgoingMessages();
-
             stepCounter++;
         }
 
@@ -124,7 +122,14 @@ namespace NetSim.Lib.Routing.DSDV
         {
             string nextHopId = GetRoute(message.Receiver);
 
-            Client.Connections[nextHopId].StartTransportMessage(message, this.Client.Id, nextHopId);
+            if (IsConnectionReachable(nextHopId))
+            {
+                Client.Connections[nextHopId].StartTransportMessage(message, this.Client.Id, nextHopId);
+            }
+            else
+            {
+                // TODO handle not reachable connection
+            }
         }
 
         /// <summary>

@@ -20,7 +20,7 @@ namespace NetSim.Lib.Simulator.Components
         /// </summary>
         // ReSharper disable once InconsistentNaming
         protected int stepCounter;
-  
+
         /// <summary>
         /// Initializes a new instance of the <see cref="NetSimRoutingProtocol"/> class.
         /// </summary>
@@ -30,7 +30,7 @@ namespace NetSim.Lib.Simulator.Components
             this.Client = client;
             this.stepCounter = 0;
         }
-   
+
         /// <summary>
         /// Gets or sets the table.
         /// </summary>
@@ -89,6 +89,21 @@ namespace NetSim.Lib.Simulator.Components
         protected virtual string GetRoute(string destinationId)
         {
             return Table.GetRouteFor(destinationId)?.NextHop;
+        }
+
+        /// <summary>
+        /// Determines whether the connection with the specified endpoint identifier is reachable.
+        /// Client has this connection (e.g. not deleted) and connection is not offline
+        /// </summary>
+        /// <param name="destinationId">The endpoint identifier.</param>
+        /// <returns>
+        ///   <c>true</c> if connection is reachable; otherwise, <c>false</c>.
+        /// </returns>
+        protected virtual bool IsConnectionReachable(string destinationId)
+        {
+            return Client?.Connections != null &&
+                Client.Connections.ContainsKey(destinationId) &&
+                !Client.Connections[destinationId].IsOffline;
         }
 
     }

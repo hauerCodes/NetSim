@@ -214,11 +214,6 @@ namespace NetSim.Lib.Simulator.Components
                     localCopy.Sender = Id;
                 }
 
-                //TODO
-                // reset transmission step - because this message gets forwarded 
-                //localCopy.TransmissionStep = NetSimMessageTransmissionStep.Sending;
-                //localCopy.NextReceiver = connection.Key;
-
                 //transport message
                 connection.Value.StartTransportMessage(localCopy, this.Id, connection.Key);
             }

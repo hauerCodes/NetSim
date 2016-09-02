@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 using NetSim.Lib.Simulator;
 using NetSim.Lib.Simulator.Components;
@@ -104,5 +105,20 @@ namespace NetSim.Lib.Routing.DSR
             return new DsrTable() { Entries = this.Entries.Select(e => (NetSimTableEntry)e.Clone()).ToList() };
         }
 
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder();
+
+            builder.AppendLine($"Dest Metric Route");
+            builder.Append(base.ToString());
+
+            return builder.ToString();
+        }
     }
 }

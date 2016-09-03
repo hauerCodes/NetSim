@@ -28,6 +28,6 @@ namespace NetSim.Lib.Routing.OLSR
         /// <summary>
         /// The handle incomming
         /// </summary>
-        HandleIncomming
+        HandleIncoming
     }
 }

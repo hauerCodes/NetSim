@@ -65,12 +65,12 @@ namespace NetSim.Lib.Routing.OLSR
 
             if (Neighbors?.Count > 0)
             {
-                builder.AppendFormat("| Neighbors: {0}", string.Join(",", Neighbors));
+                builder.AppendFormat("| Neighbors: {0}\n", string.Join(",", Neighbors));
             }
 
-            if (Neighbors?.Count > 0)
+            if (MultiPointRelays?.Count > 0)
             {
-                builder.AppendFormat("| MPRs: {0}", string.Join(",", MultiPointRelays));
+                builder.AppendFormat("| MPRs: {0}\n", string.Join(",", MultiPointRelays));
             }
 
             builder.AppendLine($"+[/{this.GetType().Name}]");

@@ -345,6 +345,7 @@ namespace NetSim.Lib.Routing.DSR
         [MessageHandler(typeof(DsrRouteRequestMessage), Outgoing = false)]
         private void IncomingDsrRouteRequestMessageHandler(NetSimMessage message)
         {
+            DsrTable dsrTable = (DsrTable)Table;
             DsrRouteRequestMessage reqMessage = (DsrRouteRequestMessage)message;
 
             //if duplicate
@@ -366,6 +367,9 @@ namespace NetSim.Lib.Routing.DSR
                 return;
             }
 
+            // cache route
+            dsrTable.HandleRequestRouteCaching(reqMessage);
+
             //check if message destination is current node (me)
             if (reqMessage.Receiver.Equals(this.Client.Id))
             {
@@ -382,8 +386,32 @@ namespace NetSim.Lib.Routing.DSR
 
                 return;
             }
+            else
+            {
+                // Check if route to the end destination for request is cached
+                var route = Table.GetRouteFor(reqMessage.Receiver);
 
-            // TODO Check if route to the end destination for request is cached
+                if (route != null)
+                {
+                    var dsrRoute = (DsrTableEntry)route;
+
+                    var newRoute = new List<string>(reqMessage.Nodes);
+                    newRoute.AddRange(dsrRoute.Route);
+
+                    //send back rrep mesage the reverse way with found route 
+                    var response = new DsrRouteReplyMessage()
+                    {
+                        Receiver = reqMessage.Sender,
+                        Sender = Client.Id,
+                        Route = newRoute
+                    };
+
+                    //enqueue message for sending
+                    SendMessage(response);
+
+                    return;
+                }
+            }
 
             // forward message to outgoing messages
             SendMessage(reqMessage);
@@ -408,13 +436,15 @@ namespace NetSim.Lib.Routing.DSR
         [MessageHandler(typeof(DsrRouteReplyMessage), Outgoing = false)]
         private void IncomingDsrRouteReplyMessageHandler(NetSimMessage message)
         {
+            DsrTable dsrTable = Table as DsrTable;
             DsrRouteReplyMessage repMessage = (DsrRouteReplyMessage)message;
+
+            // handle route caching
+            dsrTable?.HandleReplyRouteCaching(repMessage, this.Client.Id);
 
             //check if the respone is for this node
             if (repMessage.Receiver.Equals(Client.Id))
             {
-                var dsrTable = Table as DsrTable;
-
                 //save found route to table
                 dsrTable?.HandleResponse(repMessage);
             }

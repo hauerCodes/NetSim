@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Documents;
 
 using NetSim.Lib.Simulator;
 using NetSim.Lib.Simulator.Components;
@@ -67,6 +68,95 @@ namespace NetSim.Lib.Routing.DSR
                 if (entry.Route[index - 1].Equals(sender))
                 {
                     RemoveRoute(entry.Destination);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handles the request route caching.
+        /// </summary>
+        /// <param name="reqMessage">The req message.</param>
+        public void HandleRequestRouteCaching(DsrRouteRequestMessage reqMessage)
+        {
+            // search for already cached route
+            var route = (DsrTableEntry)this.GetRouteFor(reqMessage.Sender);
+
+            // reverse the request route
+            var cachedRoute = reqMessage.Nodes.Reverse<string>().ToList();
+
+            if (route == null)
+            {
+                // add route to table
+                Entries.Add(new DsrTableEntry()
+                {
+                    Destination = reqMessage.Sender,
+                    Route = cachedRoute,
+                    Metric = cachedRoute.Count
+                });
+            }
+            else
+            {
+                // check if new route is shorter
+                if (cachedRoute.Count < route.Metric)
+                {
+                    // remove route and add new one
+                    Entries.Remove(route);
+
+                    // add new route
+                    Entries.Add(new DsrTableEntry()
+                    {
+                        Destination = reqMessage.Sender,
+                        Route = cachedRoute,
+                        Metric = cachedRoute.Count
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handles the request route caching.
+        /// </summary>
+        /// <param name="repMessage">The rep message.</param>
+        /// <param name="clientId">The client identifier.</param>
+        public void HandleReplyRouteCaching(DsrRouteReplyMessage repMessage, string clientId)
+        {
+            // search for already cached route
+            var route = (DsrTableEntry)this.GetRouteFor(repMessage.Sender);
+
+            // skip the route until the own id is found in it - the rest is the path to the sender
+            var cachedRoute = repMessage.Route.SkipWhile(e => !e.Equals(clientId)).ToList();
+
+            // if route is empty drop
+            if (cachedRoute.Count == 0)
+            {
+                return;
+            }
+
+            if (route == null)
+            {
+                // add route to table
+                Entries.Add(new DsrTableEntry()
+                {
+                    Destination = repMessage.Sender,
+                    Route = cachedRoute,
+                    Metric = cachedRoute.Count
+                });
+            }
+            else
+            {
+                // check if new route is shorter
+                if (cachedRoute.Count < route.Metric)
+                {
+                    // remove route and add new one
+                    Entries.Remove(route);
+
+                    // add new route
+                    Entries.Add(new DsrTableEntry()
+                    {
+                        Destination = repMessage.Sender,
+                        Route = cachedRoute,
+                        Metric = cachedRoute.Count
+                    });
                 }
             }
         }

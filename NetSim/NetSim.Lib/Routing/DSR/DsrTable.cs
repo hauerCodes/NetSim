@@ -22,7 +22,6 @@ namespace NetSim.Lib.Routing.DSR
             {
                 Destination = destination,
                 Metric = metric,
-                //NextHop = nextHop,
                 Route = new List<string>() { nextHop }
             });
         }

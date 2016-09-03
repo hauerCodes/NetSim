@@ -64,7 +64,7 @@ namespace NetSim.Lib.Routing.DSDV
             this.CurrentSequence = new DsdvSequence(this.Client.Id, 0);
 
             // self routing entry with metric 0 and initial sequence nr
-            localTableRef.AddInitialRouteEntry(Client.Id, Client.Id, 0, CurrentSequence);
+            localTableRef.AddRouteEntry(Client.Id, Client.Id, 0, CurrentSequence);
         }
 
         /// <summary>

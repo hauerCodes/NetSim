@@ -102,6 +102,21 @@ namespace NetSim.ViewModel
         private ICommand pauseSimulationCommand;
 
         /// <summary>
+        /// The show about command
+        /// </summary>
+        private ICommand showAboutCommand;
+
+        /// <summary>
+        /// The show help command
+        /// </summary>
+        private ICommand showHelpCommand;
+
+        /// <summary>
+        /// The exit application command
+        /// </summary>
+        private ICommand closeApplicationCommand;
+
+        /// <summary>
         /// The perform step command
         /// </summary>
         private ICommand performStepCommand;
@@ -504,6 +519,63 @@ namespace NetSim.ViewModel
         }
 
         /// <summary>
+        /// Gets or sets the show help command.
+        /// </summary>
+        /// <value>
+        /// The show help command.
+        /// </value>
+        public ICommand ShowHelpCommand
+        {
+            get
+            {
+                return showHelpCommand;
+            }
+            set
+            {
+                this.showHelpCommand = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the show about command.
+        /// </summary>
+        /// <value>
+        /// The show about command.
+        /// </value>
+        public ICommand ShowAboutCommand
+        {
+            get
+            {
+                return showAboutCommand;
+            }
+            set
+            {
+                this.showAboutCommand = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the close application command.
+        /// </summary>
+        /// <value>
+        /// The close application command.
+        /// </value>
+        public ICommand CloseApplicationCommand
+        {
+            get
+            {
+                return closeApplicationCommand;
+            }
+            set
+            {
+                this.closeApplicationCommand = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
         /// Initializes the commands.
         /// </summary>
         private void InitializeCommands()
@@ -515,6 +587,38 @@ namespace NetSim.ViewModel
 
             this.SaveNetworkCommand = new RelayCommand(ExecuteSaveNetwork);
             this.LoadNetworkCommand = new RelayCommand(ExecuteLoadNetwork);
+
+            this.ShowHelpCommand = new RelayCommand(ExecuteShowHelp);
+            this.ShowAboutCommand = new RelayCommand(ExecuteShowAbout);
+            this.CloseApplicationCommand = new RelayCommand(ExecuteCloseApplication);
+        }
+
+        /// <summary>
+        /// Executes the close application.
+        /// </summary>
+        private void ExecuteCloseApplication()
+        {
+            Application.Current.MainWindow.Close();
+        }
+
+        /// <summary>
+        /// Executes the show help.
+        /// </summary>
+        private void ExecuteShowHelp()
+        {
+            HelpWindow helpWindow = new HelpWindow();
+
+            helpWindow.ShowDialog();
+        }
+
+        /// <summary>
+        /// Executes the show about.
+        /// </summary>
+        private void ExecuteShowAbout()
+        {
+            InfoWindow infoWindow = new InfoWindow();
+
+            infoWindow.ShowDialog();
         }
 
         /// <summary>

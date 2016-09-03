@@ -17,7 +17,7 @@
                 <MenuItem Header="Save" Command="{Binding SaveNetworkCommand}"></MenuItem>
                 <MenuItem Header="Load" Command="{Binding LoadNetworkCommand}"></MenuItem>
                 <Separator></Separator>
-                <MenuItem Header="Exit" Click="ExitMenuItemClick"></MenuItem>
+                <MenuItem Header="Exit" Command="{Binding CloseApplicationCommand}"></MenuItem>
             </MenuItem>
             <MenuItem Header="Routing">
                 <MenuItem IsCheckable="True" IsChecked="{Binding Path=ProtocolType, Converter={StaticResource protocolConverter}, Mode=TwoWay, ConverterParameter={x:Static simulator:NetSimProtocolType.DSR}}" Header="DSR"></MenuItem>
@@ -26,11 +26,9 @@
                 <MenuItem IsCheckable="True" IsChecked="{Binding Path=ProtocolType, Converter={StaticResource protocolConverter}, Mode=TwoWay, ConverterParameter={x:Static simulator:NetSimProtocolType.AODV}}" Header="AODV"></MenuItem>
             </MenuItem>
             <MenuItem Header="Help">
-                <MenuItem Header="Network Create"></MenuItem>
-                <MenuItem Header="Simulation Control"></MenuItem>
-                <MenuItem Header="Routing Protocol Details"></MenuItem>
+                <MenuItem Header="Help" Command="{Binding ShowHelpCommand}"></MenuItem>
                 <Separator></Separator>
-                <MenuItem Header="About"></MenuItem>
+                <MenuItem Header="About" Command="{Binding ShowAboutCommand}" ></MenuItem>
             </MenuItem>
         </Menu>
         <Grid>

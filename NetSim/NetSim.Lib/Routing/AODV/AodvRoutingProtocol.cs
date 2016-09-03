@@ -86,7 +86,7 @@ namespace NetSim.Lib.Routing.AODV
             var localTableRef = (AodvTable)this.Table;
 
             // self routing entry with metric 0
-            localTableRef.AddInitialRouteEntry(Client.Id, Client.Id, 0, CurrentSequence);
+            localTableRef.AddRouteEntry(Client.Id, Client.Id, 0, CurrentSequence);
         }
 
         /// <summary>

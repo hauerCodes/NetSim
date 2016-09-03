@@ -10,24 +10,6 @@ namespace NetSim.Lib.Routing.AODV
     public class AodvTable : NetSimTable
     {
         /// <summary>
-        /// Adds the initial route entry.
-        /// </summary>
-        /// <param name="destination">The destination.</param>
-        /// <param name="nextHop">The next hop.</param>
-        /// <param name="metric">The metric.</param>
-        /// <param name="sequenceNr">The sequence nr.</param>
-        public void AddInitialRouteEntry(string destination, string nextHop, int metric, AodvSequence sequenceNr)
-        {
-            this.Entries.Add(new AodvTableEntry()
-            {
-                Destination = destination,
-                NextHop = nextHop,
-                Metric = metric,
-                SequenceNr = sequenceNr
-            });
-        }
-
-        /// <summary>
         /// Adds the route entry.
         /// </summary>
         /// <param name="destination">The destination.</param>

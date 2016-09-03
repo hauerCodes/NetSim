@@ -21,7 +21,22 @@ namespace NetSim.Lib.Routing.OLSR
         /// <summary>
         /// The periodic update counter
         /// </summary>
-        private int periodicUpdateCounter = 10;
+        private int periodicHelloUpdateCounter = 20;
+
+        /// <summary>
+        /// The periodic toplogy control counter
+        /// </summary>
+        private int periodicToplogyControlCounter = 10;
+
+        /// <summary>
+        /// The first calculation broadcoast flag.
+        /// </summary>
+        private bool isFirstMprCalculationBroadcoasted;
+
+        /// <summary>
+        /// The is first topology broadcasted
+        /// </summary>
+        //TODO remove  private bool isFirstTopologyBroadcasted;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OlsrRoutingProtocol"/> class.
@@ -38,6 +53,7 @@ namespace NetSim.Lib.Routing.OLSR
         /// <value>
         /// The output queue.
         /// </value>
+        //TODO remove if not needed
         public Queue<NetSimMessage> OutputQueue { get; private set; }
 
         /// <summary>
@@ -57,6 +73,14 @@ namespace NetSim.Lib.Routing.OLSR
         public OlsrNeighborTable TwoHopNeighborTable { get; set; }
 
         /// <summary>
+        /// Gets or sets the toplogy table.
+        /// </summary>
+        /// <value>
+        /// The toplogy table.
+        /// </value>
+        public OlsrToplogyTable ToplogyTable { get; set; }
+
+        /// <summary>
         /// Gets or sets the state.
         /// </summary>
         /// <value>
@@ -65,20 +89,30 @@ namespace NetSim.Lib.Routing.OLSR
         public OlsrState State { get; set; }
 
         /// <summary>
+        /// Gets or sets the current sequence.
+        /// </summary>
+        /// <value>
+        /// The current sequence.
+        /// </value>
+        public OlsrSequence CurrentSequence { get; set; }
+
+        /// <summary>
+        /// Gets or sets the multi point relay selector set.
+        /// </summary>
+        /// <value>
+        /// The multi point relay selector set.
+        /// </value>
+        public List<string> MultiPointRelaySelectorSet { get; set; }
+
+        // TODO public Dictionary<string, OlsrSequence> MultiPointRelaySelectorSet { get; set; }
+
+        /// <summary>
         /// The indicator for hello update has been received
         /// </summary>
         /// <value>
         /// <c>true</c> if this instance is hello update; otherwise, <c>false</c>.
         /// </value>
         private bool IsHelloUpdate { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this instance is toplogy control update.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if this instance is toplogy control update; otherwise, <c>false</c>.
-        /// </value>
-        private bool IsToplogyUpdate { get; set; }
 
         /// <summary>
         /// Initializes this instance.
@@ -91,9 +125,20 @@ namespace NetSim.Lib.Routing.OLSR
             //intialize local neighbor tables
             this.OneHopNeighborTable = new OlsrNeighborTable();
             this.TwoHopNeighborTable = new OlsrNeighborTable();
-            
+            this.ToplogyTable = new OlsrToplogyTable();
+
             //prepare the output message queue
             this.OutputQueue = new Queue<NetSimMessage>();
+
+            // initialize the multipoint realy selector set
+            //this.MultiPointRelaySelectorSet = new Dictionary<string, OLSR.OlsrSequence>();
+            this.MultiPointRelaySelectorSet = new List<string>();
+
+            // create current (initial) sequence nr (ID-000)
+            this.CurrentSequence = new OlsrSequence(this.Client.Id, 0);
+
+            // set first mpr calcualtion broadcast done to false
+            this.isFirstMprCalculationBroadcoasted = false;
 
             //set protocol state 
             this.State = OlsrState.Hello;
@@ -107,7 +152,16 @@ namespace NetSim.Lib.Routing.OLSR
         {
             // reset hello update flag
             IsHelloUpdate = false;
-            IsToplogyUpdate = false;
+
+            // TODO check for topology changes - if one hop neighbor is offline or delted
+            //if(CheckForTopologyChange())
+            //{
+            //    // update the one hop neighbor table
+            //    HandleTopologyChange();
+            //    
+            //    // set the mode to broeadcast hello
+            //    State = OlsrState.Hello;
+            //}
 
             switch (State)
             {
@@ -122,19 +176,21 @@ namespace NetSim.Lib.Routing.OLSR
                     // wait for incoming hello messages 
                     HandleIncomingMessages();
 
+                    // if a update of the one or two hop neighbor tables occured - broadcast hello again
                     if (IsHelloUpdate)
                     {
                         State = OlsrState.Hello;
                     }
                     else
                     {
+                        // otherwise start to calculate mpr set
                         this.State = OlsrState.Calculate;
                     }
 
                     break;
 
                 case OlsrState.Calculate:
-                    // search mpr and calculate routing table
+                    // calculate mpr set 
                     var mprs = CalculateMultiPointRelays();
 
                     // set one hop neighbors to selected multi point relays
@@ -143,11 +199,63 @@ namespace NetSim.Lib.Routing.OLSR
                         e.IsMultiPointRelay = mprs.Contains(e.NeighborId);
                     });
 
-                    this.State = OlsrState.TopologyControl;
+                    // if first broadcast not done
+                    if (!isFirstMprCalculationBroadcoasted)
+                    {
+                        isFirstMprCalculationBroadcoasted = true;
 
+                        // after calculating multipoint relay set broadcast hello message
+                        // including mpr selection info - to  enable other nodes to populate the mpr selector set
+                        BroadcastHelloMessages();
+
+                        // set mode to wait for hello receive
+                        this.State = OlsrState.ReceiveHello;
+                    }
+
+                    // this node is a mpr node because is was selected as mpr from other nodes
+                    if (MultiPointRelaySelectorSet.Count > 0)
+                    {
+                        // start sharing topology control messages
+                        this.State = OlsrState.TopologyControl;
+
+                        // broadcast topology control messages to mpr selector neighbors
+                        BroadcastTopologyControlMessages();
+                    }
+                    else
+                    {
+                        // set protocol to default mode 
+                        this.State = OlsrState.HandleIncomming;
+                    }
                     break;
 
                 case OlsrState.TopologyControl:
+                    // handle all incoming messages 
+                    HandleIncomingMessages();
+
+                    // if hello one hop neighbor table was updated - broadcast changes in hello mode
+                    if (IsHelloUpdate)
+                    {
+                        State = OlsrState.Hello;
+                    }
+
+                    if (stepCounter % periodicToplogyControlCounter == 0)
+                    {
+                        // broadcast tc messages to mpr selector neighbors
+                        BroadcastTopologyControlMessages();
+                    }
+
+                    // try to calculate the routing table
+                    this.Table = CalculateRoutingTable();
+
+                    // if periodic time reached - restart hello process
+                    if (stepCounter % periodicHelloUpdateCounter == 0)
+                    {
+                        State = OlsrState.Hello;
+                    }
+
+                    break;
+
+                case OlsrState.HandleIncomming:
                     HandleIncomingMessages();
 
                     if (IsHelloUpdate)
@@ -155,8 +263,8 @@ namespace NetSim.Lib.Routing.OLSR
                         State = OlsrState.Hello;
                     }
 
-                    // restart hello process
-                    if (stepCounter % periodicUpdateCounter == 0)
+                    // if periodic time - restart hello process
+                    if (stepCounter % periodicHelloUpdateCounter == 0)
                     {
                         State = OlsrState.Hello;
                     }
@@ -167,11 +275,35 @@ namespace NetSim.Lib.Routing.OLSR
             stepCounter++;
         }
 
-        private void CalculateRoutingTable()
+        /// <summary>
+        /// Calculates the routing table.
+        /// </summary>
+        /// <returns></returns>
+        private OlsrTable CalculateRoutingTable()
         {
-            //throw new NotImplementedException();
+            int hopcount = 0;
+
+            OlsrTable localTable = new OlsrTable();
+            OlsrToplogyTable localTopoTable = (OlsrToplogyTable)ToplogyTable.Clone();
+
+            //add local loopback 
+            localTable.AddRouteEntry(Client.Id, Client.Id, 0);
+
+            //add each one hop neighbor entry
+            OneHopNeighborTable.Entries.ForEach(e => localTable.AddRouteEntry(e.NeighborId, e.NeighborId, 1));
+
+            // uddate hopcount
+            hopcount = 1;
+
+            //TODO calculate routing table
+
+            return localTable;
         }
 
+        /// <summary>
+        /// Calculates the multi point relays.
+        /// </summary>
+        /// <returns></returns>
         private List<string> CalculateMultiPointRelays()
         {
             int stopCounter = 5;
@@ -243,7 +375,10 @@ namespace NetSim.Lib.Routing.OLSR
         {
             string nextHopId = GetRoute(message.Receiver);
 
-            Client.Connections[nextHopId].StartTransportMessage(message, this.Client.Id, nextHopId);
+            if (IsConnectionReachable(nextHopId))
+            {
+                Client.Connections[nextHopId].StartTransportMessage(message, this.Client.Id, nextHopId);
+            }
         }
 
         /// <summary>
@@ -252,7 +387,23 @@ namespace NetSim.Lib.Routing.OLSR
         /// <returns></returns>
         protected override string GetRoutingData()
         {
-            return $"{Table}\n\nOne-Hop Neighbor\nId Type\n{OneHopNeighborTable}\nTwo-Hop Neighbor\nId Trough\n{TwoHopNeighborTable}";
+            StringBuilder builder = new StringBuilder();
+
+            if (Table != null)
+            {
+                builder.AppendLine(Table.ToString());
+                builder.AppendLine();
+            }
+
+            builder.AppendFormat("One-Hop Neighbor\nId Type\n{0}\n", OneHopNeighborTable);
+
+            builder.AppendFormat("Two-Hop Neighbor\nId Trough\n{0}\n", TwoHopNeighborTable);
+
+            builder.AppendFormat("MPR Selector Set\n{0}\n\n", String.Join(",", MultiPointRelaySelectorSet));
+
+            builder.AppendFormat("Topology Table\n{0}\n", ToplogyTable);
+
+            return builder.ToString();
         }
 
         /// <summary>
@@ -263,8 +414,45 @@ namespace NetSim.Lib.Routing.OLSR
             // send hello message with all direct neighbors of this client
             Client.BroadcastMessage(new OlsrHelloMessage()
             {
-                Neighbors = OneHopNeighborTable.Entries.Select(e => e.NeighborId).ToList()
+                Neighbors = OneHopNeighborTable.Entries.Select(e => e.NeighborId).ToList(),
+                MultiPointRelays = OneHopNeighborTable.Entries.Where(e => e.IsMultiPointRelay).Select(e => e.NeighborId).ToList()
             });
+        }
+
+        /// <summary>
+        /// Broadcasts the topology control messages.
+        /// </summary>
+        private void BroadcastTopologyControlMessages()
+        {
+            // broadcast topology control messages to mpr selector set neighbors
+            foreach (var entry in OneHopNeighborTable.Entries.Where(e => MultiPointRelaySelectorSet.Contains(e.NeighborId)))
+            {
+                // A node P sends control messages only to MPRsel(P)
+                SendMessage(new OlsrTopologyControlMessage()
+                {
+                    Sender = this.Client.Id,
+                    Receiver = entry.NeighborId,
+                    MultiPointRelaySelectorSet = new List<string>(MultiPointRelaySelectorSet)
+                });
+            }
+        }
+
+        /// <summary>
+        /// Broadcasts the topology control messages.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        private void BroadcastTopologyControlMessages(OlsrTopologyControlMessage message)
+        {
+            //TODO Check if send to every node or only to MPRsel set
+
+            // broadcast topology control messages to mpr selector set neighbors
+            foreach (var entry in OneHopNeighborTable.Entries.Where(e => MultiPointRelaySelectorSet.Contains(e.NeighborId)))
+            {
+                // A node P sends control messages only to MPRsel(P)
+                message.Receiver = entry.NeighborId;
+
+                SendMessage(new OlsrTopologyControlMessage());
+            }
         }
 
         /// <summary>
@@ -353,6 +541,17 @@ namespace NetSim.Lib.Routing.OLSR
                     }
                 }
             }
+
+            // if hello messages has info about multipoint relays
+            if (olsrMessage.MultiPointRelays != null && olsrMessage.MultiPointRelays.Any())
+            {
+                // if this client was selected as mpr by sender of this message 
+                if (olsrMessage.MultiPointRelays.Contains(Client.Id))
+                {
+                    // add sender to mpr selection set
+                    MultiPointRelaySelectorSet.Add(olsrMessage.Sender);
+                }
+            }
         }
 
         /// <summary>
@@ -362,7 +561,33 @@ namespace NetSim.Lib.Routing.OLSR
         [MessageHandler(typeof(OlsrTopologyControlMessage), Outgoing = false)]
         private void IncomingOlsrTopologyControlMessageHandler(NetSimMessage message)
         {
-            throw new NotImplementedException();
+            OlsrTopologyControlMessage topMessage = (OlsrTopologyControlMessage)message;
+
+            // if own tc message 
+            if (topMessage.Sender.Equals(this.Client.Id))
+            {
+                //drop message 
+                return;
+            }
+
+            // A node P forwards control messages only from MPRsel(P)
+            if (MultiPointRelaySelectorSet.Contains(topMessage.Sender))
+            {
+                //forward message
+                BroadcastTopologyControlMessages(topMessage);
+            }
+            else
+            {
+                //A node P processes control messages not from MPRsel(P)
+
+                foreach (var mprSelector in topMessage.MultiPointRelaySelectorSet)
+                {
+                    if (!ToplogyTable.Entries.Any(e => e.OrigniatorId.Equals(topMessage.Sender) && e.MprSelectorId.Equals(mprSelector)))
+                    {
+                        ToplogyTable.AddEntry(topMessage.Sender, mprSelector);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -383,6 +608,7 @@ namespace NetSim.Lib.Routing.OLSR
         }
 
         ///// <summary>
+        ///// TODO remove if not needed
         ///// Handles the outgoing messages.
         ///// </summary>
         //private void HandleOutgoingMessages()

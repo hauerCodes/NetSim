@@ -16,16 +16,24 @@ namespace NetSim.Lib.Routing.OLSR
         /// </summary>
         public OlsrTopologyControlMessage()
         {
-            this.Neighbors = new List<string>();
+            MultiPointRelaySelectorSet = new List<string>();
         }
 
         /// <summary>
-        /// Gets or sets the neighbors.
+        /// Gets or sets the multi point relays.
         /// </summary>
         /// <value>
-        /// The neighbors.
+        /// The multi point relays.
         /// </value>
-        public List<string> Neighbors { get; set; }
+        public List<string> MultiPointRelaySelectorSet { get; set; }
+
+        /// <summary>
+        /// Gets or sets the sequence nr.
+        /// </summary>
+        /// <value>
+        /// The sequence nr.
+        /// </value>
+        public OlsrSequence SequenceNr { get; set; }
 
         /// <summary>
         /// Clones this instance.
@@ -33,7 +41,11 @@ namespace NetSim.Lib.Routing.OLSR
         /// <returns></returns>
         public override object Clone()
         {
-            var clone = new OlsrHelloMessage() { Neighbors = new List<string>(Neighbors) };
+            var clone = new OlsrTopologyControlMessage()
+            {
+                SequenceNr = (OlsrSequence)this.SequenceNr?.Clone(),
+                MultiPointRelaySelectorSet = new List<string>(this.MultiPointRelaySelectorSet)
+            };
 
             return CopyTo(clone);
         }
@@ -49,9 +61,19 @@ namespace NetSim.Lib.Routing.OLSR
             StringBuilder builder = new StringBuilder();
 
             builder.AppendLine(base.ToString());
-            builder.AppendLine("--- Content ---");
 
-            builder.AppendLine(string.Join(" ", Neighbors));
+            if (SequenceNr != null)
+            {
+                builder.AppendFormat("| SequenceNr: {0}\n", SequenceNr);
+            }
+
+            if (MultiPointRelaySelectorSet != null && MultiPointRelaySelectorSet.Count > 0)
+            {
+                builder.AppendFormat("| MPR-SelectorSet: {0}\n", string.Join(",", MultiPointRelaySelectorSet));
+            }
+
+            builder.AppendLine($"+[/{this.GetType().Name}]");
+
 
             return builder.ToString();
         }

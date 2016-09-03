@@ -83,6 +83,9 @@
     <Compile Include="Routing\AODV\AodvSequence.cs" />
     <Compile Include="Routing\DSDV\DsdvRoutingProtocol.cs" />
     <Compile Include="Routing\DSDV\DsdvSequence.cs" />
+    <Compile Include="Routing\OLSR\OlsrSequence.cs" />
+    <Compile Include="Routing\OLSR\OlsrTopologyTableEntry.cs" />
+    <Compile Include="Routing\OLSR\OlsrTopologyTable.cs" />
     <Compile Include="Simulator\Messages\NetSimRequestCacheEntry.cs" />
     <Compile Include="Routing\DSR\DsrFrameMessage.cs" />
     <Compile Include="Routing\Helpers\MessageHandlerAttribute.cs" />

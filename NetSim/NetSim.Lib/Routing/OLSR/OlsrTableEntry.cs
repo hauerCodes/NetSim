@@ -11,9 +11,18 @@ namespace NetSim.Lib.Routing.OLSR
 {
     public class OlsrTableEntry : NetSimTableEntry
     {
+        /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        /// <returns></returns>
         public override object Clone()
         {
-            throw new NotImplementedException();
+            return new OlsrTableEntry()
+            {
+                Destination = this.Destination,
+                Metric = this.Metric,
+                NextHop = this.NextHop
+            };
         }
     }
 }

@@ -11,6 +11,17 @@
     <Window.Resources>
         <converter:ProtocolTypeToBoolConverter x:Key="protocolConverter"/>
     </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding StartSimulationCommand}" Key="F5" />
+        <KeyBinding Command="{Binding ResetSimulationCommand}" Key="F5" Modifiers="Shift" />
+        <KeyBinding Command="{Binding PerformStepCommand}" Key="F11" />
+        <KeyBinding Command="{Binding PauseSimulationCommand}" Key="F5" Modifiers="Ctrl" />
+        <KeyBinding Command="{Binding LoadNetworkCommand}" Key="O" Modifiers="Ctrl" />
+        <KeyBinding Command="{Binding SaveNetworkCommand}" Key="S" Modifiers="Ctrl" />
+        <KeyBinding Command="{Binding ShowHelpCommand}" Key="H" Modifiers="Ctrl" />
+        <KeyBinding Command="{Binding ShowHelpCommand}" Key="H" Modifiers="Ctrl" />
+        <KeyBinding Command="{Binding ShowHelpCommand}" Key="F1" />
+    </Window.InputBindings>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
@@ -85,7 +96,7 @@
                         </Grid.RowDefinitions>
                         <Button Grid.Row="0" Grid.Column="0" Margin="5" Command="{Binding StartSimulationCommand}">Start</Button>
                         <Button Grid.Row="0" Grid.Column="1" Margin="5" Command="{Binding PauseSimulationCommand}">Pause</Button>
-                        <Button Grid.Row="0" Grid.Column="2" Margin="5" Command="{Binding PerformStepCommand}">Step</Button>
+                        <Button Grid.Row="0" Grid.Column="2" Margin="5" Command="{Binding PerformStepCommand}" IsEnabled="{Binding IsStepEnabled, UpdateSourceTrigger=PropertyChanged}">Step</Button>
                         <Button Grid.Row="0" Grid.Column="3" Margin="5" Command="{Binding ResetSimulationCommand}" >Reset</Button>
                     </Grid>
                     <StackPanel Orientation="Horizontal" Margin="5 0 0 0">

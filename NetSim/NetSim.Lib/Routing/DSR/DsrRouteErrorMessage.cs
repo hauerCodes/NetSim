@@ -72,11 +72,6 @@ namespace NetSim.Lib.Routing.DSR
                 clone.Route = new List<string>(this.Route);
             }
 
-            //if (this.FailedMessage != null)
-            //{
-            //    clone.FailedMessage = (NetSimMessage)this.FailedMessage.Clone();
-            //}
-
             return CopyTo(clone);
         }
 
@@ -90,7 +85,8 @@ namespace NetSim.Lib.Routing.DSR
         {
             StringBuilder builder = new StringBuilder();
 
-            builder.AppendFormat(base.ToString());
+            builder.AppendLine(base.ToString());
+
             builder.AppendFormat("| NotReachable:{0}\n", NotReachableNode);
 
             if (Route != null && Route.Count > 0)

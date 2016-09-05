@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 using NetSim.Lib.Routing.Helpers;
-using NetSim.Lib.Simulator;
 using NetSim.Lib.Simulator.Components;
 using NetSim.Lib.Simulator.Messages;
 
@@ -228,6 +224,11 @@ namespace NetSim.Lib.Routing.DSR
             }
             else
             {
+                var dsrTable = Table as DsrTable;
+
+                // remove notreachable route 
+                dsrTable?.HandleError(Client.Id, nextHop);
+
                 // broadcast route error to neighbors - Neighbors remove every route with sender -> notreachable in path
                 Client.BroadcastMessage(new DsrRouteErrorMessage()
                 {
@@ -282,6 +283,11 @@ namespace NetSim.Lib.Routing.DSR
             }
             else
             {
+                var dsrTable = Table as DsrTable;
+
+                // remove not reachable route 
+                dsrTable?.HandleError(Client.Id, nextHopId);
+
                 // broadcast to all neighbors that route is down
                 Client.BroadcastMessage(new DsrRouteErrorMessage()
                 {
@@ -462,23 +468,21 @@ namespace NetSim.Lib.Routing.DSR
         [MessageHandler(typeof(DsrRouteErrorMessage), Outgoing = false)]
         private void IncomingDsrRouteErrorMessageHandler(NetSimMessage message)
         {
+            DsrTable dsrTable = Table as DsrTable;
             DsrRouteErrorMessage errorMessage = (DsrRouteErrorMessage)message;
+
+            //delete the (cached) routes defined by the error message from table 
+            dsrTable?.HandleError(errorMessage.Sender, errorMessage.NotReachableNode);
 
             //check if the respone is for this node
             if (errorMessage.Receiver.Equals(Client.Id))
             {
-                var dsrTable = Table as DsrTable;
-
-                //delete the routes defined by the error message from table
-                dsrTable?.HandleError(errorMessage.Sender, errorMessage.NotReachableNode);
-
                 // check if error has failed message
                 if (errorMessage.FailedMessage != null)
                 {
                     // try to retransmit the failed message - start route discovery again
                     SendMessage(errorMessage.FailedMessage);
                 }
-
             }
             else
             {

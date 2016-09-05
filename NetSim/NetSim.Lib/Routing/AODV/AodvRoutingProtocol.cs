@@ -19,6 +19,11 @@ namespace NetSim.Lib.Routing.AODV
         private readonly MessageHandlerResolver handlerResolver;
 
         /// <summary>
+        /// The periodic hello update counter
+        /// </summary>
+        private int periodicHelloUpdateCounter = 10;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AodvRoutingProtocol"/> class.
         /// </summary>
         /// <param name="client">The client.</param>
@@ -26,6 +31,16 @@ namespace NetSim.Lib.Routing.AODV
         {
             handlerResolver = new MessageHandlerResolver(this.GetType());
         }
+
+        /// <summary>
+        /// Gets or sets the neighbour links or connections.
+        /// Key is the identifier of the node.
+        /// Value is the time since the last message was received from this neighbour.
+        /// </summary>
+        /// <value>
+        /// The neighbours.
+        /// </value>
+        public Dictionary<string, int> Neighbours { get; set; }
 
         /// <summary>
         /// Gets the output queue.
@@ -76,6 +91,9 @@ namespace NetSim.Lib.Routing.AODV
             //intialize outgoing messages
             this.OutputQueue = new Queue<NetSimQueuedMessage>();
 
+            // intialize the neighbour list
+            this.Neighbours = new Dictionary<string, int>();
+
             // intialize request id for route request identification 
             this.CurrentRequestId = 1;
 
@@ -94,8 +112,11 @@ namespace NetSim.Lib.Routing.AODV
         /// </summary>
         public override void PerformRoutingStep()
         {
-            //handle all incomming messages
-            HandleIncommingMessages();
+            //Handle Route maintaince
+            HandleRouteMaintaince();
+
+            //handle all incoming messages
+            HandleIncomingMessages();
 
             //handle outgoing queued messages
             HandleOutgoingMessages();
@@ -108,8 +129,10 @@ namespace NetSim.Lib.Routing.AODV
         /// </summary>
         private void HandleOutgoingMessages()
         {
+            // get the count of queued messages 
             int counter = OutputQueue.Count;
 
+            // run for each queued message
             while (counter > 0)
             {
                 // get next queued message
@@ -133,34 +156,51 @@ namespace NetSim.Lib.Routing.AODV
                     }
                     else
                     {
-                        // if route was found  - send message along this route
-                        Client.Connections[nextHopId].StartTransportMessage(queuedMessage.Message, this.Client.Id, nextHopId);
+                        // if connection is not offline and not deleted
+                        if (IsConnectionReachable(nextHopId))
+                        {
+                            // if route was found  - send message along this route
+                            Client.Connections[nextHopId].StartTransportMessage(queuedMessage.Message,
+                                this.Client.Id,
+                                nextHopId);
+                        }
+                        else
+                        {
+                            HandleRouteError(nextHopId);
+                        }
                     }
                 }
 
-
-
-                //// if route found - send the message via the connection
-                //if (!string.IsNullOrEmpty(nextHopId))
-                //{
-                //    Client.Connections[nextHopId].StartTransportMessage(queuedMessage.Message, this.Client.Id, nextHopId);
-                //}
-                ////else
-                ////{
-                ////    //if route not found start route discovery
-
-
-                ////    // and enqueue message again
-                ////    OutputQueue.Enqueue(queuedMessage);
-                ////}
                 counter--;
+            }
+        }
+
+        /// <summary>
+        /// Handles the route error.
+        /// </summary>
+        /// <param name="nextHopId">The next hop identifier.</param>
+        /// <exception cref="NotImplementedException"></exception>
+        private void HandleRouteError(string nextHopId)
+        {
+            if (Neighbours.ContainsKey(nextHopId))
+            {
+                Neighbours[nextHopId] = 0;
+            }
+            else
+            {
+                Client.BroadcastMessage(new AodvRouteErrorMessage()
+                {
+                    Sender = this.Client.Id,
+                    UnReachableDestination = nextHopId,
+                    UnReachableDestinationSequenceNr = (AodvSequence)this.CurrentSequence.Clone()
+                });
             }
         }
 
         /// <summary>
         /// Handles the incomming messages.
         /// </summary>
-        private void HandleIncommingMessages()
+        private void HandleIncomingMessages()
         {
             if (Client.InputQueue.Count <= 0)
             {
@@ -191,6 +231,63 @@ namespace NetSim.Lib.Routing.AODV
         }
 
         /// <summary>
+        /// Handles the route maintaince.
+        /// </summary>
+        private void HandleRouteMaintaince()
+        {
+            // if neighbour list is emtpy - return
+            if (Neighbours.Count == 0)
+            {
+                return;
+            }
+
+            AodvTable aodvTable = (AodvTable)Table;
+
+            // after a period of time perform route maintaince via hello messages
+            if (stepCounter % periodicHelloUpdateCounter == 0)
+            {
+                // broadcast send hello messages to every neighbours
+                foreach (var neighborId in Neighbours.Keys)
+                {
+                    // enqueue the message for sending 
+                    SendMessage(new AodvHelloMessage()
+                    {
+                        Sender = this.Client.Id,
+                        Receiver = neighborId,
+                        SenderSequenceNr = (AodvSequence)this.CurrentSequence.Clone()
+                    });
+                }
+            }
+
+            // decrease the neigbor response time (clone key list)
+            foreach (string key in Neighbours.Keys.ToList())
+            {
+                Neighbours[key] -= 1;
+            }
+
+            // select neighbours where the inactive coutner is zero or less
+            var inactiveNeighbours = Neighbours.Where(n => n.Value <= 0).Select(n => n.Key).ToList();
+
+            // if a neighbour was for a period of time inactive (hellotimer * 2)
+            if (inactiveNeighbours.Any())
+            {
+                foreach (var neighbourId in inactiveNeighbours)
+                {
+                    var routeErrorReceivers = aodvTable.HandleRouteMaintaince(neighbourId);
+
+                    // enqueue route error messages for sending to route error receivers
+                    routeErrorReceivers.ForEach(receiver => SendMessage(new AodvRouteErrorMessage()
+                    {
+                        Sender = this.Client.Id,
+                        Receiver = receiver,
+                        UnReachableDestination = neighbourId,
+                        UnReachableDestinationSequenceNr = (AodvSequence)this.CurrentSequence.Clone()
+                    }));
+                }
+            }
+        }
+
+        /// <summary>
         /// Handles the outgoing DSR message.
         /// Note: Messages handled in this methods where intialy send from another node.
         /// </summary>
@@ -211,6 +308,9 @@ namespace NetSim.Lib.Routing.AODV
         /// <param name="message">The message.</param>
         private void DefaultIncomingMessageHandler(NetSimMessage message)
         {
+            // handle the neighbour lsit update - inactive timer management 
+            UpdateNeighbourList(message.Sender);
+
             // forward message if client is not reciever
             if (!message.Receiver.Equals(this.Client.Id))
             {
@@ -248,6 +348,9 @@ namespace NetSim.Lib.Routing.AODV
                 // mark as started
                 queuedMessage.IsRouteDiscoveryStarted = true;
 
+                // increment SequenceNr every time a rreq gets sent
+                CurrentSequence.SequenceNr += 2;
+
                 //broadcast to all neighbors
                 Client.BroadcastMessage(new AodvRouteRequestMessage()
                 {
@@ -282,6 +385,40 @@ namespace NetSim.Lib.Routing.AODV
         }
 
         /// <summary>
+        /// Handles the outgoing aodv hello message.
+        /// </summary>
+        /// <param name="queuedMessage">The queued message.</param>
+        [MessageHandler(typeof(AodvHelloMessage), Outgoing = true)]
+        private void OutgoingAodvHelloMessageHandler(NetSimQueuedMessage queuedMessage)
+        {
+            //get AodvHelloMessage instacne 
+            var helloMessage = (AodvHelloMessage)queuedMessage.Message;
+
+            if (IsConnectionReachable(helloMessage.Receiver))
+            {
+                // start message transport
+                Client.Connections[helloMessage.Receiver].StartTransportMessage(helloMessage, this.Client.Id, helloMessage.Receiver);
+            }
+        }
+
+        /// <summary>
+        /// Handles the outgoing aodv route error message.
+        /// </summary>
+        /// <param name="queuedMessage">The queued message.</param>
+        [MessageHandler(typeof(AodvRouteErrorMessage), Outgoing = true)]
+        private void OutgoingAodvRouteErrorMessageHandler(NetSimQueuedMessage queuedMessage)
+        {
+            //get AodvHelloMessage instacne 
+            var errorMessage = (AodvRouteErrorMessage)queuedMessage.Message;
+
+            if (IsConnectionReachable(errorMessage.Receiver))
+            {
+                // start message transport
+                Client.Connections[errorMessage.Receiver].StartTransportMessage(errorMessage, this.Client.Id, errorMessage.Receiver);
+            }
+        }
+
+        /// <summary>
         /// Handles the outgoing DsrRouteReplyMessage.
         /// dsrrouterespone - forward the reverse route way
         /// </summary>
@@ -302,8 +439,7 @@ namespace NetSim.Lib.Routing.AODV
             }
             else
             {
-                // broadcast route error to neighbors
-                //TODO
+                HandleRouteError(nextHopId);
             }
         }
 
@@ -317,14 +453,8 @@ namespace NetSim.Lib.Routing.AODV
             AodvTable aodvTable = (AodvTable)Table;
             AodvRouteRequestMessage reqMessage = (AodvRouteRequestMessage)message;
 
-            //if this node was sender of request - ignore
-            if (IsOwnRequest(reqMessage))
-            {
-                return;
-            }
-
-            //if duplicate
-            if (HasCachedRequest(reqMessage))
+            //if this node was sender of request - or has already a cached version of request
+            if (IsOwnRequest(reqMessage) || HasCachedRequest(reqMessage))
             {
                 //ignore message and proceed
                 return;
@@ -333,20 +463,17 @@ namespace NetSim.Lib.Routing.AODV
             //add request to cache
             AddCachedRequest(reqMessage);
 
-            //add reverse routing entry - if route does'nt exist or sequencenr is newer
-            aodvTable.AddRouteEntry(reqMessage.Sender,
-                reqMessage.LastHop,
-                reqMessage.HopCount + 1,
-                (AodvSequence)reqMessage.SenderSequenceNr.Clone());
+            //add reverse routing entry - if route doesn't exist or sequencenr is newer
+            aodvTable.HandleRequestReverseRouteCaching(reqMessage);
 
             // update request message - increase hopcount and update last hop
             reqMessage.LastHop = this.Client.Id;
             reqMessage.HopCount += 1;
 
-            //check if message destination is current node (me)
+            //check if message destination is current node 
             if (reqMessage.Receiver.Equals(this.Client.Id))
             {
-                //send back rrep mesage the reverse way with found route 
+                //send back rrep mesage the reverse way 
                 var response = new AodvRouteReplyMessage()
                 {
                     Receiver = reqMessage.Sender,
@@ -360,11 +487,28 @@ namespace NetSim.Lib.Routing.AODV
             }
             else
             {
-                // otherwise forward message 
-                // TODO Check if route to the end destination for request is cached
+                // Check if route was cached
+                var searchRoute = aodvTable.SearchCachedRoute(reqMessage);
 
-                // forward message to outgoing messages
-                SendMessage(reqMessage);
+                if (searchRoute != null)
+                {
+                    // send reply back to requester - send back rrep mesage the reverse way 
+                    var response = new AodvRouteReplyMessage()
+                    {
+                        Receiver = reqMessage.Sender,
+                        Sender = Client.Id,
+                        ReceiverSequenceNr = (AodvSequence)searchRoute.SequenceNr.Clone(),
+                        LastHop = Client.Id
+                    };
+
+                    //enqueue message for sending
+                    SendMessage(response);
+                }
+                else
+                {
+                    // forward message to outgoing messages
+                    SendMessage(reqMessage);
+                }
             }
         }
 
@@ -378,11 +522,11 @@ namespace NetSim.Lib.Routing.AODV
             AodvRouteReplyMessage repMessage = (AodvRouteReplyMessage)message;
             var aodvTable = Table as AodvTable;
 
-            //TODO if no route enrty exists or new received info is newer than saved
+            // handle the neighbour lsit update - inactive timer management 
+            UpdateNeighbourList(repMessage.Sender);
 
             //save found route to table
-            aodvTable?.AddRouteEntry(repMessage.Sender, repMessage.LastHop,
-                repMessage.HopCount + 1, (AodvSequence)repMessage.ReceiverSequenceNr.Clone());
+            aodvTable?.HandleReplyRoute(repMessage);
 
             //check if the respone is not for this node . then forward
             if (!repMessage.Receiver.Equals(Client.Id))
@@ -403,7 +547,65 @@ namespace NetSim.Lib.Routing.AODV
         [MessageHandler(typeof(AodvRouteErrorMessage), Outgoing = false)]
         private void IncomingAodvRouteErrorMessageHandler(NetSimMessage message)
         {
-            throw new NotImplementedException();
+            AodvRouteErrorMessage errorMessage = (AodvRouteErrorMessage)message;
+
+            //TODO handle route error 
+        }
+
+        /// <summary>
+        /// Handles the  Incommings the aodv hello message.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        [MessageHandler(typeof(AodvHelloMessage), Outgoing = false)]
+        private void IncomingAodvHelloMessageHandler(NetSimMessage message)
+        {
+            AodvHelloMessage helloMessage = (AodvHelloMessage)message;
+            AodvTable aodvTable = (AodvTable)Table;
+
+            // handle the neighbour lsit update - inactive timer management 
+            UpdateNeighbourList(helloMessage.Sender);
+
+            // search for a route for hello message sender
+            AodvTableEntry route = (AodvTableEntry)aodvTable.GetRouteFor(helloMessage.Sender);
+
+            // create route for neighbour if not exists
+            if (route == null)
+            {
+                aodvTable.AddRouteEntry(helloMessage.Sender,
+                    helloMessage.Sender, 1, (AodvSequence)helloMessage.SenderSequenceNr.Clone());
+            }
+
+        }
+
+        /// <summary>
+        /// Updates the neighbour list.
+        /// </summary>
+        /// <param name="messageSenderId">The message sender identifier.</param>
+        private void UpdateNeighbourList(string messageSenderId)
+        {
+            // if message is from this node - ignore
+            if (Client.Id.Equals(messageSenderId))
+            {
+                return;
+            }
+
+            // if potential neighour is not direct connected - ignore the message
+            if (!Client.Connections.ContainsKey(messageSenderId))
+            {
+                return;
+            }
+
+            // if neighbors contains message sender - update active neighbors lsit
+            if (Neighbours.ContainsKey(messageSenderId))
+            {
+                // reset the inactive timer for the sender
+                Neighbours[messageSenderId] = periodicHelloUpdateCounter * 2;
+            }
+            else
+            {
+                // add the sender to the neighbors list
+                Neighbours.Add(messageSenderId, periodicHelloUpdateCounter * 2);
+            }
         }
 
         /// <summary>
@@ -428,6 +630,7 @@ namespace NetSim.Lib.Routing.AODV
             List<Type> dsrTypes = new List<Type>()
             {
                 typeof(AodvRouteReplyMessage),
+                typeof(AodvHelloMessage),
                 typeof(AodvRouteRequestMessage),
                 typeof(AodvRouteErrorMessage)
             };
@@ -473,7 +676,20 @@ namespace NetSim.Lib.Routing.AODV
         /// <returns></returns>
         protected override string GetRoutingData()
         {
-            return Table.ToString();
+            StringBuilder builder = new StringBuilder();
+
+            builder.AppendLine(Table.ToString());
+
+            if (Neighbours.Count > 0)
+            {
+                builder.AppendLine("Neighbours");
+                builder.AppendLine("Node TTL");
+
+                Neighbours.Keys.ToList().ForEach(key => builder.AppendFormat("{0,4} {1,3}\n", key, Neighbours[key]));
+            }
+
+            return builder.ToString();
         }
+
     }
 }

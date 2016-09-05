@@ -16,6 +16,14 @@ namespace NetSim.Lib.Routing.AODV
     public class AodvHelloMessage : NetSimMessage
     {
         /// <summary>
+        /// Gets or sets the not reachable node sequence nr.
+        /// </summary>
+        /// <value>
+        /// The not reachable node sequence nr.
+        /// </value>
+        public AodvSequence SenderSequenceNr { get; set; }
+
+        /// <summary>
         /// Creates a new object that is a copy of the current instance.
         /// </summary>
         /// <returns>
@@ -23,7 +31,10 @@ namespace NetSim.Lib.Routing.AODV
         /// </returns>
         public override object Clone()
         {
-            return CopyTo(new AodvHelloMessage());
+            return CopyTo(new AodvHelloMessage()
+            {
+                SenderSequenceNr = (AodvSequence)this.SenderSequenceNr?.Clone()
+            });
         }
     }
 }

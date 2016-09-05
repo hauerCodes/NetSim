@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Windows.Documents;
 
-using NetSim.Lib.Simulator;
 using NetSim.Lib.Simulator.Components;
 
 namespace NetSim.Lib.Routing.DSR
@@ -37,12 +35,12 @@ namespace NetSim.Lib.Routing.DSR
             var entry = GetRouteFor(message.Sender);
 
             // if no route found or the metric of the found route is bigger
-            if (entry == null || entry.Metric > message.Route.Count)
+            if (entry == null || entry.Metric > message.Route.Count - 1)
             {
                 this.Entries.Add(new DsrTableEntry()
                 {
                     Destination = message.Sender,
-                    Metric = message.Route.Count,
+                    Metric = message.Route.Count - 1,
                     Route = new List<string>(message.Route)
                 });
             }
@@ -51,22 +49,26 @@ namespace NetSim.Lib.Routing.DSR
         /// <summary>
         /// Handles the response.
         /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="notReachableNode">The not reachable node.</param>
-        public void HandleError(string sender, string notReachableNode)
+        /// <param name="endpointFrom">The endpointFrom.</param>
+        /// <param name="notReachableNodeTo">The not reachable node.</param>
+        public void HandleError(string endpointFrom, string notReachableNodeTo)
         {
-            // search entries where message sender and message notreachable are in path (direct connected)
-            foreach (var netSimTableEntry in Entries.Where(e => ((DsrTableEntry)e).Route.Contains(notReachableNode)).ToList())
+            // search entries where message endpointFrom and message notreachable are in path (direct connected)
+            foreach (var netSimTableEntry in Entries.Where(e => ((DsrTableEntry)e).Route.Contains(notReachableNodeTo)).ToList())
             {
                 var entry = (DsrTableEntry)netSimTableEntry;
 
-                int index = entry.Route.IndexOf(notReachableNode);
+                // search the index of  the notreachable node in route
+                int index = entry.Route.IndexOf(notReachableNodeTo);
 
+                // if index - 1 out or range - endpoint from is not in route
                 if (index - 1 < 0)
                     continue;
 
-                if (entry.Route[index - 1].Equals(sender))
+                // if route element before the notreachable node equals the sender of the error message 
+                if (entry.Route[index - 1].Equals(endpointFrom))
                 {
+                    // remove the route 
                     RemoveRoute(entry.Destination);
                 }
             }
@@ -91,7 +93,7 @@ namespace NetSim.Lib.Routing.DSR
                 {
                     Destination = reqMessage.Sender,
                     Route = cachedRoute,
-                    Metric = cachedRoute.Count
+                    Metric = cachedRoute.Count - 1
                 });
             }
             else
@@ -107,7 +109,7 @@ namespace NetSim.Lib.Routing.DSR
                     {
                         Destination = reqMessage.Sender,
                         Route = cachedRoute,
-                        Metric = cachedRoute.Count
+                        Metric = cachedRoute.Count - 1
                     });
                 }
             }
@@ -123,7 +125,7 @@ namespace NetSim.Lib.Routing.DSR
             // search for already cached route
             var route = (DsrTableEntry)this.GetRouteFor(repMessage.Sender);
 
-            // skip the route until the own id is found in it - the rest is the path to the sender
+            // skip the route until the own id is found in it - the rest is the path to the endpointFrom
             var cachedRoute = repMessage.Route.SkipWhile(e => !e.Equals(clientId)).ToList();
 
             // if route is empty drop
@@ -139,13 +141,13 @@ namespace NetSim.Lib.Routing.DSR
                 {
                     Destination = repMessage.Sender,
                     Route = cachedRoute,
-                    Metric = cachedRoute.Count
+                    Metric = cachedRoute.Count - 1
                 });
             }
             else
             {
                 // check if new route is shorter
-                if (cachedRoute.Count < route.Metric)
+                if (cachedRoute.Count - 1 < route.Metric)
                 {
                     // remove route and add new one
                     Entries.Remove(route);
@@ -155,7 +157,7 @@ namespace NetSim.Lib.Routing.DSR
                     {
                         Destination = repMessage.Sender,
                         Route = cachedRoute,
-                        Metric = cachedRoute.Count
+                        Metric = cachedRoute.Count - 1
                     });
                 }
             }

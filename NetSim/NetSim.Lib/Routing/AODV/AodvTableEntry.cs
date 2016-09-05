@@ -16,12 +16,30 @@ namespace NetSim.Lib.Routing.AODV
     public class AodvTableEntry : NetSimTableEntry
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="AodvTableEntry"/> class.
+        /// </summary>
+        public AodvTableEntry()
+        {
+            this.ActiveNeighbours = new Dictionary<string, int>();
+        }
+
+        /// <summary>
         /// Gets or sets the sequence nr.
         /// </summary>
         /// <value>
         /// The sequence nr.
         /// </value>
         public AodvSequence SequenceNr { get; set; }
+
+        /// <summary>
+        /// Gets or sets the active neighbors dictonary. 
+        /// The key identifies the neighbor. 
+        /// The value part is a time counter.
+        /// </summary>
+        /// <value>
+        /// The active neighbors.
+        /// </value>
+        public Dictionary<string, int> ActiveNeighbours { get; set; }
 
         /// <summary>
         /// Clones this instance.
@@ -46,7 +64,7 @@ namespace NetSim.Lib.Routing.AODV
         /// </returns>
         public override string ToString()
         {
-            return base.ToString() + $" {SequenceNr,5}";
+            return base.ToString() + $" {SequenceNr,5} {String.Join(",", ActiveNeighbours.Keys)}";
         }
     }
 }

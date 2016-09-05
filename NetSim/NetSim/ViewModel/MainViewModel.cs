@@ -47,6 +47,11 @@ namespace NetSim.ViewModel
         private bool isRunSimluation;
 
         /// <summary>
+        /// The simulation step timespan
+        /// </summary>
+        private TimeSpan simulationStepTimespan = TimeSpan.FromSeconds(0.55);
+
+        /// <summary>
         /// The storage client
         /// </summary>
         private readonly SimulationStorage simulationStorage;
@@ -132,6 +137,11 @@ namespace NetSim.ViewModel
         private Task simulationTask;
 
         /// <summary>
+        /// The flag that indicates if the  step button enabled
+        /// </summary>
+        private bool isStepEnabled;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
         /// </summary>
         /// <param name="drawCanvas">The draw canvas.</param>
@@ -141,7 +151,7 @@ namespace NetSim.ViewModel
             this.simulationStorage = new SimulationStorage();
             this.Simulator = new NetSimSimulator();
             this.Visualizer = new NetSimVisualizer(Simulator, drawCanvas);
-
+            this.IsStepEnabled = true;
             this.Simulator.PropertyChanged += OnSimulatorPropertyChangedEventHandler;
 
             this.IsView = true;
@@ -171,6 +181,25 @@ namespace NetSim.ViewModel
                 RaisePropertyChanged();
                 RaisePropertyChanged(nameof(IsCreateNode));
                 RaisePropertyChanged(nameof(IsCreateEdge));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the step button is enabled.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is step enabled; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsStepEnabled
+        {
+            get
+            {
+                return isStepEnabled;
+            }
+            set
+            {
+                isStepEnabled = value;
+                RaisePropertyChanged();
             }
         }
 
@@ -580,11 +609,11 @@ namespace NetSim.ViewModel
         /// </summary>
         private void InitializeCommands()
         {
-            this.PerformStepCommand = new RelayCommand(ExecuteSimulationStep, CanExecuteSimulationStep);
-            this.StartSimulationCommand = new RelayCommand(ExecuteStartSimulation, CanExecuteStartSimulation);
+            this.PerformStepCommand = new RelayCommand(ExecuteSimulationStep, CanExecuteSimulationStep);     
+            this.StartSimulationCommand = new RelayCommand(ExecuteStartSimulation, CanExecuteStartSimulation);          
             this.PauseSimulationCommand = new RelayCommand(ExecutePauseSimulation, CanExecutePauseSimulation);
             this.ResetSimulationCommand = new RelayCommand(ExecuteResetSimulation, CanExecuteResetSimulation);
-
+            
             this.SaveNetworkCommand = new RelayCommand(ExecuteSaveNetwork);
             this.LoadNetworkCommand = new RelayCommand(ExecuteLoadNetwork);
 
@@ -743,6 +772,9 @@ namespace NetSim.ViewModel
         /// </summary>
         private void ExecuteSimulationStep()
         {
+            //disable step button
+            IsStepEnabled = false;
+
             if (!Simulator.IsInitialized)
             {
                 Simulator.InitializeProtocol(ProtocolType);
@@ -761,6 +793,12 @@ namespace NetSim.ViewModel
                 //ignored
             }
 
+            // start task - update enabled state of step button after time
+            Task.Run(() =>
+            {
+                Thread.Sleep(simulationStepTimespan);
+                DrawCanvas.Dispatcher.Invoke(() => IsStepEnabled = true);
+            });
         }
 
         /// <summary>
@@ -784,7 +822,7 @@ namespace NetSim.ViewModel
 
                 if (isRunSimluation)
                 {
-                    Thread.Sleep(TimeSpan.FromSeconds(0.55));
+                    Thread.Sleep(simulationStepTimespan);
                 }
             }
         }

@@ -28,6 +28,14 @@ namespace NetSim.Lib.Routing.DSR
         public List<string> Route { get; set; }
 
         /// <summary>
+        /// Gets the short name.
+        /// </summary>
+        /// <value>
+        /// The short name.
+        /// </value>
+        public override string ShortName => "RREP";
+
+        /// <summary>
         /// Gets the next reverse hop.
         /// </summary>
         /// <param name="currentNodeId">The current node identifier.</param>

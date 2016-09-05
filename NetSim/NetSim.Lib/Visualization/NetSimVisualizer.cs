@@ -149,7 +149,7 @@ namespace NetSim.Lib.Visualization
             // get message receiver and sender
             GetMessageReceiverSender(edge, message, out receiver, out sender);
 
-            var uimessage = new MessageControl { Width = 15, Height = 15, Tag = edge, MessagePath = { Tag = edge } };
+            var uimessage = new MessageControl(message.ShortName) { Width = 19, Height = 19, Tag = edge, MessagePath = { Tag = edge } };
 
             //set message to sender location
             int top = sender.Location.Top;

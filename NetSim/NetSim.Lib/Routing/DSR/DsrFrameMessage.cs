@@ -36,6 +36,14 @@ namespace NetSim.Lib.Routing.DSR
         public List<string> Route { get; set; }
 
         /// <summary>
+        /// Gets the short name.
+        /// </summary>
+        /// <value>
+        /// The short name.
+        /// </value>
+        public override string ShortName => Data.ShortName;
+
+        /// <summary>
         /// Gets the next hop.
         /// </summary>
         /// <param name="currentNodeId">The current node identifier.</param>

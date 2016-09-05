@@ -16,6 +16,14 @@ namespace NetSim.Lib.Simulator.Messages
         public string Data { get; set; }
 
         /// <summary>
+        /// Gets the short name.
+        /// </summary>
+        /// <value>
+        /// The short name.
+        /// </value>
+        public override string ShortName => Data;
+
+        /// <summary>
         /// Clones this instance.
         /// </summary>
         /// <returns></returns>

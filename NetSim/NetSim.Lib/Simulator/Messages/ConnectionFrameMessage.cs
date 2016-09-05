@@ -23,6 +23,14 @@ namespace NetSim.Lib.Simulator.Messages
         public NetSimMessage InnerMessage { get; set; }
 
         /// <summary>
+        /// Gets the short name.
+        /// </summary>
+        /// <value>
+        /// The short name.
+        /// </value>
+        public override string ShortName => InnerMessage?.ShortName ?? string.Empty;
+
+        /// <summary>
         /// Gets or sets the transmission step of this message.
         /// Intial for the initial sending step - going on wire.
         /// Transmitting for indicating that the message is on the wire.

@@ -5,8 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NetSim.Lib.Controls"
              mc:Ignorable="d" 
-             d:DesignHeight="40" d:DesignWidth="40">
+             d:DesignHeight="45" d:DesignWidth="45">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
         <Path Name="MessagePath" Width="Auto" Height="Auto" Stretch="Uniform" UseLayoutRounding="False" Fill="Gray" Data="F1 M 90.002,-0.000488281L 48.002,41.9995L 6.00195,-0.000488281L 90.002,-0.000488281 Z M 0,0.00146484L 36,36.0015L 0,72.0015L 0,0.00146484 Z M 96.001,72.001L 60.001,36.001L 96.001,0.000976563L 96.001,72.001 Z M 6.00195,72.0005L 39.002,39.0005L 48.002,48.0005L 57.002,39.0005L 90.002,72.0005L 6.00195,72.0005 Z "/>
+        <TextBlock Name="MessageName" Grid.Row="1" FontSize="6" TextAlignment="Center" >Test</TextBlock>
     </Grid>
 </UserControl>

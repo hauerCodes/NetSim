@@ -38,6 +38,14 @@ namespace NetSim.Lib.Routing.AODV
         public AodvSequence ReceiverSequenceNr { get; set; }
 
         /// <summary>
+        /// Gets the short name.
+        /// </summary>
+        /// <value>
+        /// The short name.
+        /// </value>
+        public override string ShortName => "RREP";
+
+        /// <summary>
         /// Creates a new object that is a copy of the current instance.
         /// </summary>
         /// <returns>

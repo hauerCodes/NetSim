@@ -37,6 +37,14 @@ namespace NetSim.Lib.Routing.OLSR
         public List<string> MultiPointRelays { get; set; }
 
         /// <summary>
+        /// Gets the short name.
+        /// </summary>
+        /// <value>
+        /// The short name.
+        /// </value>
+        public override string ShortName => "Hello";
+
+        /// <summary>
         /// Clones this instance.
         /// </summary>
         /// <returns></returns>

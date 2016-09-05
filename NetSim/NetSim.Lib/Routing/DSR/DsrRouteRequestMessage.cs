@@ -42,6 +42,14 @@ namespace NetSim.Lib.Routing.DSR
         public List<string> Nodes { get; set; }
 
         /// <summary>
+        /// Gets the short name.
+        /// </summary>
+        /// <value>
+        /// The short name.
+        /// </value>
+        public override string ShortName => "RREQ";
+
+        /// <summary>
         /// Clones this instance.
         /// </summary>
         /// <returns></returns>

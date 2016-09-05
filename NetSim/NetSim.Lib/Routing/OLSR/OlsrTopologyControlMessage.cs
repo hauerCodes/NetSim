@@ -36,6 +36,14 @@ namespace NetSim.Lib.Routing.OLSR
         public OlsrSequence SequenceNr { get; set; }
 
         /// <summary>
+        /// Gets the short name.
+        /// </summary>
+        /// <value>
+        /// The short name.
+        /// </value>
+        public override string ShortName => "TC";
+
+        /// <summary>
         /// Clones this instance.
         /// </summary>
         /// <returns></returns>

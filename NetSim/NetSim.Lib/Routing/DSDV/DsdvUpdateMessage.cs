@@ -20,6 +20,14 @@ namespace NetSim.Lib.Routing.DSDV
         public DsdvTable UpdateTable { get; set; }
 
         /// <summary>
+        /// Gets the short name.
+        /// </summary>
+        /// <value>
+        /// The short name.
+        /// </value>
+        public override string ShortName => "Update";
+
+        /// <summary>
         /// Clones this instance.
         /// </summary>
         /// <returns></returns>

@@ -32,6 +32,14 @@ namespace NetSim.Lib.Simulator.Components
         public string Receiver { get; set; }
 
         /// <summary>
+        /// Gets the short name.
+        /// </summary>
+        /// <value>
+        /// The short name.
+        /// </value>
+        public abstract string ShortName { get; }
+
+        /// <summary>
         /// Copies the base properties of this message instace to the given message.
         /// </summary>
         /// <param name="copyToMessage">The copy to message.</param>

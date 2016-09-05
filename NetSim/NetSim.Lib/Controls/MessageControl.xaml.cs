@@ -23,9 +23,17 @@ namespace NetSim.Lib.Controls
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageControl"/> class.
         /// </summary>
-        public MessageControl()
+        public MessageControl() : this(string.Empty) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MessageControl" /> class.
+        /// </summary>
+        /// <param name="messageName">Name of the message.</param>
+        public MessageControl(string messageName)
         {
             InitializeComponent();
+
+            MessageName.Text = messageName;
         }
 
     }

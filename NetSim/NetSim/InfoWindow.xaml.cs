@@ -23,5 +23,15 @@ namespace NetSim
         {
             InitializeComponent();
         }
+
+        /// <summary>
+        /// Buttons the click.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
+        private void ButtonClick(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
     }
 }

@@ -99,8 +99,10 @@ namespace NetSim.Lib.Routing.AODV
                 // if route exists check if sequencenr of request is newer - information in message is newer
                 if (reqMessage.SenderSequenceNr.CompareTo(route.SequenceNr) == 1)
                 {
-                    if (reqMessage.HopCount + 1 < route.Metric)
-                    {
+                    //TODO check if needed
+                    //if (reqMessage.HopCount + 1 < route.Metric)
+                    //{
+
                         // remove route and add new one
                         Entries.Remove(route);
 
@@ -109,7 +111,8 @@ namespace NetSim.Lib.Routing.AODV
                             reqMessage.LastHop,
                             reqMessage.HopCount + 1,
                             (AodvSequence)reqMessage.SenderSequenceNr.Clone());
-                    }
+
+                    //}
                 }
             }
         }
@@ -195,6 +198,26 @@ namespace NetSim.Lib.Routing.AODV
         }
 
         /// <summary>
+        /// Adds the active neigbour.
+        /// </summary>
+        /// <param name="destination">The destination.</param>
+        /// <param name="activeNeighbour">The active neighbour.</param>
+        public void AddActiveNeigbour(string destination, string activeNeighbour)
+        {
+            var route =GetRouteFor(destination) as AodvTableEntry;
+
+            if (route == null)
+            {
+                return;
+            }
+
+            if (!route.ActiveNeighbours.ContainsKey(activeNeighbour))
+            {
+                route.ActiveNeighbours.Add(activeNeighbour, 0);
+            }
+        }
+
+        /// <summary>
         /// Gets the route for.
         /// </summary>
         /// <param name="destinationId">The destination identifier.</param>
@@ -229,6 +252,6 @@ namespace NetSim.Lib.Routing.AODV
             return builder.ToString();
         }
 
-
+       
     }
 }

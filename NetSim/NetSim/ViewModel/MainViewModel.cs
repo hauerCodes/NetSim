@@ -49,7 +49,12 @@ namespace NetSim.ViewModel
         /// <summary>
         /// The simulation step timespan
         /// </summary>
-        private TimeSpan simulationStepTimespan = TimeSpan.FromSeconds(0.55);
+        private readonly TimeSpan simulationStepTimespan = TimeSpan.FromSeconds(0.55);
+
+        /// <summary>
+        /// The simulation step lock timespan
+        /// </summary>
+        private readonly TimeSpan simulationStepLockTimespan = TimeSpan.FromSeconds(0.25);
 
         /// <summary>
         /// The storage client
@@ -142,6 +147,16 @@ namespace NetSim.ViewModel
         private bool isStepEnabled;
 
         /// <summary>
+        /// The window width
+        /// </summary>
+        private int windowWidth = 900;
+
+        /// <summary>
+        /// The window height
+        /// </summary>
+        private int windowHeight = 450;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
         /// </summary>
         /// <param name="drawCanvas">The draw canvas.</param>
@@ -181,6 +196,44 @@ namespace NetSim.ViewModel
                 RaisePropertyChanged();
                 RaisePropertyChanged(nameof(IsCreateNode));
                 RaisePropertyChanged(nameof(IsCreateEdge));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the width of the window.
+        /// </summary>
+        /// <value>
+        /// The width of the window.
+        /// </value>
+        public int WindowWidth
+        {
+            get
+            {
+                return windowWidth;
+            }
+            set
+            {
+                windowWidth = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the Height of the window.
+        /// </summary>
+        /// <value>
+        /// The Height of the window.
+        /// </value>
+        public int WindowHeight
+        {
+            get
+            {
+                return windowHeight;
+            }
+            set
+            {
+                windowHeight = value;
+                RaisePropertyChanged();
             }
         }
 
@@ -609,11 +662,11 @@ namespace NetSim.ViewModel
         /// </summary>
         private void InitializeCommands()
         {
-            this.PerformStepCommand = new RelayCommand(ExecuteSimulationStep, CanExecuteSimulationStep);     
-            this.StartSimulationCommand = new RelayCommand(ExecuteStartSimulation, CanExecuteStartSimulation);          
+            this.PerformStepCommand = new RelayCommand(ExecuteSimulationStep, CanExecuteSimulationStep);
+            this.StartSimulationCommand = new RelayCommand(ExecuteStartSimulation, CanExecuteStartSimulation);
             this.PauseSimulationCommand = new RelayCommand(ExecutePauseSimulation, CanExecutePauseSimulation);
             this.ResetSimulationCommand = new RelayCommand(ExecuteResetSimulation, CanExecuteResetSimulation);
-            
+
             this.SaveNetworkCommand = new RelayCommand(ExecuteSaveNetwork);
             this.LoadNetworkCommand = new RelayCommand(ExecuteLoadNetwork);
 
@@ -657,7 +710,7 @@ namespace NetSim.ViewModel
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                InitialDirectory = @"c:\temp\",
+                //InitialDirectory = @"c:\temp\",
                 Filter = "netsim files(*.netsim)|*.netsim|All files (*.*)|*.*"
             };
 
@@ -724,10 +777,10 @@ namespace NetSim.ViewModel
         {
             SaveFileDialog openFileDialog = new SaveFileDialog
             {
-                InitialDirectory = @"c:\temp\",
+                //InitialDirectory = @"c:\temp\",
                 Filter = "netsim files(*.netsim)|*.netsim|All files (*.*)|*.*",
                 DefaultExt = "netsim",
-                FileName = $"NetworkSave_{DateTime.Now.ToString("ddMMyyyy")}",
+                FileName = $"NetworkSave_{DateTime.Now:ddMMyyyy}",
             };
 
             if (openFileDialog.ShowDialog() != true) return;
@@ -772,6 +825,12 @@ namespace NetSim.ViewModel
         /// </summary>
         private void ExecuteSimulationStep()
         {
+            // if step is currently executing - return
+            if (!IsStepEnabled)
+            {
+                return;
+            }
+
             //disable step button
             IsStepEnabled = false;
 
@@ -796,7 +855,7 @@ namespace NetSim.ViewModel
             // start task - update enabled state of step button after time
             Task.Run(() =>
             {
-                Thread.Sleep(simulationStepTimespan);
+                Thread.Sleep(simulationStepLockTimespan);
                 DrawCanvas.Dispatcher.Invoke(() => IsStepEnabled = true);
             });
         }

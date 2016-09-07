@@ -160,7 +160,14 @@ namespace NetSim.Lib.Routing.DSR
                 var nextHopId = dsrFrame.GetNextHop(Client.Id);
 
                 //lay message on wire - intial send
-                Client.Connections[nextHopId].StartTransportMessage(dsrFrame, this.Client.Id, nextHopId);
+                if (IsConnectionReachable(nextHopId))
+                {
+                    Client.Connections[nextHopId].StartTransportMessage(dsrFrame, this.Client.Id, nextHopId);
+                }
+                else
+                {
+                    HandleNotReachableRoute(nextHopId, null);
+                }
             }
             else
             {
@@ -224,25 +231,39 @@ namespace NetSim.Lib.Routing.DSR
             }
             else
             {
-                var dsrTable = Table as DsrTable;
+                HandleNotReachableRoute(nextHop, frameMessage);
+            }
+        }
 
-                // remove notreachable route 
-                dsrTable?.HandleError(Client.Id, nextHop);
+        /// <summary>
+        /// Handles the not reachable route.
+        /// </summary>
+        /// <param name="nextHopId">The next hop identifier.</param>
+        /// <param name="frameMessage">The frame message.</param>
+        private void HandleNotReachableRoute(string nextHopId, DsrFrameMessage frameMessage)
+        {
+            var dsrTable = Table as DsrTable;
 
-                // broadcast route error to neighbors - Neighbors remove every route with sender -> notreachable in path
-                Client.BroadcastMessage(new DsrRouteErrorMessage()
-                {
-                    Sender = Client.Id,
-                    NotReachableNode = nextHop,
-                });
+            // remove notreachable route 
+            dsrTable?.HandleError(Client.Id, nextHopId);
 
-                // send route error to sender with back path in message - receiver removes every route with sender - notreachable in path
+            // broadcast route error to neighbors - Neighbors remove every route with sender -> notreachable in path
+            Client.BroadcastMessage(new DsrRouteErrorMessage()
+            {
+                Sender = Client.Id,
+                NotReachableNode = nextHopId,
+            });
+
+            if (frameMessage != null)
+            {
+                // send route error to sender with back path in message 
+                // receiver removes every route with sender - notreachable in path
                 SendMessage(new DsrRouteErrorMessage()
                 {
                     Sender = Client.Id,
                     Receiver = frameMessage.Sender,
                     Route = frameMessage.Route,
-                    NotReachableNode = nextHop,
+                    NotReachableNode = nextHopId,
                     FailedMessage = frameMessage.Data
                 });
             }
@@ -283,17 +304,7 @@ namespace NetSim.Lib.Routing.DSR
             }
             else
             {
-                var dsrTable = Table as DsrTable;
-
-                // remove not reachable route 
-                dsrTable?.HandleError(Client.Id, nextHopId);
-
-                // broadcast to all neighbors that route is down
-                Client.BroadcastMessage(new DsrRouteErrorMessage()
-                {
-                    Sender = Client.Id,
-                    NotReachableNode = nextHopId,
-                });
+                HandleNotReachableRoute(nextHopId, null);
             }
         }
 
@@ -402,13 +413,19 @@ namespace NetSim.Lib.Routing.DSR
                     var dsrRoute = (DsrTableEntry)route;
 
                     var newRoute = new List<string>(reqMessage.Nodes);
+
+                    //remove last entry
+                    newRoute.RemoveAt(newRoute.Count - 1);
+
+                    // add cached route entries
                     newRoute.AddRange(dsrRoute.Route);
 
                     //send back rrep mesage the reverse way with found route 
+                    //note: sender is the orig. receiver of the req
                     var response = new DsrRouteReplyMessage()
                     {
                         Receiver = reqMessage.Sender,
-                        Sender = Client.Id,
+                        Sender = reqMessage.Receiver,
                         Route = newRoute
                     };
 

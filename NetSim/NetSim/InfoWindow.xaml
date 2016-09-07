@@ -5,15 +5,40 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NetSim"
         mc:Ignorable="d"
-        Title="About NetSim Project" Height="300" Width="300">
+        Title="About NetSim Project" Height="200" Width="400" MaxHeight="200" MaxWidth="400" 
+        WindowStyle="None" 
+        Topmost="True" 
+        ShowInTaskbar="False" ResizeMode="NoResize" Icon="netsim.ico" >
     <Grid>
-        <RichTextBox HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" >
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <FlowDocumentScrollViewer HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" VerticalScrollBarVisibility="Hidden" >
             <FlowDocument >
                 <Paragraph>
-                    <Run Text="Test"></Run>
+                    <Run  FontSize="20" Text="Project NetSim"></Run>
+                    <LineBreak/>
+                    <Run>FH Wiener Neustadt - Adative Systems</Run>
+                    <LineBreak/>
+                    <Run>2016</Run>
+                </Paragraph>
+                <Paragraph>
+                    <Run Text="Author:"></Run>
+                    <Run FontWeight="Bold" Text="Christoph Hauer"></Run>
+                    <LineBreak></LineBreak>
+                    <Run Text="E-Mail:"></Run>
+                    <Run FontWeight="Bold" Text="hauer.christoph@live.at"></Run>
+                </Paragraph>
+                <Paragraph FontSize="10">
+                    <Run>MVVMLight - </Run>
+                    <Hyperlink>http://www.mvvmlight.net/</Hyperlink>
+                    <LineBreak></LineBreak>
+                    <Run>Json.NET - </Run>
+                    <Hyperlink>http://www.newtonsoft.com/json</Hyperlink>
                 </Paragraph>
             </FlowDocument>
-        </RichTextBox>
-
+        </FlowDocumentScrollViewer>
+        <Button Grid.Row="1" Click="ButtonClick">OK</Button>
     </Grid>
 </Window>

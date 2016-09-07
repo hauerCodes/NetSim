@@ -34,11 +34,6 @@ namespace NetSim.Lib.Routing.OLSR
         private bool isFirstMprCalculationBroadcoasted;
 
         /// <summary>
-        /// The is first topology broadcasted
-        /// </summary>
-        //TODO remove  private bool isFirstTopologyBroadcasted;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="OlsrRoutingProtocol"/> class.
         /// </summary>
         /// <param name="client">The client.</param>
@@ -103,8 +98,6 @@ namespace NetSim.Lib.Routing.OLSR
         /// The multi point relay selector set.
         /// </value>
         public List<string> MultiPointRelaySelectorSet { get; set; }
-
-        // TODO public Dictionary<string, OlsrSequence> MultiPointRelaySelectorSet { get; set; }
 
         /// <summary>
         /// The indicator for hello update has been received
@@ -681,37 +674,6 @@ namespace NetSim.Lib.Routing.OLSR
                 Client.ReceiveData(message);
             }
         }
-
-        ///// <summary>
-        ///// TODO remove if not needed
-        ///// Handles the outgoing messages.
-        ///// </summary>
-        //private void HandleOutgoingMessages()
-        //{
-        //    // get the count of queued messages 
-        //    int counter = OutputQueue.Count;
-
-        //    // run for each queued message
-        //    while (counter > 0)
-        //    {
-        //        // get next queued message
-        //        var queuedMessage = OutputQueue.Dequeue();
-
-        //        ////check if message is a dsr message
-        //        //if (IsDsrMessage(queuedMessage.Message))
-        //        //{
-        //        //    // handle "resend" of dsr message intialy send from other node
-        //        //    ForwardDsrMessage(queuedMessage);
-        //        //}
-        //        //else
-        //        //{
-        //        //    //if here messages gets initally send from this node
-        //        //    HandleRouteDiscoveryForOutgoingMessage(queuedMessage);
-        //        //}
-
-        //        counter--;
-        //    }
-        //}
 
         /// <summary>
         /// Determines whether [is one hop neighbor] [the specified identifier].

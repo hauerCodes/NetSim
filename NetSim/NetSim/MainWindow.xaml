@@ -6,27 +6,28 @@
         xmlns:converter="clr-namespace:NetSim.Converter"
         xmlns:simulator="clr-namespace:NetSim.Lib.Simulator;assembly=NetSim.Lib"
         xmlns:properties="clr-namespace:NetSim.Properties"
-        mc:Ignorable="d"
-        Title="NetSim - Routing Protocol Simulator" MinHeight="450" MinWidth="800" Height="450" Width="700">
+        mc:Ignorable="d" 
+        Icon="netsim.ico"
+        Title="NetSim - Routing Protocol Simulator" MinHeight="350" MinWidth="600" Width="1000" Height="500" >
     <Window.Resources>
         <converter:ProtocolTypeToBoolConverter x:Key="protocolConverter"/>
     </Window.Resources>
     <Window.InputBindings>
         <KeyBinding Command="{Binding StartSimulationCommand}" Key="F5" />
-        <KeyBinding Command="{Binding ResetSimulationCommand}" Key="F5" Modifiers="Shift" />
+        <KeyBinding Command="{Binding ResetSimulationCommand}" Key="F8" />
+        <KeyBinding Command="{Binding PerformStepCommand}" Key="F10" />
         <KeyBinding Command="{Binding PerformStepCommand}" Key="F11" />
-        <KeyBinding Command="{Binding PauseSimulationCommand}" Key="F5" Modifiers="Ctrl" />
+        <KeyBinding Command="{Binding PauseSimulationCommand}" Key="F6" />
         <KeyBinding Command="{Binding LoadNetworkCommand}" Key="O" Modifiers="Ctrl" />
         <KeyBinding Command="{Binding SaveNetworkCommand}" Key="S" Modifiers="Ctrl" />
-        <KeyBinding Command="{Binding ShowHelpCommand}" Key="H" Modifiers="Ctrl" />
         <KeyBinding Command="{Binding ShowHelpCommand}" Key="H" Modifiers="Ctrl" />
         <KeyBinding Command="{Binding ShowHelpCommand}" Key="F1" />
     </Window.InputBindings>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
-                <MenuItem Header="Save" Command="{Binding SaveNetworkCommand}"></MenuItem>
-                <MenuItem Header="Load" Command="{Binding LoadNetworkCommand}"></MenuItem>
+                <MenuItem Header="Save" Command="{Binding SaveNetworkCommand}" InputGestureText="Ctrl + S"></MenuItem>
+                <MenuItem Header="Load" Command="{Binding LoadNetworkCommand}" InputGestureText="Ctrl + O"></MenuItem>
                 <Separator></Separator>
                 <MenuItem Header="Exit" Command="{Binding CloseApplicationCommand}"></MenuItem>
             </MenuItem>
@@ -35,9 +36,14 @@
                 <MenuItem IsCheckable="True" IsChecked="{Binding Path=ProtocolType, Converter={StaticResource protocolConverter}, Mode=TwoWay, ConverterParameter={x:Static simulator:NetSimProtocolType.DSDV}}" Header="DSDV"></MenuItem>
                 <MenuItem IsCheckable="True" IsChecked="{Binding Path=ProtocolType, Converter={StaticResource protocolConverter}, Mode=TwoWay, ConverterParameter={x:Static simulator:NetSimProtocolType.OLSR}}" Header="OLSR"></MenuItem>
                 <MenuItem IsCheckable="True" IsChecked="{Binding Path=ProtocolType, Converter={StaticResource protocolConverter}, Mode=TwoWay, ConverterParameter={x:Static simulator:NetSimProtocolType.AODV}}" Header="AODV"></MenuItem>
+                <Separator></Separator>
+                <MenuItem Command="{Binding StartSimulationCommand}" Header="Start Simulation" InputGestureText="F5"></MenuItem>
+                <MenuItem Command="{Binding PauseSimulationCommand}" Header="Pause Simulation" InputGestureText="F6"></MenuItem>
+                <MenuItem Command="{Binding PerformStepCommand}" Header="Simulation Step" InputGestureText="F10 | F11"></MenuItem>
+                <MenuItem Command="{Binding ResetSimulationCommand}" Header="Reset Simulation" InputGestureText="F8"></MenuItem>
             </MenuItem>
             <MenuItem Header="Help">
-                <MenuItem Header="Help" Command="{Binding ShowHelpCommand}"></MenuItem>
+                <MenuItem Header="Help" InputGestureText="F1" Command="{Binding ShowHelpCommand}"></MenuItem>
                 <Separator></Separator>
                 <MenuItem Header="About" Command="{Binding ShowAboutCommand}" ></MenuItem>
             </MenuItem>
@@ -94,10 +100,30 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Button Grid.Row="0" Grid.Column="0" Margin="5" Command="{Binding StartSimulationCommand}">Start</Button>
-                        <Button Grid.Row="0" Grid.Column="1" Margin="5" Command="{Binding PauseSimulationCommand}">Pause</Button>
-                        <Button Grid.Row="0" Grid.Column="2" Margin="5" Command="{Binding PerformStepCommand}" IsEnabled="{Binding IsStepEnabled, UpdateSourceTrigger=PropertyChanged}">Step</Button>
-                        <Button Grid.Row="0" Grid.Column="3" Margin="5" Command="{Binding ResetSimulationCommand}" >Reset</Button>
+                        <Button Grid.Row="0" Grid.Column="0" Margin="5" Command="{Binding StartSimulationCommand}">
+                            <TextBlock>
+                                <Run>Start</Run>
+                                <Run FontSize="9" Foreground="Gray">(F5)</Run>
+                            </TextBlock>
+                        </Button>
+                        <Button Grid.Row="0" Grid.Column="1" Margin="5" Command="{Binding PauseSimulationCommand}">
+                            <TextBlock>
+                                <Run>Pause</Run>
+                                <Run FontSize="9" Foreground="Gray">(F6)</Run>
+                            </TextBlock>
+                        </Button>
+                        <Button Grid.Row="0" Grid.Column="2" Margin="5" Command="{Binding PerformStepCommand}" IsEnabled="{Binding IsStepEnabled, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBlock>
+                                <Run>Step</Run>
+                                <Run FontSize="9" Foreground="Gray">(F11)</Run>
+                            </TextBlock>
+                        </Button>
+                        <Button Grid.Row="0" Grid.Column="3" Margin="5" Command="{Binding ResetSimulationCommand}" >
+                            <TextBlock>
+                                <Run>Reset</Run>
+                                <Run FontSize="9" Foreground="Gray">(F8)</Run>
+                            </TextBlock>
+                        </Button>
                     </Grid>
                     <StackPanel Orientation="Horizontal" Margin="5 0 0 0">
                         <TextBlock Grid.Column="0" TextAlignment="Left" VerticalAlignment="Center" FontSize="10">Simulation Step</TextBlock>

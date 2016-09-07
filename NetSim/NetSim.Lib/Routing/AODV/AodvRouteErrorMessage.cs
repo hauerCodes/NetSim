@@ -47,7 +47,7 @@ namespace NetSim.Lib.Routing.AODV
             return CopyTo(new AodvRouteErrorMessage()
             {
                 UnReachableDestination = this.UnReachableDestination,
-                UnReachableDestinationSequenceNr = (AodvSequence)this.UnReachableDestinationSequenceNr?.Clone()
+                UnReachableDestinationSequenceNr = (AodvSequence)this.UnReachableDestinationSequenceNr?.Clone(),
             });
         }
 

@@ -145,8 +145,13 @@ namespace NetSim.Lib.Routing.AODV
                 }
                 else
                 {
+                    var aodvTable = (AodvTable)Table;
+
                     //search the route (next hop)
                     string nextHopId = GetRoute(queuedMessage.Message.Receiver);
+
+                    // add the sender of this message as active neighbour for route
+                    aodvTable.AddActiveNeigbour(queuedMessage.Message.Receiver, queuedMessage.Message.Sender);
 
                     // if route not found
                     if (string.IsNullOrEmpty(nextHopId))
@@ -166,7 +171,7 @@ namespace NetSim.Lib.Routing.AODV
                         }
                         else
                         {
-                            HandleRouteError(nextHopId);
+                            HandleRouteError(nextHopId, queuedMessage.Message.Sender, queuedMessage.Message.Receiver);
                         }
                     }
                 }
@@ -179,22 +184,24 @@ namespace NetSim.Lib.Routing.AODV
         /// Handles the route error.
         /// </summary>
         /// <param name="nextHopId">The next hop identifier.</param>
-        /// <exception cref="NotImplementedException"></exception>
-        private void HandleRouteError(string nextHopId)
+        /// <param name="sender">The sender.</param>
+        /// <param name="destination">The destination.</param>
+        private void HandleRouteError(string nextHopId, string sender, string destination)
         {
+            // is is a direct neighbor set leave time zero
             if (Neighbours.ContainsKey(nextHopId))
             {
                 Neighbours[nextHopId] = 0;
             }
-            else
+
+            // send route error message
+            SendMessage(new AodvRouteErrorMessage()
             {
-                Client.BroadcastMessage(new AodvRouteErrorMessage()
-                {
-                    Sender = this.Client.Id,
-                    UnReachableDestination = nextHopId,
-                    UnReachableDestinationSequenceNr = (AodvSequence)this.CurrentSequence.Clone()
-                });
-            }
+                Sender = this.Client.Id,
+                Receiver = sender,
+                UnReachableDestination = destination,
+                UnReachableDestinationSequenceNr = (AodvSequence)this.CurrentSequence.Clone()
+            });
         }
 
         /// <summary>
@@ -283,6 +290,9 @@ namespace NetSim.Lib.Routing.AODV
                         UnReachableDestination = neighbourId,
                         UnReachableDestinationSequenceNr = (AodvSequence)this.CurrentSequence.Clone()
                     }));
+
+                    // remove the inactive neighbour
+                    Neighbours.Remove(neighbourId);
                 }
             }
         }
@@ -411,10 +421,28 @@ namespace NetSim.Lib.Routing.AODV
             //get AodvHelloMessage instacne 
             var errorMessage = (AodvRouteErrorMessage)queuedMessage.Message;
 
-            if (IsConnectionReachable(errorMessage.Receiver))
+            //indicates that the error messages was broadcasted
+            if (Client.Connections.ContainsKey(errorMessage.Receiver))
             {
-                // start message transport
-                Client.Connections[errorMessage.Receiver].StartTransportMessage(errorMessage, this.Client.Id, errorMessage.Receiver);
+                if (IsConnectionReachable(errorMessage.Receiver))
+                {
+                    // start message transport
+                    Client.Connections[errorMessage.Receiver].StartTransportMessage(errorMessage,
+                        this.Client.Id,
+                        errorMessage.Receiver);
+                }
+            }
+            else
+            {
+                // error message sgets forwared among active path
+                var nextHopId = Table.GetRouteFor(errorMessage.Receiver)?.NextHop;
+
+                if (nextHopId != null && IsConnectionReachable(nextHopId))
+                {
+                    // start message transport
+                    Client.Connections[nextHopId].StartTransportMessage(errorMessage, this.Client.Id, nextHopId);
+                }
+
             }
         }
 
@@ -439,7 +467,7 @@ namespace NetSim.Lib.Routing.AODV
             }
             else
             {
-                HandleRouteError(nextHopId);
+                HandleRouteError(nextHopId, responseMessage.Sender, responseMessage.Receiver);
             }
         }
 
@@ -496,8 +524,9 @@ namespace NetSim.Lib.Routing.AODV
                     var response = new AodvRouteReplyMessage()
                     {
                         Receiver = reqMessage.Sender,
-                        Sender = Client.Id,
+                        Sender = searchRoute.Destination,
                         ReceiverSequenceNr = (AodvSequence)searchRoute.SequenceNr.Clone(),
+                        HopCount = searchRoute.Metric,
                         LastHop = Client.Id
                     };
 
@@ -524,6 +553,7 @@ namespace NetSim.Lib.Routing.AODV
 
             // handle the neighbour lsit update - inactive timer management 
             UpdateNeighbourList(repMessage.Sender);
+            UpdateNeighbourList(repMessage.LastHop);
 
             //save found route to table
             aodvTable?.HandleReplyRoute(repMessage);
@@ -549,7 +579,36 @@ namespace NetSim.Lib.Routing.AODV
         {
             AodvRouteErrorMessage errorMessage = (AodvRouteErrorMessage)message;
 
-            //TODO handle route error 
+            var aodvTable = Table as AodvTable;
+
+            // drop if own forwarded message
+            if (errorMessage.Sender.Equals(this.Client.Id))
+            {
+                return;
+            }
+
+            //drop every route with destination from errormessage
+            List<string> receivers  = aodvTable?.HandleRouteMaintaince(errorMessage.UnReachableDestination);
+
+            // TODO check if the respone is not for this node . then forward
+            //if (!errorMessage.Receiver.Equals(Client.Id))
+            //{
+            //    // forward message
+            //    SendMessage(errorMessage);
+            //}
+
+            if (receivers == null)
+            {
+                return;
+            }
+
+            foreach(var receiver in receivers)
+            {
+                AodvRouteErrorMessage clone = (AodvRouteErrorMessage)errorMessage.Clone();
+                clone.Receiver = receiver;
+
+                SendMessage(clone);
+            }
         }
 
         /// <summary>

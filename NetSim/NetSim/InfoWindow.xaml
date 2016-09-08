@@ -9,7 +9,7 @@
         WindowStyle="None" 
         Topmost="True" 
         ShowInTaskbar="False" ResizeMode="NoResize" Icon="netsim.ico" >
-    <Grid>
+    <Grid Background="AliceBlue">
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="Auto"/>

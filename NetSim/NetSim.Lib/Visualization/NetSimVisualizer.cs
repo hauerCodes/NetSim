@@ -472,9 +472,7 @@ namespace NetSim.Lib.Visualization
                     if (currentSelectedNodeProtocol.IsTwoHopNeighbor(node.Id))
                     {
                         return CreateClientNode(node, Brushes.PowderBlue);
-                    }
-
-                    
+                    }  
                 }
 
             }

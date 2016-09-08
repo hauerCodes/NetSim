@@ -120,6 +120,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="NetSim.Lib.Diagramm.cd" />
+    <None Include="NetSim.Lib.Overview.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

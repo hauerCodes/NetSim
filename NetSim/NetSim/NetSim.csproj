@@ -178,6 +178,15 @@
       <Name>NetSim.Lib</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="help\createedge.png" />
+    <Resource Include="help\createscreen.png" />
+    <Resource Include="help\deletescreen.png" />
+    <Resource Include="help\detailsscreen.png" />
+    <Resource Include="help\offlinescreen.png" />
+    <Resource Include="help\routing.png" />
+    <Resource Include="help\startscreen.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

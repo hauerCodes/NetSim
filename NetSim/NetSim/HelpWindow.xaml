@@ -5,12 +5,179 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NetSim"
         mc:Ignorable="d"
-        Title="Help" Height="300" Width="300">
+        Title="Help" Height="600" Width="500">
     <Grid>
         <FlowDocumentScrollViewer>
-            <FlowDocument FontFamily="Segoe UI" FontSize="12" >
+            <FlowDocument FontFamily="Segoe UI" FontSize="12"  TextAlignment="Left">
                 <Paragraph>
-                    <Run Text="Test"></Run>
+                    <Run Text="Help for NetSim Simulator" FontWeight="Bold" FontSize="18"></Run>
+                </Paragraph>
+                <Paragraph FontSize="14">
+                    <Run>Content</Run>
+                </Paragraph>
+                <List FontSize="12">
+                    <ListItem>
+                        <Paragraph>
+                            <Hyperlink NavigateUri="#ChapterNetwork">Network Creation and Management</Hyperlink></Paragraph>
+                        <List>
+                            <ListItem>
+                                <Paragraph>
+                                    <Hyperlink NavigateUri="#ChapterNodes">Create Nodes</Hyperlink>
+                                </Paragraph>
+                            </ListItem>
+                            <ListItem>
+                                <Paragraph>
+                                    <Hyperlink NavigateUri="#ChapterEdges">Create Edges</Hyperlink>
+                                </Paragraph>
+                            </ListItem>
+                            <ListItem>
+                                <Paragraph>
+                                    <Hyperlink NavigateUri="#ChapterDetails">View element details</Hyperlink>
+                                </Paragraph>
+                            </ListItem>
+                            <ListItem>
+                                <Paragraph>
+                                    <Hyperlink NavigateUri="#ChapterOffline">Mark element as offline</Hyperlink>
+                                </Paragraph>
+                            </ListItem>
+                            <ListItem>
+                                <Paragraph>
+                                    <Hyperlink NavigateUri="#ChapterDelete">Delete an element</Hyperlink>
+                                </Paragraph>
+                            </ListItem>
+                        </List>
+                    </ListItem>
+                    <ListItem>
+                        <Paragraph>
+                            <Hyperlink NavigateUri="#ChapterRouting">Simulate Routing</Hyperlink>
+                        </Paragraph>
+                    </ListItem>
+                </List>
+
+                <Paragraph>
+                    <Run Text="The UI" FontWeight="Bold" FontSize="14"></Run>
+                </Paragraph>
+
+                <Paragraph>
+
+                    This help provides a brief introduction to the use of simulation project.
+                        The picture shows the User Interface of the NetSim Routing Protocol Simulator project.
+
+                </Paragraph>
+                <BlockUIContainer>
+                    <Image Source="help/startscreen.png" MaxWidth="700" HorizontalAlignment="Center" />
+                </BlockUIContainer>
+                <Paragraph>
+                    On the left side there is the network and simulation control part of the UI. 
+                        The light gray area on the right side is the network canvas. 
+                        On this canvas nodes and edges are created.
+
+                </Paragraph>
+
+
+                <Paragraph >
+                    <Run x:Name="ChapterNetwork" FontWeight="Bold" Text="Network Creation and Mangement" FontSize="16"></Run>
+                </Paragraph>
+
+                <Paragraph>
+                    <Run>The section takes care of creating network nodes and edges. The network creation has three modes:</Run>
+                    <LineBreak/>
+                    <Run>- View details mode</Run>
+                    <LineBreak/>
+                    <Run>- Creating nodes</Run>
+                    <LineBreak/>
+                    <Run>- Creating edges</Run>
+                    <LineBreak/>
+                </Paragraph>
+
+                <Paragraph Name="ChapterNodes">
+                    <Run Text="Create nodes"  FontSize="14"></Run>
+                </Paragraph>
+
+                <Paragraph>
+
+                    To create nodes click on the Create Nodes button as seen in the figure. 
+                        This starts the nodes creation mode. After clicking somewhere on the light gray canvas a network node gets created. The naming of the nodes start with the capital letter A.
+
+                </Paragraph>
+                <BlockUIContainer>
+                    <Image Source="help/createscreen.png" Width="300" HorizontalAlignment="Center"  />
+                </BlockUIContainer>
+
+                <Paragraph Name="ChapterEdges">
+                    <Run Text="Create edges"  FontSize="14"></Run>
+                </Paragraph>
+
+                <Paragraph>
+                    To create edges click on the Create Edges button as seen in the figure.
+                        This starts the edges creation mode. 
+                        After clicking and holding the left mouse button on an already created node on the light gray canvas a red line gets displayed as seen in the figure. 
+                        To finish an edge drag this line to another created node. When the connection is possible the display line gets green and you can stop holding the left mouse button.
+
+                </Paragraph>
+                <BlockUIContainer>
+                    <Image Source="help/createedge.png" MaxWidth="700" />
+                </BlockUIContainer>
+
+                <Paragraph Name="ChapterDetails">
+                    <Run Text="View element details"  FontSize="14"></Run>
+                </Paragraph>
+
+                <Paragraph>
+                    The simulator has a the ability to view the details of every node an edge on the network canvas as seen in the figure.
+                        To view the details of an element the view details mode has to be enabled. This is accomplished with the view details mode button on the top of the left part of the UI. To view the details of an specific element click on the this element.
+                </Paragraph>
+                <BlockUIContainer>
+                    <Image Source="help/detailsscreen.png" MaxWidth="700" />
+                </BlockUIContainer>
+                <Paragraph>
+                    The details on the left bottom part of the UI as seen in the figure displaying things like the client name, the current simulation step, received data messages and the protocol specific information like routing tables.
+                    <LineBreak/>
+                    On bottom part of the UI, it's possible to send a data message to an other node on the network.
+                </Paragraph>
+
+                <Paragraph x:Name="ChapterOffline">
+                    <Run Text="Mark element as offline"  FontSize="14"></Run>
+                </Paragraph>
+
+                <Paragraph>
+                    To mark an element like a node or an edge as offline get into the view details mode of the simulator and click on the specific element on the network canvas. To mark the element as offline click on the button offline on the bottom right part of the UI.
+                    If a node gets marked as offline each direct connected edge gets marked as offline to.
+                </Paragraph>
+                <BlockUIContainer>
+                    <Image Source="help/offlinescreen.png" MaxWidth="700" />
+                </BlockUIContainer>
+                <Paragraph>
+                    As seen in the figure the connection between node C and node D is marked as offline. Also the node A is marked as offline and so every direct connection of the node is marked as offline to.
+                </Paragraph>
+
+                <Paragraph Name="ChapterDelete">
+                    <Run Text="Delete an element"  FontSize="14"></Run>
+                </Paragraph>
+
+                <Paragraph>
+                    To delete an element like a node or an edge get into the view details mode of the simulator and click on the specific element on the network canvas. To delete the element click on the delete node or delete edge button on the bottom right part of the UI as seen in the figure.
+                    If a node gets deleted each direct connected edge gets marked as offline to.
+                </Paragraph>
+                <BlockUIContainer>
+                    <Image Source="help/deletescreen.png"  Width="339" HorizontalAlignment="Center" />
+                </BlockUIContainer>
+
+                <Paragraph Name="ChapterRouting">
+                    <Run  Text="Simulate Routing" FontSize="16" FontWeight="Bold"></Run>
+                </Paragraph>
+
+                <Paragraph>
+                    To control the simulation the UI provides four buttons as seen in the figure.
+                </Paragraph>
+                <BlockUIContainer>
+                    <Image Source="help/routing.png" Width="239" HorizontalAlignment="Center" />
+                </BlockUIContainer>
+                <Paragraph>
+                    The start button starts the simulation, which means a simulation step gets executed about each half second.
+To pause the simulatio run use the pause button.
+The step button performs only one simulation step.
+The reset button sets the simulation to the initial state. It doesn't delete the created network!
                 </Paragraph>
             </FlowDocument>
         </FlowDocumentScrollViewer>

@@ -259,8 +259,10 @@ namespace NetSim.Lib.Simulator
             }
 
             var delConnection =
-                Connections.FirstOrDefault(c => c.EndPointA.Id.Equals(endPointA) && c.EndPointB.Id.Equals(endPointB)) ?? 
-                Connections.FirstOrDefault(c => c.EndPointA.Id.Equals(endPointB) && c.EndPointB.Id.Equals(endPointA));
+                Connections.FirstOrDefault(c => c.EndPointA.Id.Equals(endPointA) 
+                && c.EndPointB.Id.Equals(endPointB)) ?? 
+                Connections.FirstOrDefault(c => c.EndPointA.Id.Equals(endPointB) 
+                && c.EndPointB.Id.Equals(endPointA));
 
             if(delConnection == null)
             {

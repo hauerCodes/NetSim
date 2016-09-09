@@ -76,7 +76,7 @@ namespace NetSim.Lib.Routing.DSDV
             var topologyChangeUpdate = CheckForTopologyUpdates();
 
             // handle incomming messages
-            topologyChangeUpdate = HandleIncommingMessages(topologyChangeUpdate);
+            topologyChangeUpdate = HandleIncomingMessages(topologyChangeUpdate);
 
             // handle offline connections / back online connections
             if (topologyChangeUpdate)
@@ -149,7 +149,7 @@ namespace NetSim.Lib.Routing.DSDV
         {
             bool topologyChangeUpdate = false;
 
-            // check if alle routes for offline connections are marked as not reachable
+            // check if all routes for offline connections are marked as not reachable
             foreach (var connection in Client.Connections.Where(c => c.Value.IsOffline && !offlineLinks.Contains(c.Key)))
             {
                 // connection.key is the "to" destination
@@ -159,6 +159,8 @@ namespace NetSim.Lib.Routing.DSDV
                 if (routeEntry != null && routeEntry.IsReachable)
                 {
                     //routeEntry.Metric = NotReachable;
+
+                    // change in topology detected
                     topologyChangeUpdate = true;
                 }
             }
@@ -166,8 +168,10 @@ namespace NetSim.Lib.Routing.DSDV
             // check offline links
             foreach (var connection in offlineLinks)
             {
+                // if the connection is not offline
                 if (!Client.Connections[connection].IsOffline)
                 {
+                    // change in topology detected
                     topologyChangeUpdate = true;
                 }
             }
@@ -178,7 +182,7 @@ namespace NetSim.Lib.Routing.DSDV
                 topologyChangeUpdate = true;
             }
 
-            // check if a direct connections does'nt exist which has an direct route entry -> deleted connection
+            // check if a direct connections doesn't exist which has an direct route entry -> deleted connection
             if (Table.Entries
                 .Where(e => e.Destination.Equals(e.NextHop) && !e.Destination.Equals(this.Client.Id))
                 .Any(e => !Client.Connections.ContainsKey(e.Destination)))
@@ -254,7 +258,7 @@ namespace NetSim.Lib.Routing.DSDV
         /// </summary>
         /// <param name="topologyChangeUpdate">if set to <c>true</c> [topology change update].</param>
         /// <returns></returns>
-        private bool HandleIncommingMessages(bool topologyChangeUpdate)
+        private bool HandleIncomingMessages(bool topologyChangeUpdate)
         {
             if (Client.InputQueue.Count > 0)
             {
@@ -265,14 +269,16 @@ namespace NetSim.Lib.Routing.DSDV
                     // if message is update message
                     if (message is DsdvUpdateMessage)
                     {
-                        // client table
+                        // local client table
                         var dsdvTable = Table as DsdvTable;
 
                         // ReSharper disable once InvertIf
                         if (dsdvTable != null)
                         {
+                            // let the local table handle the update message 
                             if (dsdvTable.HandleUpdate(message.Sender, (message as DsdvUpdateMessage).UpdateTable))
                             {
+                                // if somethings updated in the table - a topology change was dected 
                                 topologyChangeUpdate = true;
                             }
                         }

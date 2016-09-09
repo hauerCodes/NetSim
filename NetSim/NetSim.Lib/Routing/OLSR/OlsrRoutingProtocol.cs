@@ -43,15 +43,6 @@ namespace NetSim.Lib.Routing.OLSR
         }
 
         /// <summary>
-        /// Gets the output message queue (should be used only for data messages).
-        /// </summary>
-        /// <value>
-        /// The output queue.
-        /// </value>
-        //TODO remove if not needed
-        public Queue<NetSimMessage> OutputQueue { get; private set; }
-
-        /// <summary>
         /// Gets or sets the one hop neighbor table.
         /// </summary>
         /// <value>
@@ -127,9 +118,6 @@ namespace NetSim.Lib.Routing.OLSR
             this.OneHopNeighborTable = new OlsrNeighborTable();
             this.TwoHopNeighborTable = new OlsrNeighborTable();
             this.ToplogyTable = new OlsrToplogyTable();
-
-            //prepare the output message queue
-            this.OutputQueue = new Queue<NetSimMessage>();
 
             // initialize the multipoint realy selector set
             //this.MultiPointRelaySelectorSet = new Dictionary<string, OLSR.OlsrSequence>();

@@ -43,18 +43,19 @@ namespace NetSim.Lib.Routing.DSDV
                 // search localroute
                 var localRoute = Entries.FirstOrDefault(r => r.Destination.Equals(updateRoute.Destination));
 
-                //ignore own local route
+                //ignore own local route (e.g. A A 0)
                 if (localRoute != null && localRoute.Metric == 0)
                 {
                     continue;
                 }
 
-                // if no local route exists add route with nexthop sender and increment metric
+                // if no local route exists add route with nexthop=sender and increment metric
                 if (localRoute == null)
                 {
                     var dsdvTableEntry = updateRoute as DsdvTableEntry;
 
                     if (dsdvTableEntry == null) continue;
+
                     AddRouteEntry(
                         updateRoute.Destination,
                         senderId,
@@ -74,45 +75,57 @@ namespace NetSim.Lib.Routing.DSDV
 
                     switch (sequenceCompare)
                     {
-                        case 0: // if update route sequencenr is equal to local route sequencenr
+                        case 0:
+                            // if update route sequencenr is equal to local route sequencenr
 
-                            // check if updateRoute (metric + 1) is better than local existant route
-                            if (updateRoute.Metric + 1 < localRoute.Metric)
+                            if (updateRoute.Metric != NotReachable)
                             {
-                                // update and add increment metric
-                                dsdvLocalRouteEntry.NextHop = senderId;
-                                dsdvLocalRouteEntry.Metric = dsdvUpdateRoute.Metric + 1;
-                                dsdvLocalRouteEntry.SequenceNr = (DsdvSequence)dsdvUpdateRoute.SequenceNr.Clone();
-                                updated = true;
+                                // check if updateRoute (metric + 1) is better than local existant route
+                                if (updateRoute.Metric + 1 < localRoute.Metric)
+                                {
+                                    // update and add increment metric
+                                    dsdvLocalRouteEntry.NextHop = senderId;
+                                    dsdvLocalRouteEntry.Metric = dsdvUpdateRoute.Metric + 1;
+                                    dsdvLocalRouteEntry.SequenceNr = (DsdvSequence)dsdvUpdateRoute.SequenceNr.Clone();
+                                    updated = true;
+                                }
                             }
 
                             break;
-                        case 1: // if update route sequencenr is higher then local route sequencenr
 
-                            // if metric is the same 
-                            if (updateRoute.Metric + 1 == localRoute.Metric)
+                        case 1:
+                            // if update route sequencenr is higher then local route sequencenr (update info is newer)
+
+                            // if metric is notreachable
+                            if (updateRoute.Metric == NotReachable)
                             {
-                                // update sequence nr
-                                dsdvLocalRouteEntry.SequenceNr = (DsdvSequence)dsdvUpdateRoute.SequenceNr.Clone();
+                                if (dsdvLocalRouteEntry.Metric != NotReachable)
+                                {
+                                    // set local route not reachable
+                                    dsdvLocalRouteEntry.Metric = NotReachable;
+                                    dsdvLocalRouteEntry.SequenceNr = (DsdvSequence)dsdvUpdateRoute.SequenceNr.Clone();
+
+                                    //SetAllRoutesNotReachableForDisconnectedNextHop(dsdvLocalRouteEntry.NextHop);
+
+                                    updated = true;
+                                }
                             }
                             else
                             {
-                                // update local route with newer information (metric + 1)
-                                dsdvLocalRouteEntry.NextHop = senderId;
-
-                                if (dsdvUpdateRoute.Metric != NotReachable)
+                                // if metric is the same 
+                                if (updateRoute.Metric + 1 == localRoute.Metric)
                                 {
-                                    dsdvLocalRouteEntry.Metric = dsdvUpdateRoute.Metric + 1;
+                                    // update sequence nr and don' update hte route
+                                    dsdvLocalRouteEntry.SequenceNr = (DsdvSequence)dsdvUpdateRoute.SequenceNr.Clone();
                                 }
                                 else
                                 {
-                                    dsdvLocalRouteEntry.Metric = dsdvUpdateRoute.Metric;
-
-                                    SetAllRoutesNotReachableForDisconnectedNextHop(dsdvLocalRouteEntry.NextHop);
-
+                                    // update local route with newer information (metric + 1)
+                                    dsdvLocalRouteEntry.NextHop = senderId;
+                                    dsdvLocalRouteEntry.Metric = dsdvUpdateRoute.Metric + 1;
+                                    dsdvLocalRouteEntry.SequenceNr = (DsdvSequence)dsdvUpdateRoute.SequenceNr.Clone();
+                                    updated = true;
                                 }
-                                dsdvLocalRouteEntry.SequenceNr = (DsdvSequence)dsdvUpdateRoute.SequenceNr.Clone();
-                                updated = true;
                             }
 
                             break;
@@ -129,7 +142,7 @@ namespace NetSim.Lib.Routing.DSDV
         /// <param name="nextHop">The next hop.</param>
         public void SetAllRoutesNotReachableForDisconnectedNextHop(string nextHop)
         {
-            foreach(var netSimTableEntry in Entries.Where(e => e.NextHop.Equals(nextHop) && !e.Destination.Equals(e.NextHop)))
+            foreach (var netSimTableEntry in Entries.Where(e => e.NextHop.Equals(nextHop) && !e.Destination.Equals(e.NextHop)))
             {
                 var entry = (DsdvTableEntry)netSimTableEntry;
 

@@ -1,17 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
+﻿// -----------------------------------------------------------------------
+// <copyright file="AodvTableEntry.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - AodvTableEntry.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.AODV
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using NetSim.Lib.Simulator.Components;
+
     /// <summary>
-    /// 
+    /// The aodv table entry implementation.
     /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimTableEntry" />
     /// <seealso cref="NetSimTableEntry" />
     public class AodvTableEntry : NetSimTableEntry
     {
@@ -24,15 +30,7 @@ namespace NetSim.Lib.Routing.AODV
         }
 
         /// <summary>
-        /// Gets or sets the sequence nr.
-        /// </summary>
-        /// <value>
-        /// The sequence nr.
-        /// </value>
-        public AodvSequence SequenceNr { get; set; }
-
-        /// <summary>
-        /// Gets or sets the active neighbors dictonary. 
+        /// Gets or sets the active neighbors dictionary. 
         /// The key identifies the neighbor. 
         /// The value part is a time counter.
         /// </summary>
@@ -42,9 +40,19 @@ namespace NetSim.Lib.Routing.AODV
         public Dictionary<string, int> ActiveNeighbours { get; set; }
 
         /// <summary>
+        /// Gets or sets the sequence nr.
+        /// </summary>
+        /// <value>
+        /// The sequence nr.
+        /// </value>
+        public AodvSequence SequenceNr { get; set; }
+
+        /// <summary>
         /// Clones this instance.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// The cloned instance.
+        /// </returns>
         public override object Clone()
         {
             return new AodvTableEntry()
@@ -64,7 +72,7 @@ namespace NetSim.Lib.Routing.AODV
         /// </returns>
         public override string ToString()
         {
-            return base.ToString() + $" {SequenceNr,5} {String.Join(",", ActiveNeighbours.Keys)}";
+            return base.ToString() + $" {this.SequenceNr,5} {string.Join(",", this.ActiveNeighbours.Keys)}";
         }
     }
 }

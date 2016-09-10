@@ -1,26 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
-using NetSim.ViewModel;
+﻿// -----------------------------------------------------------------------
+// <copyright file="ClientPage.xaml.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim - ClientPage.xaml.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.DetailPages
 {
+    using System;
+    using System.Linq;
+    using System.Windows.Controls;
+
+    using NetSim.Lib.Simulator.Components;
+    using NetSim.ViewModel;
+
     /// <summary>
-    /// Interaction logic for ClientPage.xaml
+    /// Interaction logic for ClientPage
     /// </summary>
     public partial class ClientPage : Page
     {
@@ -34,8 +30,7 @@ namespace NetSim.DetailPages
         /// </summary>
         public ClientPage()
         {
-            InitializeComponent();
-
+            this.InitializeComponent();
         }
 
         /// <summary>
@@ -48,12 +43,13 @@ namespace NetSim.DetailPages
         {
             get
             {
-                return client;
+                return this.client;
             }
+
             set
             {
-                client = value;
-                this.DataContext = new ClientViewModel(client);
+                this.client = value;
+                this.DataContext = new ClientViewModel(this.client);
             }
         }
     }

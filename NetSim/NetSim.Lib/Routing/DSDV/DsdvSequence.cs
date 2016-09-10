@@ -1,45 +1,61 @@
-﻿using System;
-using System.Linq;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Messages;
+﻿// -----------------------------------------------------------------------
+// <copyright file="DsdvSequence.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - DsdvSequence.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.DSDV
 {
+    using System;
+    using NetSim.Lib.Simulator.Messages;
+
     /// <summary>
-    /// 
+    /// The dsdv sequence implementation.
     /// </summary>
     public class DsdvSequence : NetSimSequence, IEquatable<DsdvSequence>, IComparable<DsdvSequence>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DsdvSequence"/> class.
         /// </summary>
-        public DsdvSequence() { }
+        public DsdvSequence()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DsdvSequence"/> class.
         /// </summary>
         /// <param name="sequenceId">The sequence identifier.</param>
         /// <param name="sequenceNr">The sequence nr.</param>
-        public DsdvSequence(string sequenceId, int sequenceNr) : base(sequenceId, sequenceNr)
-        { }
+        public DsdvSequence(string sequenceId, int sequenceNr)
+            : base(sequenceId, sequenceNr)
+        {
+        }
 
         /// <summary>
-        /// Equalses the specified other.
+        /// Clones this instance.
         /// </summary>
-        /// <param name="other">The other.</param>
-        /// <returns></returns>
-        public bool Equals(DsdvSequence other)
+        /// <returns>
+        /// A new object that is a copy of this instance.
+        /// </returns>
+        public override object Clone()
         {
-            return base.Equals(other);
+            return new DsdvSequence(this.SequenceId, this.SequenceNr);
         }
 
         /// <summary>
         /// Compares to.
         /// </summary>
         /// <param name="other">The other.</param>
-        /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException"></exception>
+        /// <returns>
+        /// A value that indicates the relative order of the objects being compared. 
+        /// The return value has the following meanings: 
+        /// Value Meaning Less than zero This object is less than the <paramref name="other" /> 
+        /// parameter.Zero This object is equal to <paramref name="other" />. Greater than zero
+        ///  This object is greater than <paramref name="other" />.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">The other argument is null.</exception>
         /// <exception cref="System.InvalidOperationException">Can't compare this sequences.</exception>
         public int CompareTo(DsdvSequence other)
         {
@@ -47,13 +63,15 @@ namespace NetSim.Lib.Routing.DSDV
         }
 
         /// <summary>
-        /// Clones this instance.
+        /// Compares the specified other.
         /// </summary>
-        /// <returns></returns>
-        public override object Clone()
+        /// <param name="other">The other.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(DsdvSequence other)
         {
-            return new DsdvSequence(this.SequenceId, this.SequenceNr);
+            return base.Equals(other);
         }
-
     }
 }

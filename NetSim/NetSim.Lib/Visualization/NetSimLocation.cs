@@ -1,12 +1,16 @@
-﻿using System;
-using System.Linq;
+﻿// -----------------------------------------------------------------------
+// <copyright file="NetSimLocation.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - NetSimLocation.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Visualization
 {
-
     /// <summary>
     /// Note not a struct here - because:
-    ///  To enable edit on the same object refernece for placement
+    /// To enable edit on the same object reference for placement.
     /// </summary>
     public class NetSimLocation
     {

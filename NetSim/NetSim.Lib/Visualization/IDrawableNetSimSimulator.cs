@@ -1,14 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
+// -----------------------------------------------------------------------
+// <copyright file="IDrawableNetSimSimulator.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - IDrawableNetSimSimulator.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Visualization
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using NetSim.Lib.Simulator.Components;
+
     /// <summary>
-    /// 
+    /// The simulator interface for drawing.
     /// </summary>
     public interface IDrawableNetSimSimulator
     {

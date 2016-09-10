@@ -1,16 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
+﻿// -----------------------------------------------------------------------
+// <copyright file="AodvHelloMessage.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - AodvHelloMessage.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.AODV
 {
+    using System;
+    using System.Linq;
+    using NetSim.Lib.Simulator.Components;
+
     /// <summary>
-    /// 
+    /// THe Hello message of the protocol.
     /// </summary>
     /// <seealso cref="NetSimMessage" />
     public class AodvHelloMessage : NetSimMessage
@@ -29,7 +32,7 @@ namespace NetSim.Lib.Routing.AODV
         /// <value>
         /// The short name.
         /// </value>
-        public override string ShortName => "Hello"; 
+        public override string ShortName => "Hello";
 
         /// <summary>
         /// Creates a new object that is a copy of the current instance.
@@ -39,10 +42,7 @@ namespace NetSim.Lib.Routing.AODV
         /// </returns>
         public override object Clone()
         {
-            return CopyTo(new AodvHelloMessage()
-            {
-                SenderSequenceNr = (AodvSequence)this.SenderSequenceNr?.Clone()
-            });
+            return this.CopyTo(new AodvHelloMessage() { SenderSequenceNr = (AodvSequence)this.SenderSequenceNr?.Clone() });
         }
     }
 }

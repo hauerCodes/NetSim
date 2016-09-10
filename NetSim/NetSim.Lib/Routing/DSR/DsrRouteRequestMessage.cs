@@ -1,14 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
+﻿// -----------------------------------------------------------------------
+// <copyright file="DsrRouteRequestMessage.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - DsrRouteRequestMessage.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.DSR
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using NetSim.Lib.Simulator.Components;
+
     /// <summary>
     /// The DSR Route Request Message
     /// This message is used to search route to the destination Id within this message.
@@ -26,20 +31,20 @@ namespace NetSim.Lib.Routing.DSR
         }
 
         /// <summary>
-        /// Gets or sets the request identifier.
-        /// </summary>
-        /// <value>
-        /// The request identifier.
-        /// </value>
-        public int RequestId { get; set; }
-
-        /// <summary>
         /// Gets or sets the nodes.
         /// </summary>
         /// <value>
         /// The nodes.
         /// </value>
         public List<string> Nodes { get; set; }
+
+        /// <summary>
+        /// Gets or sets the request identifier.
+        /// </summary>
+        /// <value>
+        /// The request identifier.
+        /// </value>
+        public int RequestId { get; set; }
 
         /// <summary>
         /// Gets the short name.
@@ -52,7 +57,7 @@ namespace NetSim.Lib.Routing.DSR
         /// <summary>
         /// Clones this instance.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The cloned instance.</returns>
         public override object Clone()
         {
             var clone = new DsrRouteRequestMessage()
@@ -61,7 +66,7 @@ namespace NetSim.Lib.Routing.DSR
                 Nodes = new List<string>(this.Nodes)
             };
 
-            return CopyTo(clone);
+            return this.CopyTo(clone);
         }
 
         /// <summary>
@@ -72,8 +77,8 @@ namespace NetSim.Lib.Routing.DSR
         /// </returns>
         public override string ToString()
         {
-            return $"{base.ToString()}\n| Nodes:{string.Join(",", Nodes)}\n"
-                   + $"| Request:{RequestId}\n+[/{this.GetType().Name}]";
+            return $"{base.ToString()}\n| Nodes:{string.Join(",", this.Nodes)}\n"
+                   + $"| Request:{this.RequestId}\n+[/{this.GetType().Name}]";
         }
     }
 }

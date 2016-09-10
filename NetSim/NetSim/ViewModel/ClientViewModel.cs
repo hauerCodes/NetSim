@@ -1,35 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
-
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
-using NetSim.Lib.Simulator.Messages;
+﻿// -----------------------------------------------------------------------
+// <copyright file="ClientViewModel.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim - ClientViewModel.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.ViewModel
 {
+    using System;
+    using System.Linq;
+    using System.Windows.Input;
+
+    using GalaSoft.MvvmLight;
+    using GalaSoft.MvvmLight.Command;
+
+    using NetSim.Lib.Simulator.Components;
+    using NetSim.Lib.Simulator.Messages;
+
+    /// <summary>
+    /// The client view model.
+    /// </summary>
+    /// <seealso cref="GalaSoft.MvvmLight.ViewModelBase" />
     public class ClientViewModel : ViewModelBase
     {
         /// <summary>
-        /// The send message command
-        /// </summary>
-        private ICommand sendMessageCommand;
-
-        /// <summary>
-        /// The delete clien command
+        /// The delete client command
         /// </summary>
         private ICommand deleteClientCommand;
 
         /// <summary>
-        /// The send message destination
+        /// The send message command
         /// </summary>
-        private string sendMessageDestination;
+        private ICommand sendMessageCommand;
 
         /// <summary>
         /// The send message data
@@ -37,16 +40,26 @@ namespace NetSim.ViewModel
         private string sendMessageData;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ClientViewModel"/> class.
+        /// The send message destination
+        /// </summary>
+        private string sendMessageDestination;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ClientViewModel" /> class.
         /// </summary>
         /// <param name="client">The client.</param>
         public ClientViewModel(NetSimClient client)
         {
             this.Client = client;
             this.SendMessageData = "Data";
-            InitializeCommands();
+            this.InitializeCommands();
         }
-        
+
+        /// <summary>
+        /// Occurs when the deletion of the client is requested.
+        /// </summary>
+        public event EventHandler<NetSimClient> DeleteClientEvent;
+
         /// <summary>
         /// Gets the client.
         /// </summary>
@@ -56,42 +69,22 @@ namespace NetSim.ViewModel
         public NetSimClient Client { get; }
 
         /// <summary>
-        /// Occurs when the deletion of the client is requested.
-        /// Note: http://bit.ly/2bRCkbI
-        /// </summary>
-        public event EventHandler<NetSimClient> DeleteClientEvent;
-
-        /// <summary>
-        /// Gets or sets the send message destination.
+        /// Gets or sets the delete client command.
         /// </summary>
         /// <value>
-        /// The send message destination.
+        /// The delete client command.
         /// </value>
-        public string SendMessageDestination
+        public ICommand DeleteClientCommand
         {
-            get { return sendMessageDestination; }
-            set
+            get
             {
-                sendMessageDestination = value;
-                RaisePropertyChanged();
-                (SendMessageCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                return this.deleteClientCommand;
             }
-        }
 
-        /// <summary>
-        /// Gets or sets the send message data.
-        /// </summary>
-        /// <value>
-        /// The send message data.
-        /// </value>
-        public string SendMessageData
-        {
-            get { return sendMessageData; }
             set
             {
-                sendMessageData = value;
-                RaisePropertyChanged();
-                (SendMessageCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                this.deleteClientCommand = value;
+                this.RaisePropertyChanged();
             }
         }
 
@@ -105,63 +98,56 @@ namespace NetSim.ViewModel
         {
             get
             {
-                return sendMessageCommand;
+                return this.sendMessageCommand;
             }
+
             set
             {
                 this.sendMessageCommand = value;
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
             }
         }
 
         /// <summary>
-        /// Gets or sets the delte client command.
+        /// Gets or sets the send message data.
         /// </summary>
         /// <value>
-        /// The delte client command.
+        /// The send message data.
         /// </value>
-        public ICommand DeleteClientCommand
+        public string SendMessageData
         {
             get
             {
-                return deleteClientCommand;
+                return this.sendMessageData;
             }
+
             set
             {
-                this.deleteClientCommand = value;
-                RaisePropertyChanged();
+                this.sendMessageData = value;
+                this.RaisePropertyChanged();
+                (this.SendMessageCommand as RelayCommand)?.RaiseCanExecuteChanged();
             }
         }
 
         /// <summary>
-        /// Initializes the commands.
+        /// Gets or sets the send message destination.
         /// </summary>
-        private void InitializeCommands()
+        /// <value>
+        /// The send message destination.
+        /// </value>
+        public string SendMessageDestination
         {
-            this.SendMessageCommand = new RelayCommand(ExecuteSendMessage, CanExecuteSendMessage);
-            this.DeleteClientCommand = new RelayCommand(OnDeleteClient);
-        }
-
-        /// <summary>
-        /// Executes the send message.
-        /// </summary>
-        private void ExecuteSendMessage()
-        {
-            this.Client.SendMessage(new DataMessage()
+            get
             {
-                Receiver = this.SendMessageDestination,
-                Data = this.SendMessageData,
-                Sender = this.Client.Id
-            });
-        }
+                return this.sendMessageDestination;
+            }
 
-        /// <summary>
-        /// Determines whether this instance can execute send message command.
-        /// </summary>
-        /// <returns></returns>
-        private bool CanExecuteSendMessage()
-        {
-            return (!string.IsNullOrEmpty(this.SendMessageDestination) && !string.IsNullOrEmpty(this.SendMessageData));
+            set
+            {
+                this.sendMessageDestination = value;
+                this.RaisePropertyChanged();
+                (this.SendMessageCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            }
         }
 
         /// <summary>
@@ -169,7 +155,41 @@ namespace NetSim.ViewModel
         /// </summary>
         protected virtual void OnDeleteClient()
         {
-            DeleteClientEvent?.Invoke(this, this.Client);
+            this.DeleteClientEvent?.Invoke(this, this.Client);
+        }
+
+        /// <summary>
+        /// Determines whether this instance can execute send message command.
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> if this instance [can execute send message]; otherwise, <c>false</c>.
+        /// </returns>
+        private bool CanExecuteSendMessage()
+        {
+            return !string.IsNullOrEmpty(this.SendMessageDestination) && !string.IsNullOrEmpty(this.SendMessageData);
+        }
+
+        /// <summary>
+        /// Executes the send message.
+        /// </summary>
+        private void ExecuteSendMessage()
+        {
+            this.Client.SendMessage(
+                new DataMessage()
+                {
+                    Receiver = this.SendMessageDestination,
+                    Data = this.SendMessageData,
+                    Sender = this.Client.Id
+                });
+        }
+
+        /// <summary>
+        /// Initializes the commands.
+        /// </summary>
+        private void InitializeCommands()
+        {
+            this.SendMessageCommand = new RelayCommand(this.ExecuteSendMessage, this.CanExecuteSendMessage);
+            this.DeleteClientCommand = new RelayCommand(this.OnDeleteClient);
         }
     }
 }

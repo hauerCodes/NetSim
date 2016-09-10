@@ -1,16 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
+﻿// -----------------------------------------------------------------------
+// <copyright file="AodvRouteErrorMessage.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - AodvRouteErrorMessage.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.AODV
 {
+    using System;
+    using System.Linq;
+    using System.Text;
+
+    using NetSim.Lib.Simulator.Components;
+
+    /// <summary>
+    /// The route error message of the protocol.
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimMessage" />
     public class AodvRouteErrorMessage : NetSimMessage
     {
+        /// <summary>
+        /// Gets the short name.
+        /// </summary>
+        /// <value>
+        /// The short name.
+        /// </value>
+        public override string ShortName => "RERR";
 
         /// <summary>
         /// Gets or sets the not reachable node.
@@ -29,14 +45,6 @@ namespace NetSim.Lib.Routing.AODV
         public AodvSequence UnReachableDestinationSequenceNr { get; set; }
 
         /// <summary>
-        /// Gets the short name.
-        /// </summary>
-        /// <value>
-        /// The short name.
-        /// </value>
-        public override string ShortName => "RERR";
-
-        /// <summary>
         /// Creates a new object that is a copy of the current instance.
         /// </summary>
         /// <returns>
@@ -44,11 +52,13 @@ namespace NetSim.Lib.Routing.AODV
         /// </returns>
         public override object Clone()
         {
-            return CopyTo(new AodvRouteErrorMessage()
-            {
-                UnReachableDestination = this.UnReachableDestination,
-                UnReachableDestinationSequenceNr = (AodvSequence)this.UnReachableDestinationSequenceNr?.Clone(),
-            });
+            return
+                this.CopyTo(
+                    new AodvRouteErrorMessage()
+                    {
+                        UnReachableDestination = this.UnReachableDestination,
+                        UnReachableDestinationSequenceNr = (AodvSequence)this.UnReachableDestinationSequenceNr?.Clone(),
+                    });
         }
 
         /// <summary>
@@ -63,12 +73,11 @@ namespace NetSim.Lib.Routing.AODV
 
             builder.AppendLine(base.ToString());
 
-            builder.AppendFormat("| Unreachable Destination:{0}\n", UnReachableDestination);
+            builder.AppendFormat("| Unreachable Destination:{0}\n", this.UnReachableDestination);
 
-
-            if (UnReachableDestinationSequenceNr != null)
+            if (this.UnReachableDestinationSequenceNr != null)
             {
-                builder.AppendFormat("| Unreachable SequenceNr:{0}\n", UnReachableDestinationSequenceNr);
+                builder.AppendFormat("| Unreachable SequenceNr:{0}\n", this.UnReachableDestinationSequenceNr);
             }
 
             builder.AppendFormat("+[/{0}]", this.GetType().Name);

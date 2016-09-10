@@ -1,24 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
+﻿// -----------------------------------------------------------------------
+// <copyright file="DsrRouteErrorMessage.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - DsrRouteErrorMessage.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.DSR
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+
+    using NetSim.Lib.Simulator.Components;
+
+    /// <summary>
+    /// The dsr route error message implementation.
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimMessage" />
     public class DsrRouteErrorMessage : NetSimMessage
     {
-
         /// <summary>
-        /// Gets or sets the nodes.
+        /// Gets or sets the failed message.
         /// </summary>
         /// <value>
-        /// The nodes.
+        /// The failed message.
         /// </value>
-        public List<string> Route { get; set; }
+        public NetSimMessage FailedMessage { get; set; }
 
         /// <summary>
         /// Gets or sets the not reachable node.
@@ -29,12 +38,12 @@ namespace NetSim.Lib.Routing.DSR
         public string NotReachableNode { get; set; }
 
         /// <summary>
-        /// Gets or sets the failed message.
+        /// Gets or sets the nodes.
         /// </summary>
         /// <value>
-        /// The failed message.
+        /// The nodes.
         /// </value>
-        public NetSimMessage FailedMessage { get; set; }
+        public List<string> Route { get; set; }
 
         /// <summary>
         /// Gets the short name.
@@ -45,28 +54,9 @@ namespace NetSim.Lib.Routing.DSR
         public override string ShortName => "RERR";
 
         /// <summary>
-        /// Gets the next reverse hop.
-        /// </summary>
-        /// <param name="currentNodeId">The current node identifier.</param>
-        /// <returns></returns>
-        public string GetNextReverseHop(string currentNodeId)
-        {
-            if (Route == null || Route.Count == 0)
-            {
-                return null;
-            }
-
-            int searchedIndex = 0;
-
-            searchedIndex = Route.IndexOf(currentNodeId) - 1;
-
-            return searchedIndex < 0 ? null : Route[searchedIndex];
-        }
-
-        /// <summary>
         /// Clones this instance.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The cloned instance.</returns>
         public override object Clone()
         {
             var clone = new DsrRouteErrorMessage()
@@ -80,7 +70,24 @@ namespace NetSim.Lib.Routing.DSR
                 clone.Route = new List<string>(this.Route);
             }
 
-            return CopyTo(clone);
+            return this.CopyTo(clone);
+        }
+
+        /// <summary>
+        /// Gets the next reverse hop.
+        /// </summary>
+        /// <param name="currentNodeId">The current node identifier.</param>
+        /// <returns>The next reverse hop on the saved route or null.</returns>
+        public string GetNextReverseHop(string currentNodeId)
+        {
+            if (this.Route == null || this.Route.Count == 0)
+            {
+                return null;
+            }
+
+            var searchedIndex = this.Route.IndexOf(currentNodeId) - 1;
+
+            return searchedIndex < 0 ? null : this.Route[searchedIndex];
         }
 
         /// <summary>
@@ -95,22 +102,21 @@ namespace NetSim.Lib.Routing.DSR
 
             builder.AppendLine(base.ToString());
 
-            builder.AppendFormat("| NotReachable:{0}\n", NotReachableNode);
+            builder.AppendFormat("| NotReachable:{0}\n", this.NotReachableNode);
 
-            if (Route != null && Route.Count > 0)
+            if (this.Route != null && this.Route.Count > 0)
             {
-                builder.AppendFormat("| Route:{0}\n", string.Join(",", Route));
+                builder.AppendFormat("| Route:{0}\n", string.Join(",", this.Route));
             }
 
-            if (FailedMessage != null)
+            if (this.FailedMessage != null)
             {
-                builder.AppendFormat("| FailedMessage:\n #| {0}\n", FailedMessage.ToString());
+                builder.AppendFormat("| FailedMessage:\n #| {0}\n", this.FailedMessage);
             }
 
             builder.AppendFormat("+[/{0}]", this.GetType().Name);
 
             return builder.ToString();
         }
-
     }
 }

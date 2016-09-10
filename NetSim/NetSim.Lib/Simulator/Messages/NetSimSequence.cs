@@ -1,17 +1,32 @@
-﻿using System;
-using System.Linq;
+﻿// -----------------------------------------------------------------------
+// <copyright file="NetSimSequence.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - NetSimSequence.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Simulator.Messages
 {
+    using System;
+
+    /// <summary>
+    /// The Sequence base class.
+    /// </summary>
+    /// <seealso cref="System.IEquatable{NetSimSequence}" />
+    /// <seealso cref="System.IComparable{NetSimSequence}" />
+    /// <seealso cref="System.ICloneable" />
     public class NetSimSequence : IEquatable<NetSimSequence>, IComparable<NetSimSequence>, ICloneable
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NetSimSequence"/> class.
+        /// Initializes a new instance of the <see cref="NetSimSequence" /> class.
         /// </summary>
-        public NetSimSequence() { }
+        public NetSimSequence()
+        {
+        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="NetSimSequence"/> class.
+        /// Initializes a new instance of the <see cref="NetSimSequence" /> class.
         /// </summary>
         /// <param name="sequenceId">The sequence identifier.</param>
         /// <param name="sequenceNr">The sequence nr.</param>
@@ -38,27 +53,36 @@ namespace NetSim.Lib.Simulator.Messages
         public int SequenceNr { get; set; }
 
         /// <summary>
-        /// Equalses the specified other.
+        /// Clones this instance.
         /// </summary>
-        /// <param name="other">The other.</param>
-        /// <returns></returns>
-        public bool Equals(NetSimSequence other)
+        /// <returns>
+        /// A new object that is a copy of this instance.
+        /// </returns>
+        public virtual object Clone()
         {
-            if (other == null) return false;
-
-            return (this.SequenceId.Equals(other.SequenceId) && this.SequenceNr == other.SequenceNr);
+            return new NetSimSequence(this.SequenceId, this.SequenceNr);
         }
 
         /// <summary>
         /// Compares to.
         /// </summary>
         /// <param name="other">The other.</param>
-        /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException"></exception>
+        /// <returns>
+        /// A value that indicates the relative order of the objects being compared. 
+        /// The return value has the following meanings: Value Meaning Less than zero 
+        /// This object is less than the <paramref name="other" /> parameter.
+        /// Zero This object is equal to <paramref name="other" />. 
+        /// Greater than zero This object is greater than <paramref name="other" />.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">Can't compare this sequences.</exception>
+        /// <exception cref="System.ArgumentNullException">If argument other is null.</exception>
         /// <exception cref="System.InvalidOperationException">Can't compare this sequences.</exception>
         public int CompareTo(NetSimSequence other)
         {
-            if (other == null) throw new ArgumentNullException(nameof(other));
+            if (other == null)
+            {
+                throw new ArgumentNullException(nameof(other));
+            }
 
             if (!other.SequenceId.Equals(this.SequenceId))
             {
@@ -79,12 +103,20 @@ namespace NetSim.Lib.Simulator.Messages
         }
 
         /// <summary>
-        /// Clones this instance.
+        /// Compared the specified other instance to this instance.
         /// </summary>
-        /// <returns></returns>
-        public virtual object Clone()
+        /// <param name="other">The other.</param>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+        /// </returns>
+        public bool Equals(NetSimSequence other)
         {
-            return new NetSimSequence(this.SequenceId, this.SequenceNr);
+            if (other == null)
+            {
+                return false;
+            }
+
+            return this.SequenceId.Equals(other.SequenceId) && this.SequenceNr == other.SequenceNr;
         }
 
         /// <summary>
@@ -95,7 +127,7 @@ namespace NetSim.Lib.Simulator.Messages
         /// </returns>
         public override string ToString()
         {
-            return $"{SequenceId}-{SequenceNr:000}";
+            return $"{this.SequenceId}-{this.SequenceNr:000}";
         }
     }
 }

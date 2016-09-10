@@ -1,10 +1,17 @@
-﻿using System;
-using System.Linq;
-
-using NetSim.Lib.Simulator.Components;
+﻿// -----------------------------------------------------------------------
+// <copyright file="ConnectionFrameMessage.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - ConnectionFrameMessage.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Simulator.Messages
 {
+    using System;
+    using System.Linq;
+    using NetSim.Lib.Simulator.Components;
+
     /// <summary>
     /// This Message is a connection frame message.
     /// It can be compared with an ethernet frame message.
@@ -28,11 +35,11 @@ namespace NetSim.Lib.Simulator.Messages
         /// <value>
         /// The short name.
         /// </value>
-        public override string ShortName => InnerMessage?.ShortName ?? string.Empty;
+        public override string ShortName => this.InnerMessage?.ShortName ?? string.Empty;
 
         /// <summary>
         /// Gets or sets the transmission step of this message.
-        /// Intial for the initial sending step - going on wire.
+        /// Initial for the initial sending step - going on wire.
         /// Transmitting for indicating that the message is on the wire.
         /// Receiving for indicating that the message is going to be received.
         /// </summary>
@@ -44,13 +51,12 @@ namespace NetSim.Lib.Simulator.Messages
         /// <summary>
         /// Clones this instance.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// A new object that is a copy of this instance.
+        /// </returns>
         public override object Clone()
         {
-            return CopyTo(new ConnectionFrameMessage()
-            {
-                InnerMessage = this.InnerMessage,
-            });
+            return this.CopyTo(new ConnectionFrameMessage() { InnerMessage = this.InnerMessage, });
         }
 
         /// <summary>
@@ -61,8 +67,8 @@ namespace NetSim.Lib.Simulator.Messages
         /// </returns>
         public override string ToString()
         {
-            return $"[{this.GetType().Name} ({Sender} -> {Receiver})]"
-                   + $"\n{InnerMessage}\n[/{this.GetType().Name}]";
+            return $"[{this.GetType().Name} ({this.Sender} -> {this.Receiver})]"
+                   + $"\n{this.InnerMessage}\n[/{this.GetType().Name}]";
         }
     }
 }

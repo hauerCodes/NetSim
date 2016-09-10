@@ -1,21 +1,20 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="NetSimItem.cs" company="FH Wr.Neustadt">
+// <copyright file="INetSimVisualizableItem.cs" company="FH Wr.Neustadt">
 //      Copyright Christoph Hauer. All rights reserved.
 // </copyright>
 // <author>Christoph Hauer</author>
-// <summary>NetSim.Lib - NetSimItem.cs</summary>
+// <summary>NetSim.Lib - INetSimVisualizableItem.cs</summary>
 // -----------------------------------------------------------------------
 
-namespace NetSim.Lib.Simulator.Components
+namespace NetSim.Lib.Visualization
 {
     using System;
     using System.Linq;
-    using NetSim.Lib.Visualization;
 
     /// <summary>
-    /// The Simulator Item base class with identifier and location.
+    /// The visualize interface for an item.
     /// </summary>
-    public abstract class NetSimItem : INetSimVisualizableItem
+    public interface INetSimVisualizableItem
     {
         /// <summary>
         /// Gets or sets the identifier.
@@ -23,7 +22,7 @@ namespace NetSim.Lib.Simulator.Components
         /// <value>
         /// The identifier.
         /// </value>
-        public string Id { get; set; }
+        string Id { get; set; }
 
         /// <summary>
         /// Gets or sets the location.
@@ -31,6 +30,6 @@ namespace NetSim.Lib.Simulator.Components
         /// <value>
         /// The location.
         /// </value>
-        public NetSimLocation Location { get; set; }
+        NetSimLocation Location { get; set; }
     }
 }

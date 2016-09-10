@@ -1,14 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
+﻿// -----------------------------------------------------------------------
+// <copyright file="DsrTableEntry.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - DsrTableEntry.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.DSR
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using NetSim.Lib.Simulator.Components;
+
+    /// <summary>
+    /// The dsr table entry implementation.
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimTableEntry" />
     public class DsrTableEntry : NetSimTableEntry
     {
         /// <summary>
@@ -30,10 +39,12 @@ namespace NetSim.Lib.Routing.DSR
         /// <summary>
         /// Clones this instance.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// The cloned instance.
+        /// </returns>
         public override object Clone()
         {
-            return new DsrTableEntry() { Destination = Destination, Route = new List<string>(this.Route) };
+            return new DsrTableEntry() { Destination = this.Destination, Route = new List<string>(this.Route) };
         }
 
         /// <summary>
@@ -44,7 +55,9 @@ namespace NetSim.Lib.Routing.DSR
         /// </returns>
         public override string ToString()
         {
-            return !IsReachable ? $"{Destination,4} {"---",6}" : $"{Destination,4} {Metric,5} {String.Join(",", Route)}";
+            return !this.IsReachable
+                       ? $"{this.Destination,4} {"---",6}"
+                       : $"{this.Destination,4} {this.Metric,5} {string.Join(",", this.Route)}";
         }
     }
 }

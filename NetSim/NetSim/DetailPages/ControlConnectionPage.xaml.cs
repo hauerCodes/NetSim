@@ -1,26 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
-using NetSim.ViewModel;
+﻿// -----------------------------------------------------------------------
+// <copyright file="ControlConnectionPage.xaml.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim - ControlConnectionPage.xaml.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.DetailPages
 {
+    using System;
+    using System.Linq;
+    using System.Windows.Controls;
+
+    using NetSim.Lib.Simulator.Components;
+    using NetSim.ViewModel;
+
     /// <summary>
-    /// Interaction logic for ConnectionPage.xaml
+    /// Interaction logic for ConnectionPage
     /// </summary>
     public partial class ControlConnectionPage : Page
     {
@@ -30,11 +26,11 @@ namespace NetSim.DetailPages
         private NetSimConnection connection;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConnectionPage"/> class.
+        /// Initializes a new instance of the <see cref="ControlConnectionPage"/> class.
         /// </summary>
         public ControlConnectionPage()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
         /// <summary>
@@ -53,13 +49,14 @@ namespace NetSim.DetailPages
         {
             get
             {
-                return connection;
+                return this.connection;
             }
+
             set
             {
-                connection = value;
-                var viewmodel = new ConnectionViewModel(connection);
-                viewmodel.DeleteConnectionEvent += (sender, e) => OnDeleteConnection();
+                this.connection = value;
+                var viewmodel = new ConnectionViewModel(this.connection);
+                viewmodel.DeleteConnectionEvent += (sender, e) => this.OnDeleteConnection();
 
                 this.DataContext = viewmodel;
             }
@@ -70,7 +67,7 @@ namespace NetSim.DetailPages
         /// </summary>
         protected virtual void OnDeleteConnection()
         {
-            DeleteConnectionEvent?.Invoke(this, this.Connection);
+            this.DeleteConnectionEvent?.Invoke(this, this.Connection);
         }
     }
 }

@@ -57,7 +57,9 @@
     <Compile Include="Controls\MessageControl.xaml.cs">
       <DependentUpon>MessageControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="Properties\Annotations.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Routing\AODV\AodvRouteErrorMessage.cs" />
     <Compile Include="Routing\AODV\AodvRouteReplyMessage.cs" />
     <Compile Include="Routing\AODV\AodvRouteRequestMessage.cs" />
@@ -71,19 +73,27 @@
     <Compile Include="Routing\OLSR\OlsrTopologyTableEntry.cs" />
     <Compile Include="Routing\OLSR\OlsrTopologyTable.cs" />
     <Compile Include="Simulator\Messages\NetSimRequestCacheEntry.cs" />
-    <Compile Include="Routing\DSR\DsrFrameMessage.cs" />
+    <Compile Include="Routing\DSR\DsrFrameMessage.cs">
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Routing\Helpers\MessageHandlerAttribute.cs" />
     <Compile Include="Routing\DSR\DsrRoutingProtocol.cs" />
     <Compile Include="Routing\DSR\DsrRouteErrorMessage.cs" />
-    <Compile Include="Routing\DSR\DsrRouteReplyMessage.cs" />
+    <Compile Include="Routing\DSR\DsrRouteReplyMessage.cs">
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Routing\DSR\DsrRouteRequestMessage.cs" />
     <Compile Include="Routing\DSR\DsrTableEntry.cs" />
     <Compile Include="Routing\Helpers\MessageHandlerResolver.cs" />
     <Compile Include="Routing\OLSR\OlsrTopologyControlMessage.cs" />
-    <Compile Include="Routing\OLSR\OlsrHelloMessage.cs" />
+    <Compile Include="Routing\OLSR\OlsrHelloMessage.cs">
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Routing\OLSR\OlsrNeighborTable.cs" />
     <Compile Include="Routing\OLSR\OlsrNeighborTableEntry.cs" />
-    <Compile Include="Routing\OLSR\OlsrRoutingProtocol.cs" />
+    <Compile Include="Routing\OLSR\OlsrRoutingProtocol.cs">
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Routing\OLSR\OlsrState.cs" />
     <Compile Include="Routing\OLSR\OlsrTableEntry.cs" />
     <Compile Include="Routing\Helpers\RoutingProtocolFactory.cs" />
@@ -92,15 +102,19 @@
     <Compile Include="Simulator\INetSimConnectionEndpoint.cs" />
     <Compile Include="Simulator\Messages\NetSimMessageTransmissionStep.cs" />
     <Compile Include="Simulator\Messages\NetSimQueuedMessage.cs" />
-    <Compile Include="Simulator\Messages\NetSimSequence.cs" />
+    <Compile Include="Simulator\Messages\NetSimSequence.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Storage\SimulationStorage.cs" />
     <Compile Include="Storage\StorageConnection.cs" />
     <Compile Include="Storage\StorageClient.cs" />
     <Compile Include="Storage\StorageNetwork.cs" />
-    <Compile Include="Visualization\INetSimVisualizeableItem.cs" />
+    <Compile Include="Visualization\INetSimVisualizableItem.cs" />
     <Compile Include="Simulator\Components\NetSimRoutingProtocol.cs" />
     <Compile Include="Routing\AODV\AodvTable.cs" />
-    <Compile Include="Routing\DSDV\DsdvTable.cs" />
+    <Compile Include="Routing\DSDV\DsdvTable.cs">
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Routing\DSDV\DsdvTableEntry.cs" />
     <Compile Include="Routing\DSDV\DsdvUpdateMessage.cs" />
     <Compile Include="Routing\DSR\DsrTable.cs" />
@@ -114,9 +128,13 @@
     <Compile Include="Visualization\NetSimLocation.cs" />
     <Compile Include="Simulator\Components\NetSimMessage.cs" />
     <Compile Include="Simulator\NetSimSimulator.cs" />
-    <Compile Include="Simulator\Components\NetSimTable.cs" />
+    <Compile Include="Simulator\Components\NetSimTable.cs">
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Visualization\NetSimVisualizer.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="NetSim.Lib.Diagramm.cd" />

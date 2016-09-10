@@ -1,14 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
-
+﻿// -----------------------------------------------------------------------
+// <copyright file="AodvRouteReplyMessage.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - AodvRouteReplyMessage.cs</summary>
+// -----------------------------------------------------------------------
 namespace NetSim.Lib.Routing.AODV
 {
+    using System;
+    using System.Linq;
+
+    using NetSim.Lib.Simulator.Components;
+
+    /// <summary>
+    /// The route reply message of the protocol.
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimMessage" />
     public class AodvRouteReplyMessage : NetSimMessage
     {
         /// <summary>
@@ -53,11 +60,13 @@ namespace NetSim.Lib.Routing.AODV
         /// </returns>
         public override object Clone()
         {
-            return CopyTo(new AodvRouteReplyMessage()
-            {
-                HopCount = this.HopCount,
-                ReceiverSequenceNr = (AodvSequence)this.ReceiverSequenceNr.Clone()
-            });
+            return
+                this.CopyTo(
+                    new AodvRouteReplyMessage()
+                    {
+                        HopCount = this.HopCount,
+                        ReceiverSequenceNr = (AodvSequence)this.ReceiverSequenceNr.Clone()
+                    });
         }
 
         /// <summary>
@@ -68,7 +77,7 @@ namespace NetSim.Lib.Routing.AODV
         /// </returns>
         public override string ToString()
         {
-            return $"{base.ToString()}\n| HopCount:{HopCount}\n+[/{this.GetType().Name}]";
+            return $"{base.ToString()}\n| HopCount:{this.HopCount}\n+[/{this.GetType().Name}]";
         }
     }
 }

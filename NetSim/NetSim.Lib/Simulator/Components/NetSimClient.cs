@@ -1,30 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-
-using NetSim.Lib.Annotations;
-using NetSim.Lib.Routing;
-using NetSim.Lib.Routing.Helpers;
-using NetSim.Lib.Simulator.Messages;
-using NetSim.Lib.Visualization;
+﻿// -----------------------------------------------------------------------
+// <copyright file="NetSimClient.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - NetSimClient.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Simulator.Components
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Linq;
+    using System.Runtime.CompilerServices;
+    using System.Text;
+
+    using NetSim.Lib.Annotations;
+    using NetSim.Lib.Routing.Helpers;
+    using NetSim.Lib.Visualization;
+
+    /// <summary>
+    /// The client class that represents a node in the network.
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimItem" />
+    /// <seealso cref="System.ComponentModel.INotifyPropertyChanged" />
+    /// <seealso cref="NetSim.Lib.Simulator.INetSimConnectionEndpoint" />
     public class NetSimClient : NetSimItem, INotifyPropertyChanged, INetSimConnectionEndpoint
     {
-        /// <summary>
-        /// Occurs when clientStateUpdate.
-        /// </summary>
-        private event Action ClientStateUpdate;
-
-        /// <summary>
-        /// The step counter
-        /// </summary>
-        private int stepCounter;
-
         /// <summary>
         /// The client data
         /// </summary>
@@ -34,6 +36,11 @@ namespace NetSim.Lib.Simulator.Components
         /// The is offline
         /// </summary>
         private bool isOffline;
+
+        /// <summary>
+        /// The step counter
+        /// </summary>
+        private int stepCounter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NetSimClient"/> class.
@@ -53,6 +60,32 @@ namespace NetSim.Lib.Simulator.Components
         }
 
         /// <summary>
+        /// Occurs when a property is changed.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Occurs when client state is updated due routing or other events.
+        /// </summary>
+        public event Action StateUpdated
+        {
+            add
+            {
+                this.ClientStateUpdate += value;
+            }
+
+            remove
+            {
+                this.ClientStateUpdate -= value;
+            }
+        }
+
+        /// <summary>
+        /// Occurs when clientStateUpdate.
+        /// </summary>
+        private event Action ClientStateUpdate;
+
+        /// <summary>
         /// Gets or sets the connections.
         /// </summary>
         /// <value>
@@ -61,12 +94,57 @@ namespace NetSim.Lib.Simulator.Components
         public Dictionary<string, NetSimConnection> Connections { get; set; }
 
         /// <summary>
+        /// Gets the current data.
+        /// </summary>
+        /// <value>
+        /// The current data.
+        /// </value>
+        public string CurrentData => this.clientData.ToString();
+
+        /// <summary>
         /// Gets or sets the input queue.
         /// </summary>
         /// <value>
         /// The input queue.
         /// </value>
         public Queue<NetSimMessage> InputQueue { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is initialized.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is initialized; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsInitialized { get; private set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is offline.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is offline; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsOffline
+        {
+            get
+            {
+                return this.isOffline;
+            }
+
+            set
+            {
+                this.isOffline = value;
+
+                if (!(this.Connections?.Values.Count > 0))
+                {
+                    return;
+                }
+
+                foreach (var connection in this.Connections.Values)
+                {
+                    connection.IsOffline = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the routing protocol.
@@ -86,78 +164,39 @@ namespace NetSim.Lib.Simulator.Components
         {
             get
             {
-                return stepCounter;
+                return this.stepCounter;
             }
+
             private set
             {
                 this.stepCounter = value;
-                OnPropertyChanged();
+                this.OnPropertyChanged();
             }
         }
 
         /// <summary>
-        /// Gets a value indicating whether this instance is initialized.
+        /// Broadcasts the message.
         /// </summary>
-        /// <value>
-        /// <c>true</c> if this instance is initialized; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsInitialized { get; private set; }
-
-        /// <summary>
-        /// Gets a value indicating whether this instance is offline.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if this instance is offline; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsOffline
+        /// <param name="message">The message.</param>
+        /// <param name="overrideSenderReceiver">if set to <c>true</c> [override sender receiver].</param>
+        public void BroadcastMessage(NetSimMessage message, bool overrideSenderReceiver = true)
         {
-            get
+            foreach (var connection in this.Connections)
             {
-                return isOffline;
-            }
-            set
-            {
-                isOffline = value;
+                // create copy of message
+                NetSimMessage localCopy = (NetSimMessage)message.Clone();
 
-                if(!(Connections?.Values?.Count > 0))
+                // insert receiver id 
+                if (overrideSenderReceiver)
                 {
-                    return;
+                    localCopy.Receiver = connection.Key;
+                    localCopy.Sender = this.Id;
                 }
 
-                foreach (var connection in Connections.Values)
-                {
-                    connection.IsOffline = value;
-                }
+                // transport message
+                connection.Value.StartTransportMessage(localCopy, this.Id, connection.Key);
             }
         }
-
-        /// <summary>
-        /// Gets the current data.
-        /// </summary>
-        /// <value>
-        /// The current data.
-        /// </value>
-        public string CurrentData => clientData.ToString();
-
-        /// <summary>
-        /// Occurs when client state is updated due routing or other events.
-        /// </summary>
-        public event Action StateUpdated
-        {
-            add
-            {
-                ClientStateUpdate += value;
-            }
-            remove
-            {
-                ClientStateUpdate -= value;
-            }
-        }
-
-        /// <summary>
-        /// Occurs when a property is changed.
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// Initializes the protocol.
@@ -166,14 +205,15 @@ namespace NetSim.Lib.Simulator.Components
         public void InitializeProtocol(NetSimProtocolType protocolType)
         {
             // if client is already intialized - then this is a reset
-            if (IsInitialized)
+            if (this.IsInitialized)
             {
-                //clear pending messages in connections
-                Connections.Values.ToList().ForEach(c =>
-                {
-                    c.PendingMessages.Clear();
-                    c.TransmittedMessages.Clear();
-                });
+                // clear pending messages in connections
+                this.Connections.Values.ToList().ForEach(
+                    c =>
+                        {
+                            c.PendingMessages.Clear();
+                            c.TransmittedMessages.Clear();
+                        });
             }
 
             // (re)set step counter
@@ -188,44 +228,30 @@ namespace NetSim.Lib.Simulator.Components
             // (re)set input queue
             this.InputQueue = new Queue<NetSimMessage>();
 
-            //initialize protocol
-            RoutingProtocol.Initialize();
+            // initialize protocol
+            this.RoutingProtocol.Initialize();
 
             // client is initialized
             this.IsInitialized = true;
         }
 
         /// <summary>
-        /// Broadcasts the message.
+        /// Performs the routing step.
         /// </summary>
-        /// <param name="message">The message.</param>
-        /// <param name="overrideSenderReceiver">if set to <c>true</c> [override sender receiver].</param>
-        public void BroadcastMessage(NetSimMessage message, bool overrideSenderReceiver = true)
+        public void PerformSimulationStep()
         {
-            foreach (var connection in Connections)
-            {
-                //create copy of message
-                NetSimMessage localCopy = (NetSimMessage)message.Clone();
+            this.RoutingProtocol.PerformRoutingStep();
 
-                // insert receiver id 
-                if (overrideSenderReceiver)
-                {
-                    localCopy.Receiver = connection.Key;
-                    localCopy.Sender = Id;
-                }
-
-                //transport message
-                connection.Value.StartTransportMessage(localCopy, this.Id, connection.Key);
-            }
+            this.StepCounter++;
         }
 
         /// <summary>
-        /// Sends the message.
+        /// Receives a data message
         /// </summary>
         /// <param name="message">The message.</param>
-        public void SendMessage(NetSimMessage message)
+        public void ReceiveData(NetSimMessage message)
         {
-            RoutingProtocol.SendMessage(message);
+            this.clientData?.AppendLine(message.ToString());
         }
 
         /// <summary>
@@ -234,34 +260,16 @@ namespace NetSim.Lib.Simulator.Components
         /// <param name="message">The message.</param>
         public void ReceiveMessage(NetSimMessage message)
         {
-            InputQueue?.Enqueue(message);
+            this.InputQueue?.Enqueue(message);
         }
 
         /// <summary>
-        /// Receives a datamessage
+        /// Sends the message.
         /// </summary>
         /// <param name="message">The message.</param>
-        public void ReceiveData(NetSimMessage message)
+        public void SendMessage(NetSimMessage message)
         {
-            clientData?.AppendLine(message.ToString());
-        }
-
-        /// <summary>
-        /// Performs the routing step.
-        /// </summary>
-        public void PerformSimulationStep()
-        {
-            RoutingProtocol.PerformRoutingStep();
-
-            StepCounter++;
-        }
-
-        /// <summary>
-        /// Called when the state is updated.
-        /// </summary>
-        protected void OnStateUpdated()
-        {
-            ClientStateUpdate?.Invoke();
+            this.RoutingProtocol.SendMessage(message);
         }
 
         /// <summary>
@@ -271,7 +279,15 @@ namespace NetSim.Lib.Simulator.Components
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        /// <summary>
+        /// Called when the state is updated.
+        /// </summary>
+        protected void OnStateUpdated()
+        {
+            this.ClientStateUpdate?.Invoke();
         }
     }
 }

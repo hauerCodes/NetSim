@@ -1,55 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Shapes;
+﻿// -----------------------------------------------------------------------
+// <copyright file="MainViewModel.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim - MainViewModel.cs</summary>
+// -----------------------------------------------------------------------
 
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
-
-using Microsoft.Win32;
-
-using NetSim.DetailPages;
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
-using NetSim.Lib.Storage;
-using NetSim.Lib.Visualization;
 // ReSharper disable ExplicitCallerInfoArgument
-
 namespace NetSim.ViewModel
 {
-    [SuppressMessage("ReSharper", "TryCastAlwaysSucceeds")]
+    using System;
+    using System.ComponentModel;
+    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Input;
+    using System.Windows.Media;
+    using System.Windows.Shapes;
+
+    using GalaSoft.MvvmLight;
+    using GalaSoft.MvvmLight.Command;
+
+    using Microsoft.Win32;
+
+    using NetSim.DetailPages;
+    using NetSim.Lib.Simulator;
+    using NetSim.Lib.Simulator.Components;
+    using NetSim.Lib.Storage;
+    using NetSim.Lib.Visualization;
+
+    /// <summary>
+    /// The main view model.
+    /// </summary>
+    /// <seealso cref="GalaSoft.MvvmLight.ViewModelBase" />
+    [SuppressMessage("ReSharper", "TryCastAlwaysSucceeds", Justification = "Reason pattern feature not availiable in C# 6.0")]
     public class MainViewModel : ViewModelBase
     {
         /// <summary>
-        /// The next node name
+        /// The simulation lock object
         /// </summary>
-        private char nextNodeName = 'A';
-
-        /// <summary>
-        /// The view mode
-        /// </summary>
-        private ViewMode viewMode;
-
-        /// <summary>
-        /// The is run simluation
-        /// </summary>
-        private bool isRunSimluation;
-
-        /// <summary>
-        /// The simulation step timespan
-        /// </summary>
-        private readonly TimeSpan simulationStepTimespan = TimeSpan.FromSeconds(0.55);
+        private readonly object simulationLockObj = new object();
 
         /// <summary>
         /// The simulation step lock timespan
@@ -57,29 +51,19 @@ namespace NetSim.ViewModel
         private readonly TimeSpan simulationStepLockTimespan = TimeSpan.FromSeconds(0.25);
 
         /// <summary>
+        /// The simulation step timespan
+        /// </summary>
+        private readonly TimeSpan simulationStepTimespan = TimeSpan.FromSeconds(0.55);
+
+        /// <summary>
         /// The storage client
         /// </summary>
         private readonly SimulationStorage simulationStorage;
 
         /// <summary>
-        /// The simluation lock object
+        /// The exit application command
         /// </summary>
-        private readonly object simluationLockObj = new object();
-
-        /// <summary>
-        /// The protocol type
-        /// </summary>
-        private NetSimProtocolType protocolType;
-
-        /// <summary>
-        /// The draft connection
-        /// </summary>
-        private NetSimConnection draftConnection;
-
-        /// <summary>
-        /// The draft connection line
-        /// </summary>
-        private Line draftConnectionLine;
+        private ICommand closeApplicationCommand;
 
         /// <summary>
         /// The current selected node
@@ -92,9 +76,24 @@ namespace NetSim.ViewModel
         private NetSimItem currentViewedItem;
 
         /// <summary>
-        /// The save network command
+        /// The draft connection
         /// </summary>
-        private ICommand saveNetworkCommand;
+        private NetSimConnection draftConnection;
+
+        /// <summary>
+        /// The draft connection line
+        /// </summary>
+        private Line draftConnectionLine;
+
+        /// <summary>
+        /// The is run simulation.
+        /// </summary>
+        private bool isRunSimulation;
+
+        /// <summary>
+        /// The flag that indicates if the  step button enabled
+        /// </summary>
+        private bool isStepEnabled;
 
         /// <summary>
         /// The load network command
@@ -102,14 +101,34 @@ namespace NetSim.ViewModel
         private ICommand loadNetworkCommand;
 
         /// <summary>
-        /// The start simulation command
+        /// The next node name
         /// </summary>
-        private ICommand startSimulationCommand;
+        private char nextNodeName = 'A';
 
         /// <summary>
         /// The pause simulation command
         /// </summary>
         private ICommand pauseSimulationCommand;
+
+        /// <summary>
+        /// The perform step command
+        /// </summary>
+        private ICommand performStepCommand;
+
+        /// <summary>
+        /// The protocol type
+        /// </summary>
+        private NetSimProtocolType protocolType;
+
+        /// <summary>
+        /// The reset simulation command
+        /// </summary>
+        private ICommand resetSimulationCommand;
+
+        /// <summary>
+        /// The save network command
+        /// </summary>
+        private ICommand saveNetworkCommand;
 
         /// <summary>
         /// The show about command
@@ -122,39 +141,29 @@ namespace NetSim.ViewModel
         private ICommand showHelpCommand;
 
         /// <summary>
-        /// The exit application command
-        /// </summary>
-        private ICommand closeApplicationCommand;
-
-        /// <summary>
-        /// The perform step command
-        /// </summary>
-        private ICommand performStepCommand;
-
-        /// <summary>
-        /// The reset simulation command
-        /// </summary>
-        private ICommand resetSimulationCommand;
-
-        /// <summary>
         /// The simulation task
         /// </summary>
         private Task simulationTask;
 
         /// <summary>
-        /// The flag that indicates if the  step button enabled
+        /// The start simulation command
         /// </summary>
-        private bool isStepEnabled;
+        private ICommand startSimulationCommand;
 
         /// <summary>
-        /// The window width
+        /// The view mode
         /// </summary>
-        private int windowWidth = 900;
+        private ViewMode viewMode;
 
         /// <summary>
         /// The window height
         /// </summary>
         private int windowHeight = 450;
+
+        /// <summary>
+        /// The window width
+        /// </summary>
+        private int windowWidth = 900;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -165,142 +174,79 @@ namespace NetSim.ViewModel
             this.DrawCanvas = drawCanvas;
             this.simulationStorage = new SimulationStorage();
             this.Simulator = new NetSimSimulator();
-            this.Visualizer = new NetSimVisualizer(Simulator, drawCanvas);
+            this.Visualizer = new NetSimVisualizer(this.Simulator, drawCanvas);
             this.IsStepEnabled = true;
-            this.Simulator.PropertyChanged += OnSimulatorPropertyChangedEventHandler;
+            this.Simulator.PropertyChanged += this.OnSimulatorPropertyChangedEventHandler;
 
             this.IsView = true;
             this.ProtocolType = NetSimProtocolType.DSR;
 
-            InitializeCommands();
+            this.InitializeCommands();
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this instance is view.
+        /// Gets or sets the close application command.
         /// </summary>
         /// <value>
-        ///   <c>true</c> if this instance is view; otherwise, <c>false</c>.
+        /// The close application command.
         /// </value>
-        public bool IsView
+        public ICommand CloseApplicationCommand
         {
             get
             {
-                return viewMode == ViewMode.View;
+                return this.closeApplicationCommand;
             }
+
             set
             {
-                if (value)
+                this.closeApplicationCommand = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets the control page.
+        /// </summary>
+        /// <value>
+        /// The control page.
+        /// </value>
+        public Page ControlPage
+        {
+            get
+            {
+                if (this.currentViewedItem == null)
                 {
-                    viewMode = ViewMode.View;
+                    return null;
                 }
-                RaisePropertyChanged();
-                RaisePropertyChanged(nameof(IsCreateNode));
-                RaisePropertyChanged(nameof(IsCreateEdge));
-            }
-        }
 
-        /// <summary>
-        /// Gets or sets the width of the window.
-        /// </summary>
-        /// <value>
-        /// The width of the window.
-        /// </value>
-        public int WindowWidth
-        {
-            get
-            {
-                return windowWidth;
-            }
-            set
-            {
-                windowWidth = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the Height of the window.
-        /// </summary>
-        /// <value>
-        /// The Height of the window.
-        /// </value>
-        public int WindowHeight
-        {
-            get
-            {
-                return windowHeight;
-            }
-            set
-            {
-                windowHeight = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the step button is enabled.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if this instance is step enabled; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsStepEnabled
-        {
-            get
-            {
-                return isStepEnabled;
-            }
-            set
-            {
-                isStepEnabled = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this instance is create node.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if this instance is create node; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsCreateNode
-        {
-            get
-            {
-                return viewMode == ViewMode.CreateNodes;
-            }
-            set
-            {
-                if (value)
+                if (this.currentViewedItem is NetSimClient)
                 {
-                    viewMode = ViewMode.CreateNodes;
-                }
-                RaisePropertyChanged();
-                RaisePropertyChanged(nameof(IsView));
-                RaisePropertyChanged(nameof(IsCreateEdge));
-            }
-        }
+                    var controlClientPage = new ControlClientPage() { Client = this.currentViewedItem as NetSimClient };
+                    controlClientPage.DeleteClientEvent += (sender, e) =>
+                        {
+                            this.Simulator.RemoveClient(e.Id);
+                            this.Visualizer.Refresh();
+                        };
 
-        /// <summary>
-        /// Gets or sets a value indicating whether this instance is create edge.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if this instance is create edge; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsCreateEdge
-        {
-            get
-            {
-                return viewMode == ViewMode.CreateEdges;
-            }
-            set
-            {
-                if (value)
-                {
-                    viewMode = ViewMode.CreateEdges;
+                    return controlClientPage;
                 }
-                RaisePropertyChanged();
-                RaisePropertyChanged(nameof(IsCreateNode));
-                RaisePropertyChanged(nameof(IsView));
+
+                if (this.currentViewedItem is NetSimConnection)
+                {
+                    var controlConnectionPage = new ControlConnectionPage()
+                    {
+                        Connection = this.currentViewedItem as NetSimConnection
+                    };
+                    controlConnectionPage.DeleteConnectionEvent += (sender, e) =>
+                        {
+                            this.Simulator.RemoveConnection(e.EndPointA.Id, e.EndPointB.Id);
+                            this.Visualizer.Refresh();
+                        };
+
+                    return controlConnectionPage;
+                }
+
+                return null;
             }
         }
 
@@ -314,14 +260,15 @@ namespace NetSim.ViewModel
         {
             get
             {
-                return currentSelectedNode;
+                return this.currentSelectedNode;
             }
+
             set
             {
-                currentSelectedNode = value;
+                this.currentSelectedNode = value;
                 Debug.WriteLine(value != null ? $"CurrentSelected:{value.Id}" : $"CurrentSelected: -");
 
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
             }
         }
 
@@ -335,13 +282,14 @@ namespace NetSim.ViewModel
         {
             get
             {
-                return currentViewedItem;
+                return this.currentViewedItem;
             }
+
             set
             {
-                var oldValue = currentViewedItem;
+                var oldValue = this.currentViewedItem;
 
-                currentViewedItem = value;
+                this.currentViewedItem = value;
                 Debug.WriteLine(value != null ? $"CurrentViewed:{value.Id}" : $"CurrentViewed: -");
 
                 var client = value as NetSimClient;
@@ -351,13 +299,12 @@ namespace NetSim.ViewModel
                 }
 
                 // update every time to display new informations (e.g. messages, tables)
-                RaisePropertyChanged();
-                RaisePropertyChanged(nameof(DetailPage));
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(this.DetailPage));
 
-
-                if (currentViewedItem == null || !currentViewedItem.Equals(oldValue))
+                if (this.currentViewedItem == null || !this.currentViewedItem.Equals(oldValue))
                 {
-                    RaisePropertyChanged(nameof(ControlPage));
+                    this.RaisePropertyChanged(nameof(this.ControlPage));
                 }
             }
         }
@@ -372,64 +319,23 @@ namespace NetSim.ViewModel
         {
             get
             {
-                if (currentViewedItem == null) return null;
-
-                if (currentViewedItem is NetSimClient)
+                if (this.currentViewedItem == null)
                 {
-                    return new ClientPage() { Client = currentViewedItem as NetSimClient };
+                    return null;
                 }
 
-                if (currentViewedItem is NetSimConnection)
+                if (this.currentViewedItem is NetSimClient)
                 {
-                    return new ConnectionPage() { Connection = currentViewedItem as NetSimConnection };
+                    return new ClientPage() { Client = this.currentViewedItem as NetSimClient };
                 }
 
-                return null;
-            }
-
-        }
-
-        /// <summary>
-        /// Gets the control page.
-        /// </summary>
-        /// <value>
-        /// The control page.
-        /// </value>
-        public Page ControlPage
-        {
-            get
-            {
-                if (currentViewedItem == null) return null;
-
-                if (currentViewedItem is NetSimClient)
+                if (this.currentViewedItem is NetSimConnection)
                 {
-                    var controlClientPage = new ControlClientPage() { Client = currentViewedItem as NetSimClient };
-                    controlClientPage.DeleteClientEvent += (sender, e) =>
-                    {
-                        Simulator.RemoveClient(e.Id);
-                        Visualizer.Refresh();
-                    };
-
-                    return controlClientPage;
-
-                }
-
-                if (currentViewedItem is NetSimConnection)
-                {
-                    var controlConnectionPage = new ControlConnectionPage() { Connection = currentViewedItem as NetSimConnection };
-                    controlConnectionPage.DeleteConnectionEvent +=
-                        (sender, e) =>
-                        {
-                            Simulator.RemoveConnection(e.EndPointA.Id, e.EndPointB.Id);
-                            Visualizer.Refresh();
-                        };
-
-                    return controlConnectionPage;
+                    return new ConnectionPage() { Connection = this.currentViewedItem as NetSimConnection };
                 }
 
                 return null;
             }
-
         }
 
         /// <summary>
@@ -441,143 +347,100 @@ namespace NetSim.ViewModel
         public Canvas DrawCanvas { get; set; }
 
         /// <summary>
-        /// Gets or sets the visualizer.
+        /// Gets or sets a value indicating whether this instance is create edge.
         /// </summary>
         /// <value>
-        /// The visualizer.
+        /// <c>true</c> if this instance is create edge; otherwise, <c>false</c>.
         /// </value>
-        public NetSimVisualizer Visualizer { get; set; }
-
-        /// <summary>
-        /// Gets or sets the simulator.
-        /// </summary>
-        /// <value>
-        /// The simulator.
-        /// </value>
-        public NetSimSimulator Simulator { get; set; }
-
-        /// <summary>
-        /// Gets or sets the type of the protocol.
-        /// </summary>
-        /// <value>
-        /// The type of the protocol.
-        /// </value>
-        public NetSimProtocolType ProtocolType
+        public bool IsCreateEdge
         {
             get
             {
-                return this.protocolType;
+                return this.viewMode == ViewMode.CreateEdges;
             }
+
             set
             {
-                this.protocolType = value;
-                RaisePropertyChanged();
+                if (value)
+                {
+                    this.viewMode = ViewMode.CreateEdges;
+                }
 
-                ExecuteResetSimulation();
-
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(this.IsCreateNode));
+                this.RaisePropertyChanged(nameof(this.IsView));
             }
         }
 
         /// <summary>
-        /// Gets the simulation step.
+        /// Gets or sets a value indicating whether this instance is create node.
         /// </summary>
         /// <value>
-        /// The simulation step.
+        /// <c>true</c> if this instance is create node; otherwise, <c>false</c>.
         /// </value>
-        public int SimulationStep => this.Simulator.StepCounter;
-
-        /// <summary>
-        /// Gets or sets the start simulation command.
-        /// </summary>
-        /// <value>
-        /// The start simulation command.
-        /// </value>
-        public ICommand StartSimulationCommand
+        public bool IsCreateNode
         {
             get
             {
-                return startSimulationCommand;
+                return this.viewMode == ViewMode.CreateNodes;
             }
+
             set
             {
-                this.startSimulationCommand = value;
-                RaisePropertyChanged();
+                if (value)
+                {
+                    this.viewMode = ViewMode.CreateNodes;
+                }
+
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(this.IsView));
+                this.RaisePropertyChanged(nameof(this.IsCreateEdge));
             }
         }
 
         /// <summary>
-        /// Gets or sets the start simulation command.
+        /// Gets or sets a value indicating whether the step button is enabled.
         /// </summary>
         /// <value>
-        /// The start simulation command.
+        /// <c>true</c> if this instance is step enabled; otherwise, <c>false</c>.
         /// </value>
-        public ICommand PauseSimulationCommand
+        public bool IsStepEnabled
         {
             get
             {
-                return pauseSimulationCommand;
+                return this.isStepEnabled;
             }
+
             set
             {
-                this.pauseSimulationCommand = value;
-                RaisePropertyChanged();
+                this.isStepEnabled = value;
+                this.RaisePropertyChanged();
             }
         }
 
         /// <summary>
-        /// Gets or sets the start simulation command.
+        /// Gets or sets a value indicating whether this instance is view.
         /// </summary>
         /// <value>
-        /// The start simulation command.
+        ///   <c>true</c> if this instance is view; otherwise, <c>false</c>.
         /// </value>
-        public ICommand ResetSimulationCommand
+        public bool IsView
         {
             get
             {
-                return resetSimulationCommand;
+                return this.viewMode == ViewMode.View;
             }
-            set
-            {
-                this.resetSimulationCommand = value;
-                RaisePropertyChanged();
-            }
-        }
 
-        /// <summary>
-        /// Gets or sets the perform step command.
-        /// </summary>
-        /// <value>
-        /// The perform step command.
-        /// </value>
-        public ICommand PerformStepCommand
-        {
-            get
-            {
-                return performStepCommand;
-            }
             set
             {
-                this.performStepCommand = value;
-                RaisePropertyChanged();
-            }
-        }
+                if (value)
+                {
+                    this.viewMode = ViewMode.View;
+                }
 
-        /// <summary>
-        /// Gets or sets the save network command.
-        /// </summary>
-        /// <value>
-        /// The save network command.
-        /// </value>
-        public ICommand SaveNetworkCommand
-        {
-            get
-            {
-                return saveNetworkCommand;
-            }
-            set
-            {
-                this.saveNetworkCommand = value;
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(this.IsCreateNode));
+                this.RaisePropertyChanged(nameof(this.IsCreateEdge));
             }
         }
 
@@ -591,31 +454,115 @@ namespace NetSim.ViewModel
         {
             get
             {
-                return loadNetworkCommand;
+                return this.loadNetworkCommand;
             }
+
             set
             {
                 this.loadNetworkCommand = value;
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
             }
         }
 
         /// <summary>
-        /// Gets or sets the show help command.
+        /// Gets or sets the start simulation command.
         /// </summary>
         /// <value>
-        /// The show help command.
+        /// The start simulation command.
         /// </value>
-        public ICommand ShowHelpCommand
+        public ICommand PauseSimulationCommand
         {
             get
             {
-                return showHelpCommand;
+                return this.pauseSimulationCommand;
             }
+
             set
             {
-                this.showHelpCommand = value;
-                RaisePropertyChanged();
+                this.pauseSimulationCommand = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the perform step command.
+        /// </summary>
+        /// <value>
+        /// The perform step command.
+        /// </value>
+        public ICommand PerformStepCommand
+        {
+            get
+            {
+                return this.performStepCommand;
+            }
+
+            set
+            {
+                this.performStepCommand = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the type of the protocol.
+        /// </summary>
+        /// <value>
+        /// The type of the protocol.
+        /// </value>
+        public NetSimProtocolType ProtocolType
+        {
+            get
+            {
+                return this.protocolType;
+            }
+
+            set
+            {
+                this.protocolType = value;
+                this.RaisePropertyChanged();
+
+                this.ExecuteResetSimulation();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the start simulation command.
+        /// </summary>
+        /// <value>
+        /// The start simulation command.
+        /// </value>
+        public ICommand ResetSimulationCommand
+        {
+            get
+            {
+                return this.resetSimulationCommand;
+            }
+
+            set
+            {
+                this.resetSimulationCommand = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the save network command.
+        /// </summary>
+        /// <value>
+        /// The save network command.
+        /// </value>
+        public ICommand SaveNetworkCommand
+        {
+            get
+            {
+                return this.saveNetworkCommand;
+            }
+
+            set
+            {
+                this.saveNetworkCommand = value;
+                this.RaisePropertyChanged();
             }
         }
 
@@ -629,390 +576,176 @@ namespace NetSim.ViewModel
         {
             get
             {
-                return showAboutCommand;
+                return this.showAboutCommand;
             }
+
             set
             {
                 this.showAboutCommand = value;
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
             }
         }
 
         /// <summary>
-        /// Gets or sets the close application command.
+        /// Gets or sets the show help command.
         /// </summary>
         /// <value>
-        /// The close application command.
+        /// The show help command.
         /// </value>
-        public ICommand CloseApplicationCommand
+        public ICommand ShowHelpCommand
         {
             get
             {
-                return closeApplicationCommand;
+                return this.showHelpCommand;
             }
+
             set
             {
-                this.closeApplicationCommand = value;
-                RaisePropertyChanged();
+                this.showHelpCommand = value;
+                this.RaisePropertyChanged();
             }
         }
 
         /// <summary>
-        /// Initializes the commands.
+        /// Gets the simulation step.
         /// </summary>
-        private void InitializeCommands()
-        {
-            this.PerformStepCommand = new RelayCommand(ExecuteSimulationStep, CanExecuteSimulationStep);
-            this.StartSimulationCommand = new RelayCommand(ExecuteStartSimulation, CanExecuteStartSimulation);
-            this.PauseSimulationCommand = new RelayCommand(ExecutePauseSimulation, CanExecutePauseSimulation);
-            this.ResetSimulationCommand = new RelayCommand(ExecuteResetSimulation, CanExecuteResetSimulation);
-
-            this.SaveNetworkCommand = new RelayCommand(ExecuteSaveNetwork);
-            this.LoadNetworkCommand = new RelayCommand(ExecuteLoadNetwork);
-
-            this.ShowHelpCommand = new RelayCommand(ExecuteShowHelp);
-            this.ShowAboutCommand = new RelayCommand(ExecuteShowAbout);
-            this.CloseApplicationCommand = new RelayCommand(ExecuteCloseApplication);
-        }
+        /// <value>
+        /// The simulation step.
+        /// </value>
+        public int SimulationStep => this.Simulator.StepCounter;
 
         /// <summary>
-        /// Executes the close application.
+        /// Gets or sets the simulator.
         /// </summary>
-        private void ExecuteCloseApplication()
-        {
-            Application.Current.MainWindow.Close();
-        }
+        /// <value>
+        /// The simulator.
+        /// </value>
+        public NetSimSimulator Simulator { get; set; }
 
         /// <summary>
-        /// Executes the show help.
+        /// Gets or sets the start simulation command.
         /// </summary>
-        private void ExecuteShowHelp()
+        /// <value>
+        /// The start simulation command.
+        /// </value>
+        public ICommand StartSimulationCommand
         {
-            HelpWindow helpWindow = new HelpWindow();
-
-            helpWindow.ShowDialog();
-        }
-
-        /// <summary>
-        /// Executes the show about.
-        /// </summary>
-        private void ExecuteShowAbout()
-        {
-            InfoWindow infoWindow = new InfoWindow();
-
-            infoWindow.ShowDialog();
-        }
-
-        /// <summary>
-        /// Executes the load network.
-        /// </summary>
-        private void ExecuteLoadNetwork()
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog
+            get
             {
-                //InitialDirectory = @"c:\temp\",
-                Filter = "netsim files(*.netsim)|*.netsim|All files (*.*)|*.*"
-            };
+                return this.startSimulationCommand;
+            }
 
-            if (openFileDialog.ShowDialog() != true) return;
+            set
+            {
+                this.startSimulationCommand = value;
+                this.RaisePropertyChanged();
+            }
+        }
 
-            var fallbackSimulator = this.Simulator;
-            var fallbackVisualizer = this.Visualizer;
+        /// <summary>
+        /// Gets or sets the visualizer.
+        /// </summary>
+        /// <value>
+        /// The visualizer.
+        /// </value>
+        public NetSimVisualizer Visualizer { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Height of the window.
+        /// </summary>
+        /// <value>
+        /// The Height of the window.
+        /// </value>
+        public int WindowHeight
+        {
+            get
+            {
+                return this.windowHeight;
+            }
+
+            set
+            {
+                this.windowHeight = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the width of the window.
+        /// </summary>
+        /// <value>
+        /// The width of the window.
+        /// </value>
+        public int WindowWidth
+        {
+            get
+            {
+                return this.windowWidth;
+            }
+
+            set
+            {
+                this.windowWidth = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Adds the edge.
+        /// </summary>
+        /// <param name="from">From item.</param>
+        /// <param name="to">To item.</param>
+        public void AddEdge(NetSimItem from, NetSimItem to)
+        {
             try
             {
-                ExecutePauseSimulation();
-
-                var simulationInstance = simulationStorage.LoadNetwork(openFileDialog.FileName,
-                    (network) =>
+                lock (this.simulationLockObj)
+                {
+                    if (!this.Simulator.AddConnection(from.Id, to.Id, 1))
                     {
-                        var simulator = new NetSimSimulator();
-
-                        foreach (var client in network.Clients)
-                        {
-                            simulator.AddClient(client.Id, client.Left, client.Top);
-                        }
-
-                        foreach (var connection in network.Connections)
-                        {
-                            simulator.AddConnection(connection.EndpointA, connection.EndpointB, connection.Metric);
-                        }
-
-                        return simulator;
-                    });
-
-                this.Simulator = (NetSimSimulator)simulationInstance;
-                this.Visualizer = new NetSimVisualizer(Simulator, DrawCanvas);
-                this.Simulator.PropertyChanged += OnSimulatorPropertyChangedEventHandler;
-
-                // initialize simulator
-                this.Simulator.InitializeProtocol(ProtocolType);
-
-                if (Simulator.Clients.Count > 0)
-                {
-                    this.nextNodeName = Simulator.Clients.Max(c => c.Id)[0];
-                    this.nextNodeName++;
-                }
-                else
-                {
-                    this.nextNodeName = 'A';
+                        this.draftConnection = null;
+                        this.DrawCanvas.Children.Remove(this.draftConnectionLine);
+                        this.draftConnectionLine = null;
+                    }
                 }
 
-                Visualizer.Refresh();
-                CheckCanExecuteCommands();
+                this.CheckCanExecuteCommands();
             }
             catch (Exception ex)
             {
-                this.Simulator = fallbackSimulator;
-                this.Visualizer = fallbackVisualizer;
-
-                Trace.TraceError(ex.Message);
+                Trace.WriteLine(ex.Message);
+                this.draftConnection = null;
+                this.DrawCanvas.Children.Remove(this.draftConnectionLine);
+                this.draftConnectionLine = null;
             }
-        }
-
-        /// <summary>
-        /// Executes the save network.
-        /// </summary>
-        private void ExecuteSaveNetwork()
-        {
-            SaveFileDialog openFileDialog = new SaveFileDialog
-            {
-                //InitialDirectory = @"c:\temp\",
-                Filter = "netsim files(*.netsim)|*.netsim|All files (*.*)|*.*",
-                DefaultExt = "netsim",
-                FileName = $"NetworkSave_{DateTime.Now:ddMMyyyy}",
-            };
-
-            if (openFileDialog.ShowDialog() != true) return;
-
-            try
-            {
-                simulationStorage.SaveNetwork(openFileDialog.FileName, Simulator);
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError(ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// Executes the start simulation.
-        /// </summary>
-        private void ExecuteStartSimulation()
-        {
-            isRunSimluation = true;
-
-            simulationTask = Task.Run(() => RunSimulation());
-
-            CheckCanExecuteCommands();
-        }
-
-        /// <summary>
-        /// Executes the pause simulation.
-        /// </summary>
-        private void ExecutePauseSimulation()
-        {
-            lock (simluationLockObj)
-            {
-                isRunSimluation = false;
-            }
-
-            CheckCanExecuteCommands();
-        }
-
-        /// <summary>
-        /// Executes the simulation step.
-        /// </summary>
-        private void ExecuteSimulationStep()
-        {
-            // if step is currently executing - return
-            if (!IsStepEnabled)
-            {
-                return;
-            }
-
-            //disable step button
-            IsStepEnabled = false;
-
-            if (!Simulator.IsInitialized)
-            {
-                Simulator.InitializeProtocol(ProtocolType);
-            }
-
-            Simulator.PerformSimulationStep();
-
-            try
-            {
-                UpdateCurrentViewedItem();
-
-                CheckCanExecuteCommands();
-            }
-            catch
-            {
-                //ignored
-            }
-
-            // start task - update enabled state of step button after time
-            Task.Run(() =>
-            {
-                Thread.Sleep(simulationStepLockTimespan);
-                DrawCanvas.Dispatcher.Invoke(() => IsStepEnabled = true);
-            });
-        }
-
-        /// <summary>
-        /// Runs the simulation.
-        /// </summary>
-        private void RunSimulation()
-        {
-            if (!Simulator.IsInitialized)
-            {
-                Simulator.InitializeProtocol(ProtocolType);
-            }
-
-            while (isRunSimluation)
-            {
-                lock (simluationLockObj)
-                {
-                    Simulator.PerformSimulationStep();
-                }
-
-                UpdateCurrentViewedItem();
-
-                if (isRunSimluation)
-                {
-                    Thread.Sleep(simulationStepTimespan);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Executes the reset simulation.
-        /// </summary>
-        private void ExecuteResetSimulation()
-        {
-            lock (simluationLockObj)
-            {
-                isRunSimluation = false;
-            }
-
-            simulationTask?.Wait();
-
-            Simulator.InitializeProtocol(this.ProtocolType);
-            UpdateCurrentViewedItem();
-            CheckCanExecuteCommands();
-        }
-
-        /// <summary>
-        /// Determines whether this instance [can execute pause simulation].
-        /// </summary>
-        /// <returns>
-        ///   <c>true</c> if this instance [can execute pause simulation]; otherwise, <c>false</c>.
-        /// </returns>
-        private bool CanExecutePauseSimulation()
-        {
-            return SimulatorNetworkCreated() && isRunSimluation;
-        }
-
-        /// <summary>
-        /// Determines whether this instance [can execute start simulation].
-        /// </summary>
-        /// <returns>
-        ///   <c>true</c> if this instance [can execute start simulation]; otherwise, <c>false</c>.
-        /// </returns>
-        private bool CanExecuteStartSimulation()
-        {
-            return SimulatorNetworkCreated() && !isRunSimluation;
-        }
-
-        /// <summary>
-        /// Determines whether this instance [can execute reset simulation].
-        /// </summary>
-        /// <returns>
-        ///   <c>true</c> if this instance [can execute reset simulation]; otherwise, <c>false</c>.
-        /// </returns>
-        private bool CanExecuteResetSimulation()
-        {
-            return SimulatorNetworkCreated();
-        }
-
-        /// <summary>
-        /// Determines whether this instance [can execute simulation step].
-        /// </summary>
-        /// <returns>
-        ///   <c>true</c> if this instance [can execute simulation step]; otherwise, <c>false</c>.
-        /// </returns>
-        private bool CanExecuteSimulationStep()
-        {
-            return SimulatorNetworkCreated() && !isRunSimluation;
-        }
-
-        /// <summary>
-        /// Simulators the network created.
-        /// </summary>
-        /// <returns></returns>
-        private bool SimulatorNetworkCreated()
-        {
-            return Simulator.Clients.Count > 0 && Simulator.Connections.Count > 0;
         }
 
         /// <summary>
         /// Adds the node.
         /// </summary>
         /// <param name="location">The location.</param>
-        /// <returns></returns>
+        /// <returns>The created node item.</returns>
         public NetSimItem AddNode(Point location)
         {
             NetSimItem returnObj;
 
-            lock (simluationLockObj)
+            lock (this.simulationLockObj)
             {
-                returnObj = Simulator.AddClient(nextNodeName.ToString(), (int)location.X, (int)location.Y);
+                returnObj = this.Simulator.AddClient(this.nextNodeName.ToString(), (int)location.X, (int)location.Y);
             }
 
-            nextNodeName++;
+            this.nextNodeName++;
 
-            CheckCanExecuteCommands();
+            this.CheckCanExecuteCommands();
 
             return returnObj;
-        }
-
-        /// <summary>
-        /// Adds the edge.
-        /// </summary>
-        /// <param name="from">From.</param>
-        /// <param name="to">To.</param>
-        public void AddEdge(NetSimItem from, NetSimItem to)
-        {
-            try
-            {
-                lock (simluationLockObj)
-                {
-                    if (!Simulator.AddConnection(from.Id, to.Id, 1))
-                    {
-                        draftConnection = null;
-                        DrawCanvas.Children.Remove(draftConnectionLine);
-                        draftConnectionLine = null;
-                    }
-                }
-
-                CheckCanExecuteCommands();
-
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.Message);
-                draftConnection = null;
-                DrawCanvas.Children.Remove(draftConnectionLine);
-                draftConnectionLine = null;
-            }
         }
 
         /// <summary>
         /// Gets the current item.
         /// </summary>
         /// <param name="getPosition">The get position.</param>
-        /// <returns></returns>
+        /// <returns>The current node item for this position.</returns>
         public NetSimItem GetCurrentItem(Point getPosition)
         {
             Debug.WriteLine(Mouse.DirectlyOver);
@@ -1042,9 +775,9 @@ namespace NetSim.ViewModel
                 return (Mouse.DirectlyOver as Line).Tag as NetSimItem;
             }
 
-            if (Mouse.DirectlyOver is System.Windows.Shapes.Path)
+            if (Mouse.DirectlyOver is Path)
             {
-                return (Mouse.DirectlyOver as System.Windows.Shapes.Path).Tag as NetSimItem;
+                return (Mouse.DirectlyOver as Path).Tag as NetSimItem;
             }
 
             return null;
@@ -1057,13 +790,13 @@ namespace NetSim.ViewModel
         /// <param name="mouseButtonEventArgs">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         public void HandleMouseLeftButtonDown(object sender, MouseButtonEventArgs mouseButtonEventArgs)
         {
-            var item = GetCurrentItem(mouseButtonEventArgs.GetPosition(DrawCanvas));
+            var item = this.GetCurrentItem(mouseButtonEventArgs.GetPosition(this.DrawCanvas));
 
             if (item == null)
             {
-                if (IsView)
+                if (this.IsView)
                 {
-                    CurrentViewedItem = null;
+                    this.CurrentViewedItem = null;
                 }
 
                 return;
@@ -1072,24 +805,24 @@ namespace NetSim.ViewModel
             // ReSharper disable once CanBeReplacedWithTryCastAndCheckForNull
             if (item is NetSimClient)
             {
-                CurrentSelectedNode = item;
+                this.CurrentSelectedNode = item;
 
-                switch (viewMode)
+                switch (this.viewMode)
                 {
                     case ViewMode.CreateEdges:
-                        draftConnection = new NetSimConnection { EndPointA = (NetSimClient)item };
+                        this.draftConnection = new NetSimConnection { EndPointA = (NetSimClient)item };
                         break;
                     case ViewMode.View:
-                        CurrentViewedItem = item;
+                        this.CurrentViewedItem = item;
                         break;
                 }
             }
 
             if (item is NetSimConnection)
             {
-                if (IsView)
+                if (this.IsView)
                 {
-                    CurrentViewedItem = item;
+                    this.CurrentViewedItem = item;
                 }
             }
         }
@@ -1101,21 +834,21 @@ namespace NetSim.ViewModel
         /// <param name="mouseButtonEventArgs">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         public void HandleMouseLeftButtonUp(object sender, MouseButtonEventArgs mouseButtonEventArgs)
         {
-            if (IsCreateNode && CurrentSelectedNode == null)
+            if (this.IsCreateNode && this.CurrentSelectedNode == null)
             {
-                AddNode(mouseButtonEventArgs.GetPosition(DrawCanvas));
+                this.AddNode(mouseButtonEventArgs.GetPosition(this.DrawCanvas));
             }
 
-            if (IsCreateEdge && draftConnection?.EndPointA != null && draftConnection?.EndPointB != null)
+            if (this.IsCreateEdge && this.draftConnection?.EndPointA != null && this.draftConnection?.EndPointB != null)
             {
-                AddEdge(draftConnection.EndPointA as NetSimItem, draftConnection.EndPointB as NetSimItem);
-                draftConnection = null;
+                this.AddEdge(this.draftConnection.EndPointA as NetSimItem, this.draftConnection.EndPointB as NetSimItem);
+                this.draftConnection = null;
             }
             else
             {
-                draftConnection = null;
-                DrawCanvas.Children.Remove(draftConnectionLine);
-                draftConnectionLine = null;
+                this.draftConnection = null;
+                this.DrawCanvas.Children.Remove(this.draftConnectionLine);
+                this.draftConnectionLine = null;
             }
         }
 
@@ -1128,51 +861,108 @@ namespace NetSim.ViewModel
         {
             if (mouseEventArgs.LeftButton == MouseButtonState.Pressed)
             {
-                switch (viewMode)
+                switch (this.viewMode)
                 {
                     case ViewMode.View:
-                        if (CurrentSelectedNode != null)
+                        if (this.CurrentSelectedNode != null)
                         {
-                            var dragLocation = mouseEventArgs.GetPosition(DrawCanvas);
-                            CurrentSelectedNode.Location.Left = (int)dragLocation.X;
-                            CurrentSelectedNode.Location.Top = (int)dragLocation.Y;
-                            Visualizer.Refresh();
+                            var dragLocation = mouseEventArgs.GetPosition(this.DrawCanvas);
+                            this.CurrentSelectedNode.Location.Left = (int)dragLocation.X;
+                            this.CurrentSelectedNode.Location.Top = (int)dragLocation.Y;
+                            this.Visualizer.Refresh();
                         }
                         else
                         {
-                            CurrentSelectedNode = null;
+                            this.CurrentSelectedNode = null;
                         }
+
                         break;
                     case ViewMode.CreateEdges:
-                        if (draftConnection?.EndPointA != null)
+                        if (this.draftConnection?.EndPointA != null)
                         {
-                            var point = mouseEventArgs.GetPosition(DrawCanvas);
+                            var point = mouseEventArgs.GetPosition(this.DrawCanvas);
 
-                            var node = GetCurrentItem(point);
-                            if (node != null && node.Id != draftConnection.EndPointA.Id && node is NetSimClient)
+                            var node = this.GetCurrentItem(point);
+                            if (node != null && node.Id != this.draftConnection.EndPointA.Id && node is NetSimClient)
                             {
-                                CurrentSelectedNode = node;
-                                draftConnection.EndPointB = (NetSimClient)node;
+                                this.CurrentSelectedNode = node;
+                                this.draftConnection.EndPointB = (NetSimClient)node;
                             }
                             else
                             {
-                                CurrentSelectedNode = null;
-                                draftConnection.EndPointB = null;
+                                this.CurrentSelectedNode = null;
+                                this.draftConnection.EndPointB = null;
                             }
 
-                            DrawConnectionLine(point, draftConnection.EndPointB != null);
+                            this.DrawConnectionLine(point, this.draftConnection.EndPointB != null);
                         }
                         else
                         {
-                            CurrentSelectedNode = null;
+                            this.CurrentSelectedNode = null;
                         }
+
                         break;
                 }
             }
             else
             {
-                CurrentSelectedNode = null;
+                this.CurrentSelectedNode = null;
             }
+        }
+
+        /// <summary>
+        /// Determines whether this instance [can execute pause simulation].
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> if this instance [can execute pause simulation]; otherwise, <c>false</c>.
+        /// </returns>
+        private bool CanExecutePauseSimulation()
+        {
+            return this.SimulatorNetworkCreated() && this.isRunSimulation;
+        }
+
+        /// <summary>
+        /// Determines whether this instance [can execute reset simulation].
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> if this instance [can execute reset simulation]; otherwise, <c>false</c>.
+        /// </returns>
+        private bool CanExecuteResetSimulation()
+        {
+            return this.SimulatorNetworkCreated();
+        }
+
+        /// <summary>
+        /// Determines whether this instance [can execute simulation step].
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> if this instance [can execute simulation step]; otherwise, <c>false</c>.
+        /// </returns>
+        private bool CanExecuteSimulationStep()
+        {
+            return this.SimulatorNetworkCreated() && !this.isRunSimulation;
+        }
+
+        /// <summary>
+        /// Determines whether this instance [can execute start simulation].
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> if this instance [can execute start simulation]; otherwise, <c>false</c>.
+        /// </returns>
+        private bool CanExecuteStartSimulation()
+        {
+            return this.SimulatorNetworkCreated() && !this.isRunSimulation;
+        }
+
+        /// <summary>
+        /// Checks if commands can be executed.
+        /// </summary>
+        private void CheckCanExecuteCommands()
+        {
+            (this.PerformStepCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (this.StartSimulationCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (this.PauseSimulationCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (this.ResetSimulationCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
 
         /// <summary>
@@ -1184,37 +974,258 @@ namespace NetSim.ViewModel
         {
             int drawOffset = 4;
 
-            DrawCanvas.Children.Remove(draftConnectionLine);
-            draftConnectionLine = null;
+            this.DrawCanvas.Children.Remove(this.draftConnectionLine);
+            this.draftConnectionLine = null;
 
-            if (draftConnection?.EndPointA != null)
+            if (this.draftConnection?.EndPointA != null)
             {
-                draftConnectionLine = new Line() { StrokeThickness = 2, StrokeDashOffset = 1, Stroke = possibleConnection ? Brushes.Green : Brushes.Red };
-                DrawCanvas.Children.Add(draftConnectionLine);
+                this.draftConnectionLine = new Line()
+                {
+                    StrokeThickness = 2,
+                    StrokeDashOffset = 1,
+                    Stroke = possibleConnection ? Brushes.Green : Brushes.Red
+                };
+                this.DrawCanvas.Children.Add(this.draftConnectionLine);
 
-                if (endPoint.X - draftConnection.EndPointA.Location.Left < 0 &&
-                   endPoint.Y - draftConnection.EndPointA.Location.Top < 0)
+                if (endPoint.X - this.draftConnection.EndPointA.Location.Left < 0
+                    && endPoint.Y - this.draftConnection.EndPointA.Location.Top < 0)
                 {
                     drawOffset = -4;
                 }
 
-                draftConnectionLine.X1 = draftConnection.EndPointA.Location.Left;
-                draftConnectionLine.Y1 = draftConnection.EndPointA.Location.Top;
-                draftConnectionLine.X2 = endPoint.X - drawOffset;
-                draftConnectionLine.Y2 = endPoint.Y - drawOffset;
+                this.draftConnectionLine.X1 = this.draftConnection.EndPointA.Location.Left;
+                this.draftConnectionLine.Y1 = this.draftConnection.EndPointA.Location.Top;
+                this.draftConnectionLine.X2 = endPoint.X - drawOffset;
+                this.draftConnectionLine.Y2 = endPoint.Y - drawOffset;
             }
         }
 
         /// <summary>
-        /// Updates the current viewed item.
+        /// Executes the close application.
         /// </summary>
-        private void UpdateCurrentViewedItem()
+        private void ExecuteCloseApplication()
         {
-            if (CurrentViewedItem != null)
+            Application.Current.MainWindow.Close();
+        }
+
+        /// <summary>
+        /// Executes the load network.
+        /// </summary>
+        private void ExecuteLoadNetwork()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                // update details view for client or connection
-                this.CurrentViewedItem = CurrentViewedItem;
+                // InitialDirectory = @"c:\temp\",
+                Filter = "netsim files(*.netsim)|*.netsim|All files (*.*)|*.*"
+            };
+
+            if (openFileDialog.ShowDialog() != true)
+            {
+                return;
             }
+
+            var fallbackSimulator = this.Simulator;
+            var fallbackVisualizer = this.Visualizer;
+
+            try
+            {
+                this.ExecutePauseSimulation();
+
+                var simulationInstance = this.simulationStorage.LoadNetwork(
+                    openFileDialog.FileName,
+                    (network) =>
+                        {
+                            var simulator = new NetSimSimulator();
+
+                            foreach (var client in network.Clients)
+                            {
+                                simulator.AddClient(client.Id, client.Left, client.Top);
+                            }
+
+                            foreach (var connection in network.Connections)
+                            {
+                                simulator.AddConnection(connection.EndpointA, connection.EndpointB, connection.Metric);
+                            }
+
+                            return simulator;
+                        });
+
+                this.Simulator = (NetSimSimulator)simulationInstance;
+                this.Visualizer = new NetSimVisualizer(this.Simulator, this.DrawCanvas);
+                this.Simulator.PropertyChanged += this.OnSimulatorPropertyChangedEventHandler;
+
+                // initialize simulator
+                this.Simulator.InitializeProtocol(this.ProtocolType);
+
+                if (this.Simulator.Clients.Count > 0)
+                {
+                    this.nextNodeName = this.Simulator.Clients.Max(c => c.Id)[0];
+                    this.nextNodeName++;
+                }
+                else
+                {
+                    this.nextNodeName = 'A';
+                }
+
+                this.Visualizer.Refresh();
+                this.CheckCanExecuteCommands();
+            }
+            catch (Exception ex)
+            {
+                this.Simulator = fallbackSimulator;
+                this.Visualizer = fallbackVisualizer;
+
+                Trace.TraceError(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Executes the pause simulation.
+        /// </summary>
+        private void ExecutePauseSimulation()
+        {
+            lock (this.simulationLockObj)
+            {
+                this.isRunSimulation = false;
+            }
+
+            this.CheckCanExecuteCommands();
+        }
+
+        /// <summary>
+        /// Executes the reset simulation.
+        /// </summary>
+        private void ExecuteResetSimulation()
+        {
+            lock (this.simulationLockObj)
+            {
+                this.isRunSimulation = false;
+            }
+
+            this.simulationTask?.Wait();
+
+            this.Simulator.InitializeProtocol(this.ProtocolType);
+            this.UpdateCurrentViewedItem();
+            this.CheckCanExecuteCommands();
+        }
+
+        /// <summary>
+        /// Executes the save network.
+        /// </summary>
+        private void ExecuteSaveNetwork()
+        {
+            SaveFileDialog openFileDialog = new SaveFileDialog
+            {
+                // InitialDirectory = @"c:\temp\",
+                Filter = "netsim files(*.netsim)|*.netsim|All files (*.*)|*.*",
+                DefaultExt = "netsim",
+                FileName = $"NetworkSave_{DateTime.Now:ddMMyyyy}",
+            };
+
+            if (openFileDialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            try
+            {
+                this.simulationStorage.SaveNetwork(openFileDialog.FileName, this.Simulator);
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Executes the show about.
+        /// </summary>
+        private void ExecuteShowAbout()
+        {
+            InfoWindow infoWindow = new InfoWindow();
+
+            infoWindow.ShowDialog();
+        }
+
+        /// <summary>
+        /// Executes the show help.
+        /// </summary>
+        private void ExecuteShowHelp()
+        {
+            HelpWindow helpWindow = new HelpWindow();
+
+            helpWindow.ShowDialog();
+        }
+
+        /// <summary>
+        /// Executes the simulation step.
+        /// </summary>
+        private void ExecuteSimulationStep()
+        {
+            // if step is currently executing - return
+            if (!this.IsStepEnabled)
+            {
+                return;
+            }
+
+            // disable step button
+            this.IsStepEnabled = false;
+
+            if (!this.Simulator.IsInitialized)
+            {
+                this.Simulator.InitializeProtocol(this.ProtocolType);
+            }
+
+            this.Simulator.PerformSimulationStep();
+
+            try
+            {
+                this.UpdateCurrentViewedItem();
+
+                this.CheckCanExecuteCommands();
+            }
+            catch
+            {
+                // ignored
+            }
+
+            // start task - update enabled state of step button after time
+            Task.Run(
+                () =>
+                    {
+                        Thread.Sleep(this.simulationStepLockTimespan);
+                        this.DrawCanvas.Dispatcher.Invoke(() => this.IsStepEnabled = true);
+                    });
+        }
+
+        /// <summary>
+        /// Executes the start simulation.
+        /// </summary>
+        private void ExecuteStartSimulation()
+        {
+            this.isRunSimulation = true;
+
+            this.simulationTask = Task.Run(() => this.RunSimulation());
+
+            this.CheckCanExecuteCommands();
+        }
+
+        /// <summary>
+        /// Initializes the commands.
+        /// </summary>
+        private void InitializeCommands()
+        {
+            this.PerformStepCommand = new RelayCommand(this.ExecuteSimulationStep, this.CanExecuteSimulationStep);
+            this.StartSimulationCommand = new RelayCommand(this.ExecuteStartSimulation, this.CanExecuteStartSimulation);
+            this.PauseSimulationCommand = new RelayCommand(this.ExecutePauseSimulation, this.CanExecutePauseSimulation);
+            this.ResetSimulationCommand = new RelayCommand(this.ExecuteResetSimulation, this.CanExecuteResetSimulation);
+
+            this.SaveNetworkCommand = new RelayCommand(this.ExecuteSaveNetwork);
+            this.LoadNetworkCommand = new RelayCommand(this.ExecuteLoadNetwork);
+
+            this.ShowHelpCommand = new RelayCommand(this.ExecuteShowHelp);
+            this.ShowAboutCommand = new RelayCommand(this.ExecuteShowAbout);
+            this.CloseApplicationCommand = new RelayCommand(this.ExecuteCloseApplication);
         }
 
         /// <summary>
@@ -1224,22 +1235,58 @@ namespace NetSim.ViewModel
         /// <param name="e">The <see cref="PropertyChangedEventArgs"/> instance containing the event data.</param>
         private void OnSimulatorPropertyChangedEventHandler(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName.Equals(nameof(Simulator.StepCounter)))
+            if (e.PropertyName.Equals(nameof(this.Simulator.StepCounter)))
             {
-                RaisePropertyChanged(nameof(SimulationStep));
+                this.RaisePropertyChanged(nameof(this.SimulationStep));
             }
         }
 
         /// <summary>
-        /// Checks if commands can be executed.
+        /// Runs the simulation.
         /// </summary>
-        private void CheckCanExecuteCommands()
+        private void RunSimulation()
         {
-            (PerformStepCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            (StartSimulationCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            (PauseSimulationCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            (ResetSimulationCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            if (!this.Simulator.IsInitialized)
+            {
+                this.Simulator.InitializeProtocol(this.ProtocolType);
+            }
+
+            while (this.isRunSimulation)
+            {
+                lock (this.simulationLockObj)
+                {
+                    this.Simulator.PerformSimulationStep();
+                }
+
+                this.UpdateCurrentViewedItem();
+
+                if (this.isRunSimulation)
+                {
+                    Thread.Sleep(this.simulationStepTimespan);
+                }
+            }
         }
 
+        /// <summary>
+        /// Checks if the simulators the network created.
+        /// That means more than one client or more than one connection.
+        /// </summary>
+        /// <returns>true is the network is created; otherwise false.</returns>
+        private bool SimulatorNetworkCreated()
+        {
+            return this.Simulator.Clients.Count > 0 && this.Simulator.Connections.Count > 0;
+        }
+
+        /// <summary>
+        /// Updates the current viewed item.
+        /// </summary>
+        private void UpdateCurrentViewedItem()
+        {
+            if (this.CurrentViewedItem != null)
+            {
+                // update details view for client or connection
+                this.CurrentViewedItem = this.CurrentViewedItem;
+            }
+        }
     }
 }

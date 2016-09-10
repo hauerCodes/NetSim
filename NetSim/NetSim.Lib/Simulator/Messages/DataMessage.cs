@@ -1,10 +1,21 @@
-﻿using System;
-using System.Linq;
-
-using NetSim.Lib.Simulator.Components;
+﻿// -----------------------------------------------------------------------
+// <copyright file="DataMessage.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - DataMessage.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Simulator.Messages
 {
+    using System;
+    using System.Linq;
+    using NetSim.Lib.Simulator.Components;
+
+    /// <summary>
+    /// The implementation for a simple data message.
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimMessage" />
     public class DataMessage : NetSimMessage
     {
         /// <summary>
@@ -21,15 +32,17 @@ namespace NetSim.Lib.Simulator.Messages
         /// <value>
         /// The short name.
         /// </value>
-        public override string ShortName => Data;
+        public override string ShortName => this.Data;
 
         /// <summary>
         /// Clones this instance.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// A new object that is a copy of this instance.
+        /// </returns>
         public override object Clone()
         {
-            return CopyTo(new DataMessage() { Data = this.Data });
+            return this.CopyTo(new DataMessage() { Data = this.Data });
         }
 
         /// <summary>

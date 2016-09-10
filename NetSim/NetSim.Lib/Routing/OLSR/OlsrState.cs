@@ -1,8 +1,19 @@
-﻿using System;
-using System.Linq;
+﻿// -----------------------------------------------------------------------
+// <copyright file="OlsrState.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - OlsrState.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.OLSR
 {
+    using System;
+    using System.Linq;
+
+    /// <summary>
+    /// The olsr state enumeration.
+    /// </summary>
     public enum OlsrState
     {
         /// <summary>
@@ -26,7 +37,7 @@ namespace NetSim.Lib.Routing.OLSR
         TopologyControl,
 
         /// <summary>
-        /// The handle incomming
+        /// The handle incoming
         /// </summary>
         HandleIncoming
     }

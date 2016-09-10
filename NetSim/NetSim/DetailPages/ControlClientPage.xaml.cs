@@ -1,26 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
-using NetSim.ViewModel;
+﻿// -----------------------------------------------------------------------
+// <copyright file="ControlClientPage.xaml.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim - ControlClientPage.xaml.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.DetailPages
 {
+    using System;
+    using System.Linq;
+    using System.Windows.Controls;
+
+    using NetSim.Lib.Simulator.Components;
+    using NetSim.ViewModel;
+
     /// <summary>
-    /// Interaction logic for ClientPage.xaml
+    /// Interaction logic for ControlClientPage
     /// </summary>
     public partial class ControlClientPage : Page
     {
@@ -34,12 +30,11 @@ namespace NetSim.DetailPages
         /// </summary>
         public ControlClientPage()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
         /// <summary>
         /// Occurs when the deletion of the client is requested.
-        /// Note: http://bit.ly/2bRCkbI
         /// </summary>
         public event EventHandler<NetSimClient> DeleteClientEvent;
 
@@ -53,14 +48,15 @@ namespace NetSim.DetailPages
         {
             get
             {
-                return client;
+                return this.client;
             }
+
             set
             {
-                client = value;
-                var viewModel = new ClientViewModel(client);
+                this.client = value;
+                var viewModel = new ClientViewModel(this.client);
 
-                viewModel.DeleteClientEvent += (sender, e) => OnDeleteClient();
+                viewModel.DeleteClientEvent += (sender, e) => this.OnDeleteClient();
                 this.DataContext = viewModel;
             }
         }
@@ -70,7 +66,7 @@ namespace NetSim.DetailPages
         /// </summary>
         protected virtual void OnDeleteClient()
         {
-            DeleteClientEvent?.Invoke(this, this.Client);
+            this.DeleteClientEvent?.Invoke(this, this.Client);
         }
     }
 }

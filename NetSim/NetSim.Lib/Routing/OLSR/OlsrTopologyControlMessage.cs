@@ -1,14 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
+﻿// -----------------------------------------------------------------------
+// <copyright file="OlsrTopologyControlMessage.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - OlsrTopologyControlMessage.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.OLSR
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+
+    using NetSim.Lib.Simulator.Components;
+
+    /// <summary>
+    /// The olsr topology control message implementation.
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimMessage" />
     public class OlsrTopologyControlMessage : NetSimMessage
     {
         /// <summary>
@@ -16,7 +26,7 @@ namespace NetSim.Lib.Routing.OLSR
         /// </summary>
         public OlsrTopologyControlMessage()
         {
-            MultiPointRelaySelectorSet = new List<string>();
+            this.MultiPointRelaySelectorSet = new List<string>();
         }
 
         /// <summary>
@@ -46,7 +56,9 @@ namespace NetSim.Lib.Routing.OLSR
         /// <summary>
         /// Clones this instance.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// A new object that is a copy of this instance.
+        /// </returns>
         public override object Clone()
         {
             var clone = new OlsrTopologyControlMessage()
@@ -55,7 +67,7 @@ namespace NetSim.Lib.Routing.OLSR
                 MultiPointRelaySelectorSet = new List<string>(this.MultiPointRelaySelectorSet)
             };
 
-            return CopyTo(clone);
+            return this.CopyTo(clone);
         }
 
         /// <summary>
@@ -70,18 +82,17 @@ namespace NetSim.Lib.Routing.OLSR
 
             builder.AppendLine(base.ToString());
 
-            if (SequenceNr != null)
+            if (this.SequenceNr != null)
             {
-                builder.AppendFormat("| SequenceNr: {0}\n", SequenceNr);
+                builder.AppendFormat("| SequenceNr: {0}\n", this.SequenceNr);
             }
 
-            if (MultiPointRelaySelectorSet != null && MultiPointRelaySelectorSet.Count > 0)
+            if (this.MultiPointRelaySelectorSet != null && this.MultiPointRelaySelectorSet.Count > 0)
             {
-                builder.AppendFormat("| MPR-SelectorSet: {0}\n", string.Join(",", MultiPointRelaySelectorSet));
+                builder.AppendFormat("| MPR-SelectorSet: {0}\n", string.Join(",", this.MultiPointRelaySelectorSet));
             }
 
             builder.AppendLine($"+[/{this.GetType().Name}]");
-
 
             return builder.ToString();
         }

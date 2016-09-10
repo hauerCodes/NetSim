@@ -1,31 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// -----------------------------------------------------------------------
+// <copyright file="OlsrNeighborTableEntry.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - OlsrNeighborTableEntry.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.OLSR
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    /// <summary>
+    /// The olsr neighbour table entry implementation.
+    /// </summary>
     public class OlsrNeighborTableEntry
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OlsrNeighborTableEntry"/> class.
+        /// </summary>
         public OlsrNeighborTableEntry()
         {
-            this.AccessableThrough = new List<string>();
+            this.AccessibleThrough = new List<string>();
         }
 
         /// <summary>
-        /// Gets or sets the neighbor identifier.
+        /// Gets or sets the accessible though.
         /// </summary>
         /// <value>
-        /// The neighbor identifier.
+        /// The accessible though.
         /// </value>
-        public string NeighborId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the accessable though.
-        /// </summary>
-        /// <value>
-        /// The accessable though.
-        /// </value>
-        public List<string> AccessableThrough { get; set; }
+        public List<string> AccessibleThrough { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this instance is multi point relay.
@@ -36,6 +42,14 @@ namespace NetSim.Lib.Routing.OLSR
         public bool IsMultiPointRelay { get; set; }
 
         /// <summary>
+        /// Gets or sets the neighbor identifier.
+        /// </summary>
+        /// <value>
+        /// The neighbor identifier.
+        /// </value>
+        public string NeighborId { get; set; }
+
+        /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
         /// <returns>
@@ -43,17 +57,17 @@ namespace NetSim.Lib.Routing.OLSR
         /// </returns>
         public override string ToString()
         {
-            if (IsMultiPointRelay)
+            if (this.IsMultiPointRelay)
             {
-                return $"{NeighborId,2} MPR";
+                return $"{this.NeighborId,2} MPR";
             }
 
-            if (AccessableThrough.Any())
+            if (this.AccessibleThrough.Any())
             {
-                return $"{NeighborId,2} {String.Join(",", AccessableThrough)}";
+                return $"{this.NeighborId,2} {string.Join(",", this.AccessibleThrough)}";
             }
 
-            return NeighborId;
+            return this.NeighborId;
         }
     }
 }

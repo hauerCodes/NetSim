@@ -1,11 +1,21 @@
-﻿using System;
-using System.Linq;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
+﻿// -----------------------------------------------------------------------
+// <copyright file="DsdvTableEntry.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - DsdvTableEntry.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.DSDV
 {
+    using System;
+    using System.Linq;
+    using NetSim.Lib.Simulator.Components;
+
+    /// <summary>
+    /// The implementation of a dsdv table entry.
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimTableEntry" />
     public class DsdvTableEntry : NetSimTableEntry
     {
         /// <summary>
@@ -19,16 +29,16 @@ namespace NetSim.Lib.Routing.DSDV
         /// <summary>
         /// Clones this instance.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The cloned instance of the dsdv table entry.</returns>
         public override object Clone()
         {
             return new DsdvTableEntry()
-            {
-                Destination = this.Destination,
-                Metric = this.Metric,
-                NextHop = this.NextHop, 
-                SequenceNr = (DsdvSequence)SequenceNr.Clone()
-            };
+                   {
+                       Destination = this.Destination,
+                       Metric = this.Metric,
+                       NextHop = this.NextHop,
+                       SequenceNr = (DsdvSequence)this.SequenceNr.Clone()
+                   };
         }
 
         /// <summary>
@@ -39,7 +49,7 @@ namespace NetSim.Lib.Routing.DSDV
         /// </returns>
         public override string ToString()
         {
-            return base.ToString() + $" {SequenceNr, 5}";
+            return base.ToString() + $" {this.SequenceNr, 5}";
         }
     }
 }

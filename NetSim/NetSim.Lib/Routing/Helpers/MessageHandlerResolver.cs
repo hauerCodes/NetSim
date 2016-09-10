@@ -1,12 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿// -----------------------------------------------------------------------
+// <copyright file="MessageHandlerResolver.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - MessageHandlerResolver.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.Helpers
 {
+    using System;
+    using System.Linq;
+    using System.Reflection;
+
+    /// <summary>
+    /// The message handler resolver implementation.
+    /// This class searches the message handler method in the given search type.
+    /// </summary>
     public class MessageHandlerResolver
     {
         /// <summary>
@@ -25,28 +34,25 @@ namespace NetSim.Lib.Routing.Helpers
 
         /// <summary>
         /// Gets the handler method.
-        /// searches a handler method with the dsrmessagehandler attribute and the 
+        /// searches a handler method with the dsr message handler attribute and the 
         /// right message type and for incoming(false) or outgoing (true, default) messages.
         /// e.g. IncomingDsrRouteRequestMessageHandler
         /// </summary>
         /// <param name="messageType">Type of the message.</param>
         /// <param name="searchOutgoing">if set to <c>true</c> [search outgoing].</param>
-        /// <returns></returns>
+        /// <returns>The message handler method info or null.</returns>
         public MethodInfo GetHandlerMethod(Type messageType, bool searchOutgoing = true)
         {
-            var method =
-                searchType
-                    .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
-                    .FirstOrDefault(m =>
+            var method = this.searchType.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic).FirstOrDefault(
+                m =>
                     {
                         MessageHandlerAttribute attribute =
-                            m.GetCustomAttributes()
-                                .FirstOrDefault(c => c.GetType() == typeof(MessageHandlerAttribute)) as
-                            MessageHandlerAttribute;
-                        return attribute != null && attribute.MessageToHandle == messageType && attribute.Outgoing == searchOutgoing;
+                            m.GetCustomAttributes().FirstOrDefault(c => c.GetType() == typeof(MessageHandlerAttribute))
+                                as MessageHandlerAttribute;
+                        return attribute != null && attribute.MessageToHandle == messageType
+                               && attribute.Outgoing == searchOutgoing;
                     });
             return method;
         }
-
     }
 }

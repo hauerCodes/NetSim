@@ -1,28 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
+﻿// -----------------------------------------------------------------------
+// <copyright file="AodvRouteRequestMessage.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - AodvRouteRequestMessage.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.AODV
 {
+    using System;
+    using System.Linq;
+    using System.Text;
+
+    using NetSim.Lib.Simulator.Components;
+
     /// <summary>
-    /// 
+    /// The route request message of the protocol.
     /// </summary>
     /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimMessage" />
     public class AodvRouteRequestMessage : NetSimMessage
     {
-
         /// <summary>
-        /// Gets or sets the request identifier.
+        /// Gets or sets the hop count.
         /// </summary>
         /// <value>
-        /// The request identifier.
+        /// The hop count.
         /// </value>
-        public int RequestId { get; set; }
+        public int HopCount { get; set; }
 
         /// <summary>
         /// Gets or sets the last hop.
@@ -35,12 +39,12 @@ namespace NetSim.Lib.Routing.AODV
         public string LastHop { get; set; }
 
         /// <summary>
-        /// Gets or sets the hop count.
+        /// Gets or sets the request identifier.
         /// </summary>
         /// <value>
-        /// The hop count.
+        /// The request identifier.
         /// </value>
-        public int HopCount { get; set; }
+        public int RequestId { get; set; }
 
         /// <summary>
         /// Gets or sets the sequence nr.
@@ -67,14 +71,14 @@ namespace NetSim.Lib.Routing.AODV
         public override object Clone()
         {
             var clone = new AodvRouteRequestMessage()
-            {
-                RequestId = this.RequestId,
-                HopCount = this.HopCount,
-                LastHop = this.LastHop,
-                SenderSequenceNr = (AodvSequence)this.SenderSequenceNr.Clone()
-            };
+                        {
+                            RequestId = this.RequestId,
+                            HopCount = this.HopCount,
+                            LastHop = this.LastHop,
+                            SenderSequenceNr = (AodvSequence)this.SenderSequenceNr.Clone()
+                        };
 
-            return CopyTo(clone);
+            return this.CopyTo(clone);
         }
 
         /// <summary>
@@ -88,10 +92,10 @@ namespace NetSim.Lib.Routing.AODV
             StringBuilder builder = new StringBuilder();
 
             builder.AppendLine(base.ToString());
-            builder.AppendFormat("| Request: {0}\n", RequestId);
-            builder.AppendFormat("| HopCount: {0}\n", HopCount);
-            builder.AppendFormat("| LastHop: {0}\n", LastHop);
-            builder.AppendFormat("| Sender SequenceNr: {0}\n", SenderSequenceNr);
+            builder.AppendFormat("| Request: {0}\n", this.RequestId);
+            builder.AppendFormat("| HopCount: {0}\n", this.HopCount);
+            builder.AppendFormat("| LastHop: {0}\n", this.LastHop);
+            builder.AppendFormat("| Sender SequenceNr: {0}\n", this.SenderSequenceNr);
             builder.AppendLine($"+[/{this.GetType().Name}]");
 
             return builder.ToString();

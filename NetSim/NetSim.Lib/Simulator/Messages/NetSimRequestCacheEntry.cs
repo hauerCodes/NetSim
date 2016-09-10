@@ -1,9 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// -----------------------------------------------------------------------
+// <copyright file="NetSimRequestCacheEntry.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - NetSimRequestCacheEntry.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Simulator.Messages
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    /// <summary>
+    /// The request cache entry implementation is used for saving cached route requests.
+    /// </summary>
     public class NetSimRequestCacheEntry
     {
         /// <summary>
@@ -11,8 +22,16 @@ namespace NetSim.Lib.Simulator.Messages
         /// </summary>
         public NetSimRequestCacheEntry()
         {
-            this.ChachedRequests = new List<int>();
+            this.CachedRequests = new List<int>();
         }
+
+        /// <summary>
+        /// Gets or sets the cached requests.
+        /// </summary>
+        /// <value>
+        /// The cached requests.
+        /// </value>
+        public List<int> CachedRequests { get; set; }
 
         /// <summary>
         /// Gets or sets the identifier.
@@ -23,21 +42,15 @@ namespace NetSim.Lib.Simulator.Messages
         public string Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the chached requests.
-        /// </summary>
-        /// <value>
-        /// The chached requests.
-        /// </value>
-        public List<int> ChachedRequests { get; set; }
-
-        /// <summary>
-        /// Determines whether this entry has chached request with the specified identifier.
+        /// Determines whether this entry has cached request with the specified identifier.
         /// </summary>
         /// <param name="requestId">The request identifier.</param>
-        /// <returns></returns>
+        /// <returns>
+        ///   <c>true</c> if the specified request identifier is  cached request; otherwise, <c>false</c>.
+        /// </returns>
         public bool HasCachedRequest(int requestId)
         {
-            return ChachedRequests.Contains(requestId);
+            return this.CachedRequests.Contains(requestId);
         }
 
         /// <summary>
@@ -48,7 +61,7 @@ namespace NetSim.Lib.Simulator.Messages
         /// </returns>
         public override string ToString()
         {
-            return $"{Id} {String.Join(",", ChachedRequests)}";
+            return $"{this.Id} {string.Join(",", this.CachedRequests)}";
         }
     }
 }

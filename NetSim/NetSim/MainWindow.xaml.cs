@@ -1,35 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
-using NetSim.ViewModel;
+﻿// -----------------------------------------------------------------------
+// <copyright file="MainWindow.xaml.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim - MainWindow.xaml.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim
 {
+    using System;
+    using System.Linq;
+    using System.Windows;
+    using System.Windows.Input;
+
+    using NetSim.ViewModel;
+
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for MainWindow
     /// </summary>
     public partial class MainWindow : Window
     {
-
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
         public MainWindow()
         {
-            InitializeComponent();
-            this.DataContext = new MainViewModel(DrawCanvas);
+            this.InitializeComponent();
+            this.DataContext = new MainViewModel(this.DrawCanvas);
         }
 
         /// <summary>
@@ -41,13 +38,23 @@ namespace NetSim
         private MainViewModel ViewModel => this.DataContext as MainViewModel;
 
         /// <summary>
+        /// Draws the canvas mouse left button down.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void DrawCanvasMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            this.ViewModel.HandleMouseLeftButtonDown(sender, e);
+        }
+
+        /// <summary>
         /// Draws the canvas mouse left button up.
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         private void DrawCanvasMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            ViewModel.HandleMouseLeftButtonUp(sender, e);
+            this.ViewModel.HandleMouseLeftButtonUp(sender, e);
         }
 
         /// <summary>
@@ -57,18 +64,7 @@ namespace NetSim
         /// <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
         private void DrawCanvasMouseMove(object sender, MouseEventArgs e)
         {
-            ViewModel.HandleMouseMove(sender, e);
+            this.ViewModel.HandleMouseMove(sender, e);
         }
-
-        /// <summary>
-        /// Draws the canvas mouse left button down.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
-        private void DrawCanvasMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            ViewModel.HandleMouseLeftButtonDown(sender, e);
-        }
-
     }
 }

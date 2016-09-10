@@ -1,24 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
+﻿// -----------------------------------------------------------------------
+// <copyright file="DsdvUpdateMessage.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - DsdvUpdateMessage.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.DSDV
 {
+    using System;
+    using System.Linq;
+    using System.Text;
+
+    using NetSim.Lib.Simulator.Components;
+
+    /// <summary>
+    /// The dsdv update message.
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimMessage" />
     public class DsdvUpdateMessage : NetSimMessage
     {
-        /// <summary>
-        /// Gets or sets the update table.
-        /// </summary>
-        /// <value>
-        /// The update table.
-        /// </value>
-        public DsdvTable UpdateTable { get; set; }
-
         /// <summary>
         /// Gets the short name.
         /// </summary>
@@ -28,17 +29,24 @@ namespace NetSim.Lib.Routing.DSDV
         public override string ShortName => "Update";
 
         /// <summary>
+        /// Gets or sets the update table.
+        /// </summary>
+        /// <value>
+        /// The update table.
+        /// </value>
+        public DsdvTable UpdateTable { get; set; }
+
+        /// <summary>
         /// Clones this instance.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// A new object that is a copy of this instance.
+        /// </returns>
         public override object Clone()
         {
-            var clone = new DsdvUpdateMessage()
-            {
-                UpdateTable = (DsdvTable)UpdateTable.Clone()
-            };
+            var clone = new DsdvUpdateMessage() { UpdateTable = (DsdvTable)this.UpdateTable.Clone() };
 
-            return CopyTo(clone);
+            return this.CopyTo(clone);
         }
 
         /// <summary>
@@ -54,9 +62,9 @@ namespace NetSim.Lib.Routing.DSDV
             builder.AppendLine(base.ToString());
             builder.AppendLine($"| Dest Metric SeqNr");
 
-            foreach (var entry in UpdateTable.Entries)
+            foreach (var entry in this.UpdateTable.Entries)
             {
-                var dsdvEntry = (entry as DsdvTableEntry);
+                var dsdvEntry = entry as DsdvTableEntry;
 
                 if (dsdvEntry == null)
                 {
@@ -70,6 +78,5 @@ namespace NetSim.Lib.Routing.DSDV
 
             return builder.ToString();
         }
-
     }
 }

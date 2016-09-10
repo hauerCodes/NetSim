@@ -1,16 +1,24 @@
-﻿using System;
-using System.Linq;
+﻿// -----------------------------------------------------------------------
+// <copyright file="MessageHandlerAttribute.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - MessageHandlerAttribute.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.Helpers
 {
+    using System;
+    using System.Linq;
+
     /// <summary>
-    /// 
+    /// The message handler attribute implementation.
+    /// This attribute is used for connection message handlers with incoming messages in routing protocols.
     /// </summary>
     /// <seealso cref="System.Attribute" />
     [AttributeUsage(AttributeTargets.Method)]
     public class MessageHandlerAttribute : Attribute
     {
-
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageHandlerAttribute"/> class.
         /// </summary>
@@ -36,7 +44,6 @@ namespace NetSim.Lib.Routing.Helpers
         /// <value>
         ///   <c>true</c> if outgoing; otherwise, <c>false</c>.
         /// </value>
-        public bool Outgoing { get; set; } = false;
-
+        public bool Outgoing { get; set; }
     }
 }

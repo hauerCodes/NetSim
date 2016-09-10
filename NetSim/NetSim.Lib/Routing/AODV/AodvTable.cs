@@ -1,15 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
+﻿// -----------------------------------------------------------------------
+// <copyright file="AodvTable.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - AodvTable.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.AODV
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+
+    using NetSim.Lib.Simulator.Components;
+
+    /// <summary>
+    /// The routing table for aodv protocol.
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimTable" />
     public class AodvTable : NetSimTable
     {
+        /// <summary>
+        /// Adds the active neighbour.
+        /// </summary>
+        /// <param name="destination">The destination.</param>
+        /// <param name="activeNeighbour">The active neighbour.</param>
+        public void AddActiveNeigbour(string destination, string activeNeighbour)
+        {
+            var route = this.GetRouteFor(destination) as AodvTableEntry;
+
+            if (route == null)
+            {
+                return;
+            }
+
+            if (!route.ActiveNeighbours.ContainsKey(activeNeighbour))
+            {
+                route.ActiveNeighbours.Add(activeNeighbour, 0);
+            }
+        }
+
         /// <summary>
         /// Adds the route entry.
         /// </summary>
@@ -19,108 +50,39 @@ namespace NetSim.Lib.Routing.AODV
         /// <param name="sequenceNr">The sequence nr.</param>
         public void AddRouteEntry(string destination, string nextHop, int metric, AodvSequence sequenceNr)
         {
-            this.Entries.Add(new AodvTableEntry()
-            {
-                Destination = destination,
-                NextHop = nextHop,
-                Metric = metric,
-                SequenceNr = sequenceNr,
-            });
-        }
-
-        /// <summary>
-        /// Handles the route maintaince.
-        /// </summary>
-        /// <param name="inactiveNeighbourId">The inactive neighbour identifier.</param>
-        /// <returns>
-        /// A List of Route Error Receivers
-        /// </returns>
-        public List<string> HandleRouteMaintaince(string inactiveNeighbourId)
-        {
-            List<string> routeErrorReceivers = new List<string>();
-
-            // remove every route where inactive neighour is destination
-            var directRoute = GetRouteFor(inactiveNeighbourId);
-
-            if (directRoute != null)
-            {
-                // send rerr to every active neighbour of the route
-                routeErrorReceivers.AddRange(GetActiveNeighbours(directRoute));
-
-                Entries.Remove(directRoute);
-            }
-
-            // remove every route where a inactive neighbour is next hop
-            var nextHopRoutes = Entries.Where(e => e.NextHop.Equals(inactiveNeighbourId)).ToList();
-
-            foreach (var nextHopRoute in nextHopRoutes)
-            {
-                // send rerr to every active neighbour of the route
-                routeErrorReceivers.AddRange(GetActiveNeighbours(nextHopRoute));
-
-                Entries.Remove(nextHopRoute);
-            }
-
-            return routeErrorReceivers.Distinct().ToList();
-        }
-
-        /// <summary>
-        /// Gets the active neighbours.
-        /// </summary>
-        /// <param name="route">The route.</param>
-        /// <returns></returns>
-        private List<string> GetActiveNeighbours(NetSimTableEntry route)
-        {
-            var aodvroute = route as AodvTableEntry;
-
-            return aodvroute?.ActiveNeighbours.Keys.ToList() ?? new List<string>();
-        }
-
-        /// <summary>
-        /// Handles the request route caching.
-        /// </summary>
-        /// <param name="reqMessage">The req message.</param>
-        public void HandleRequestReverseRouteCaching(AodvRouteRequestMessage reqMessage)
-        {
-            // search for already cached route
-            var route = (AodvTableEntry)this.GetRouteFor(reqMessage.Sender);
-
-            // add route if route doesn't exist
-            if (route == null)
-            {
-                // add route to table
-                AddRouteEntry(reqMessage.Sender,
-                    reqMessage.LastHop,
-                    reqMessage.HopCount + 1,
-                    (AodvSequence)reqMessage.SenderSequenceNr.Clone());
-            }
-            else
-            {
-                // if route exists check if sequencenr of request is newer - information in message is newer
-                if (reqMessage.SenderSequenceNr.CompareTo(route.SequenceNr) == 1)
+            this.Entries.Add(
+                new AodvTableEntry()
                 {
-                    //TODO check if needed
-                    //if (reqMessage.HopCount + 1 < route.Metric)
-                    //{
+                    Destination = destination,
+                    NextHop = nextHop,
+                    Metric = metric,
+                    SequenceNr = sequenceNr,
+                });
+        }
 
-                        // remove route and add new one
-                        Entries.Remove(route);
+        /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        /// <returns>The cloned instance of the table.</returns>
+        public override object Clone()
+        {
+            return new AodvTable() { Entries = this.Entries.Select(e => (NetSimTableEntry)e.Clone()).ToList() };
+        }
 
-                        // add new route
-                        AddRouteEntry(reqMessage.Sender,
-                            reqMessage.LastHop,
-                            reqMessage.HopCount + 1,
-                            (AodvSequence)reqMessage.SenderSequenceNr.Clone());
-
-                    //}
-                }
-            }
+        /// <summary>
+        /// Gets the route for.
+        /// </summary>
+        /// <param name="destinationId">The destination identifier.</param>
+        /// <returns>The found route for the destination or null.</returns>
+        public override NetSimTableEntry GetRouteFor(string destinationId)
+        {
+            return this.Entries.FirstOrDefault(e => e.Destination.Equals(destinationId));
         }
 
         /// <summary>
         /// Handles the request route caching.
         /// </summary>
-        /// <param name="repMessage">The req message.</param>
+        /// <param name="repMessage">The request message.</param>
         public void HandleReplyRoute(AodvRouteReplyMessage repMessage)
         {
             // search for already cached route
@@ -130,7 +92,8 @@ namespace NetSim.Lib.Routing.AODV
             if (route == null)
             {
                 // add route to table
-                AddRouteEntry(repMessage.Sender,
+                this.AddRouteEntry(
+                    repMessage.Sender,
                     repMessage.LastHop,
                     repMessage.HopCount + 1,
                     (AodvSequence)repMessage.ReceiverSequenceNr.Clone());
@@ -143,10 +106,11 @@ namespace NetSim.Lib.Routing.AODV
                     if (repMessage.HopCount + 1 < route.Metric)
                     {
                         // remove route and add new one
-                        Entries.Remove(route);
+                        this.Entries.Remove(route);
 
                         // add new route
-                        AddRouteEntry(repMessage.Sender,
+                        this.AddRouteEntry(
+                            repMessage.Sender,
                             repMessage.LastHop,
                             repMessage.HopCount + 1,
                             (AodvSequence)repMessage.ReceiverSequenceNr.Clone());
@@ -171,14 +135,93 @@ namespace NetSim.Lib.Routing.AODV
         }
 
         /// <summary>
+        /// Handles the request route caching.
+        /// </summary>
+        /// <param name="reqMessage">The request message.</param>
+        public void HandleRequestReverseRouteCaching(AodvRouteRequestMessage reqMessage)
+        {
+            // search for already cached route
+            var route = (AodvTableEntry)this.GetRouteFor(reqMessage.Sender);
+
+            // add route if route doesn't exist
+            if (route == null)
+            {
+                // add route to table
+                this.AddRouteEntry(
+                    reqMessage.Sender,
+                    reqMessage.LastHop,
+                    reqMessage.HopCount + 1,
+                    (AodvSequence)reqMessage.SenderSequenceNr.Clone());
+            }
+            else
+            {
+                // if route exists check if sequencenr of request is newer - information in message is newer
+                if (reqMessage.SenderSequenceNr.CompareTo(route.SequenceNr) == 1)
+                {
+                    // TODO check if needed
+                    // if (reqMessage.HopCount + 1 < route.Metric)
+                    // {
+
+                    // remove route and add new one
+                    this.Entries.Remove(route);
+
+                    // add new route
+                    this.AddRouteEntry(
+                        reqMessage.Sender,
+                        reqMessage.LastHop,
+                        reqMessage.HopCount + 1,
+                        (AodvSequence)reqMessage.SenderSequenceNr.Clone());
+
+                    // }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handles the route maintenance.
+        /// </summary>
+        /// <param name="inactiveNeighbourId">The inactive neighbour identifier.</param>
+        /// <returns>
+        /// A List of Route Error Receivers
+        /// </returns>
+        public List<string> HandleRouteMaintaince(string inactiveNeighbourId)
+        {
+            List<string> routeErrorReceivers = new List<string>();
+
+            // remove every route where inactive neighour is destination
+            var directRoute = this.GetRouteFor(inactiveNeighbourId);
+
+            if (directRoute != null)
+            {
+                // send rerr to every active neighbour of the route
+                routeErrorReceivers.AddRange(this.GetActiveNeighbours(directRoute));
+
+                this.Entries.Remove(directRoute);
+            }
+
+            // remove every route where a inactive neighbour is next hop
+            var nextHopRoutes = this.Entries.Where(e => e.NextHop.Equals(inactiveNeighbourId)).ToList();
+
+            foreach (var nextHopRoute in nextHopRoutes)
+            {
+                // send rerr to every active neighbour of the route
+                routeErrorReceivers.AddRange(this.GetActiveNeighbours(nextHopRoute));
+
+                this.Entries.Remove(nextHopRoute);
+            }
+
+            return routeErrorReceivers.Distinct().ToList();
+        }
+
+        /// <summary>
         /// Searches the cached route.
         /// </summary>
-        /// <param name="reqMessage">The req message.</param>
-        /// <returns></returns>
+        /// <param name="reqMessage">The request message.</param>
+        /// <returns>The cached route or null.</returns>
         public AodvTableEntry SearchCachedRoute(AodvRouteRequestMessage reqMessage)
         {
             // Check if route was cached
-            var searchRoute = GetRouteFor(reqMessage.Receiver);
+            var searchRoute = this.GetRouteFor(reqMessage.Receiver);
 
             if (searchRoute == null)
             {
@@ -189,51 +232,13 @@ namespace NetSim.Lib.Routing.AODV
             var aodvRoute = (AodvTableEntry)searchRoute;
 
             // add back route to table  with data from rreq
-            AddRouteEntry(reqMessage.Sender,
+            this.AddRouteEntry(
+                reqMessage.Sender,
                 reqMessage.LastHop,
                 reqMessage.HopCount,
                 (AodvSequence)reqMessage.SenderSequenceNr.Clone());
 
             return aodvRoute;
-        }
-
-        /// <summary>
-        /// Adds the active neigbour.
-        /// </summary>
-        /// <param name="destination">The destination.</param>
-        /// <param name="activeNeighbour">The active neighbour.</param>
-        public void AddActiveNeigbour(string destination, string activeNeighbour)
-        {
-            var route =GetRouteFor(destination) as AodvTableEntry;
-
-            if (route == null)
-            {
-                return;
-            }
-
-            if (!route.ActiveNeighbours.ContainsKey(activeNeighbour))
-            {
-                route.ActiveNeighbours.Add(activeNeighbour, 0);
-            }
-        }
-
-        /// <summary>
-        /// Gets the route for.
-        /// </summary>
-        /// <param name="destinationId">The destination identifier.</param>
-        /// <returns></returns>
-        public override NetSimTableEntry GetRouteFor(string destinationId)
-        {
-            return Entries.FirstOrDefault(e => e.Destination.Equals(destinationId));
-        }
-
-        /// <summary>
-        /// Clones this instance.
-        /// </summary>
-        /// <returns></returns>
-        public override object Clone()
-        {
-            return new AodvTable() { Entries = this.Entries.Select(e => (NetSimTableEntry)e.Clone()).ToList() };
         }
 
         /// <summary>
@@ -252,6 +257,16 @@ namespace NetSim.Lib.Routing.AODV
             return builder.ToString();
         }
 
-       
+        /// <summary>
+        /// Gets the active neighbours.
+        /// </summary>
+        /// <param name="route">The route.</param>
+        /// <returns>The active neighbours list. Note list can be empty not null.</returns>
+        private List<string> GetActiveNeighbours(NetSimTableEntry route)
+        {
+            var aodvroute = route as AodvTableEntry;
+
+            return aodvroute?.ActiveNeighbours.Keys.ToList() ?? new List<string>();
+        }
     }
 }

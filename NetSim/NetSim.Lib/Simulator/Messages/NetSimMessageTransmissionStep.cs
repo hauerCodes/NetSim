@@ -1,10 +1,18 @@
-﻿using System;
-using System.Linq;
+﻿// -----------------------------------------------------------------------
+// <copyright file="NetSimMessageTransmissionStep.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - NetSimMessageTransmissionStep.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Simulator.Messages
 {
+    using System;
+    using System.Linq;
+
     /// <summary>
-    /// 
+    /// The message transmission step enumeration.
     /// </summary>
     public enum NetSimMessageTransmissionStep
     {

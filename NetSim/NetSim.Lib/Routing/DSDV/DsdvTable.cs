@@ -1,12 +1,24 @@
-﻿using System;
-using System.Linq;
-using System.Text;
+﻿// -----------------------------------------------------------------------
+// <copyright file="DsdvTable.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - DsdvTable.cs</summary>
+// -----------------------------------------------------------------------
 
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
-
+// ReSharper disable ArrangeStaticMemberQualifier
 namespace NetSim.Lib.Routing.DSDV
 {
+    using System;
+    using System.Linq;
+    using System.Text;
+
+    using NetSim.Lib.Simulator.Components;
+
+    /// <summary>
+    /// The dsdv routing table implementation.
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimTable" />
     public class DsdvTable : NetSimTable
     {
         /// <summary>
@@ -18,13 +30,33 @@ namespace NetSim.Lib.Routing.DSDV
         /// <param name="sequenceNr">The sequence nr.</param>
         public void AddRouteEntry(string destination, string nextHop, int metric, DsdvSequence sequenceNr)
         {
-            this.Entries.Add(new DsdvTableEntry()
-            {
-                Destination = destination,
-                NextHop = nextHop,
-                Metric = metric,
-                SequenceNr = sequenceNr,
-            });
+            this.Entries.Add(
+                new DsdvTableEntry()
+                {
+                    Destination = destination,
+                    NextHop = nextHop,
+                    Metric = metric,
+                    SequenceNr = sequenceNr,
+                });
+        }
+
+        /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        /// <returns>The cloned table instance.</returns>
+        public override object Clone()
+        {
+            return new DsdvTable() { Entries = this.Entries.Select(e => (NetSimTableEntry)e.Clone()).ToList() };
+        }
+
+        /// <summary>
+        /// Gets the route for.
+        /// </summary>
+        /// <param name="destinationId">The destination identifier.</param>
+        /// <returns>The found route or null.</returns>
+        public override NetSimTableEntry GetRouteFor(string destinationId)
+        {
+            return this.Entries.FirstOrDefault(e => e.Destination.Equals(destinationId));
         }
 
         /// <summary>
@@ -32,7 +64,7 @@ namespace NetSim.Lib.Routing.DSDV
         /// </summary>
         /// <param name="senderId">The sender identifier.</param>
         /// <param name="receivedUpdate">The received update.</param>
-        /// <returns></returns>
+        /// <returns>true if the table was updated; otherwise false</returns>
         public bool HandleUpdate(string senderId, DsdvTable receivedUpdate)
         {
             bool updated = false;
@@ -41,9 +73,9 @@ namespace NetSim.Lib.Routing.DSDV
             foreach (var updateRoute in receivedUpdate.Entries)
             {
                 // search localroute
-                var localRoute = Entries.FirstOrDefault(r => r.Destination.Equals(updateRoute.Destination));
+                var localRoute = this.Entries.FirstOrDefault(r => r.Destination.Equals(updateRoute.Destination));
 
-                //ignore own local route (e.g. A A 0)
+                // ignore own local route (e.g. A A 0)
                 if (localRoute != null && localRoute.Metric == 0)
                 {
                     continue;
@@ -54,9 +86,12 @@ namespace NetSim.Lib.Routing.DSDV
                 {
                     var dsdvTableEntry = updateRoute as DsdvTableEntry;
 
-                    if (dsdvTableEntry == null) continue;
+                    if (dsdvTableEntry == null)
+                    {
+                        continue;
+                    }
 
-                    AddRouteEntry(
+                    this.AddRouteEntry(
                         updateRoute.Destination,
                         senderId,
                         updateRoute.Metric + 1,
@@ -69,16 +104,19 @@ namespace NetSim.Lib.Routing.DSDV
                     var dsdvLocalRouteEntry = localRoute as DsdvTableEntry;
                     var dsdvUpdateRoute = updateRoute as DsdvTableEntry;
 
-                    if (dsdvUpdateRoute == null || dsdvLocalRouteEntry == null) continue;
+                    if (dsdvUpdateRoute == null || dsdvLocalRouteEntry == null)
+                    {
+                        continue;
+                    }
 
                     var sequenceCompare = dsdvUpdateRoute.SequenceNr.CompareTo(dsdvLocalRouteEntry.SequenceNr);
 
                     switch (sequenceCompare)
                     {
                         case 0:
-                            // if update route sequencenr is equal to local route sequencenr
 
-                            if (updateRoute.Metric != NotReachable)
+                            // if update route sequencenr is equal to local route sequencenr
+                            if (updateRoute.Metric != NetSimTable.NotReachable)
                             {
                                 // check if updateRoute (metric + 1) is better than local existant route
                                 if (updateRoute.Metric + 1 < localRoute.Metric)
@@ -94,19 +132,19 @@ namespace NetSim.Lib.Routing.DSDV
                             break;
 
                         case 1:
+
                             // if update route sequencenr is higher then local route sequencenr (update info is newer)
 
                             // if metric is notreachable
-                            if (updateRoute.Metric == NotReachable)
+                            if (updateRoute.Metric == NetSimTable.NotReachable)
                             {
-                                if (dsdvLocalRouteEntry.Metric != NotReachable)
+                                if (dsdvLocalRouteEntry.Metric != NetSimTable.NotReachable)
                                 {
                                     // set local route not reachable
-                                    dsdvLocalRouteEntry.Metric = NotReachable;
+                                    dsdvLocalRouteEntry.Metric = NetSimTable.NotReachable;
                                     dsdvLocalRouteEntry.SequenceNr = (DsdvSequence)dsdvUpdateRoute.SequenceNr.Clone();
 
-                                    //SetAllRoutesNotReachableForDisconnectedNextHop(dsdvLocalRouteEntry.NextHop);
-
+                                    // SetAllRoutesNotReachableForDisconnectedNextHop(dsdvLocalRouteEntry.NextHop);
                                     updated = true;
                                 }
                             }
@@ -142,34 +180,17 @@ namespace NetSim.Lib.Routing.DSDV
         /// <param name="nextHop">The next hop.</param>
         public void SetAllRoutesNotReachableForDisconnectedNextHop(string nextHop)
         {
-            foreach (var netSimTableEntry in Entries.Where(e => e.NextHop.Equals(nextHop) && !e.Destination.Equals(e.NextHop)))
+            foreach (
+                var netSimTableEntry in
+                this.Entries.Where(e => e.NextHop.Equals(nextHop) && !e.Destination.Equals(e.NextHop)))
             {
                 var entry = (DsdvTableEntry)netSimTableEntry;
 
-                entry.Metric = NotReachable;
-                //increment sequence nr - outside of "destination" node
+                entry.Metric = NetSimTable.NotReachable;
+
+                // increment sequence nr - outside of "destination" node
                 entry.SequenceNr.SequenceNr++;
-
             }
-        }
-
-        /// <summary>
-        /// Gets the route for.
-        /// </summary>
-        /// <param name="destinationId">The destination identifier.</param>
-        /// <returns></returns>
-        public override NetSimTableEntry GetRouteFor(string destinationId)
-        {
-            return Entries.FirstOrDefault(e => e.Destination.Equals(destinationId));
-        }
-
-        /// <summary>
-        /// Clones this instance.
-        /// </summary>
-        /// <returns></returns>
-        public override object Clone()
-        {
-            return new DsdvTable() { Entries = this.Entries.Select(e => (NetSimTableEntry)e.Clone()).ToList() };
         }
 
         /// <summary>

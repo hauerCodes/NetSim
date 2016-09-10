@@ -1,20 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// -----------------------------------------------------------------------
+// <copyright file="OlsrTopologyTableEntry.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - OlsrTopologyTableEntry.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.OLSR
 {
+    using System;
+    using System.Linq;
+
+    /// <summary>
+    /// The olsr topology table entry implementation.
+    /// </summary>
+    /// <seealso cref="System.ICloneable" />
     public class OlsrTopologyTableEntry : ICloneable
     {
-
-        /// <summary>
-        /// Gets or sets the origniator identifier.
-        /// </summary>
-        /// <value>
-        /// The origniator identifier.
-        /// </value>
-        public string OrigniatorId { get; set; }
-
         /// <summary>
         /// Gets or sets the MPR selector identifier.
         /// </summary>
@@ -24,15 +26,12 @@ namespace NetSim.Lib.Routing.OLSR
         public string MprSelectorId { get; set; }
 
         /// <summary>
-        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// Gets or sets the originator identifier.
         /// </summary>
-        /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
-        /// </returns>
-        public override string ToString()
-        {
-            return $"{OrigniatorId,10} {MprSelectorId}";
-        }
+        /// <value>
+        /// The originator identifier.
+        /// </value>
+        public string OriginatorId { get; set; }
 
         /// <summary>
         /// Creates a new object that is a copy of the current instance.
@@ -42,11 +41,18 @@ namespace NetSim.Lib.Routing.OLSR
         /// </returns>
         public object Clone()
         {
-            return new OlsrTopologyTableEntry()
-            {
-                OrigniatorId = this.OrigniatorId,
-                MprSelectorId = this.MprSelectorId
-            };
+            return new OlsrTopologyTableEntry() { OriginatorId = this.OriginatorId, MprSelectorId = this.MprSelectorId };
+        }
+
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return $"{this.OriginatorId,10} {this.MprSelectorId}";
         }
     }
 }

@@ -1,10 +1,18 @@
-﻿using System;
-using System.Linq;
+﻿// -----------------------------------------------------------------------
+// <copyright file="NetSimTableEntry.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - NetSimTableEntry.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Simulator.Components
 {
+    using System;
+    using System.Linq;
+
     /// <summary>
-    /// 
+    /// The base class for the table entry implementations.
     /// </summary>
     public abstract class NetSimTableEntry : ICloneable
     {
@@ -17,12 +25,12 @@ namespace NetSim.Lib.Simulator.Components
         public string Destination { get; set; }
 
         /// <summary>
-        /// Gets or sets the next hop.
+        /// Gets a value indicating whether this instance is reachable.
         /// </summary>
         /// <value>
-        /// The next hop.
+        /// <c>true</c> if this instance is reachable; otherwise, <c>false</c>.
         /// </value>
-        public string NextHop { get; set; }
+        public bool IsReachable => this.Metric >= 0;
 
         /// <summary>
         /// Gets or sets the metric.
@@ -33,17 +41,17 @@ namespace NetSim.Lib.Simulator.Components
         public int Metric { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether this instance is reachable.
+        /// Gets or sets the next hop.
         /// </summary>
         /// <value>
-        /// <c>true</c> if this instance is reachable; otherwise, <c>false</c>.
+        /// The next hop.
         /// </value>
-        public bool IsReachable => Metric >= 0;
+        public string NextHop { get; set; }
 
         /// <summary>
         /// Clones this instance.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The cloned instance.</returns>
         public abstract object Clone();
 
         /// <summary>
@@ -54,7 +62,9 @@ namespace NetSim.Lib.Simulator.Components
         /// </returns>
         public override string ToString()
         {
-            return !IsReachable ? $"{Destination, 4} {NextHop, 4} {"---",6}" : $"{Destination,4} {NextHop,4} {Metric,6}";
+            return !this.IsReachable
+                       ? $"{this.Destination,4} {this.NextHop,4} {"---",6}"
+                       : $"{this.Destination,4} {this.NextHop,4} {this.Metric,6}";
         }
     }
 }

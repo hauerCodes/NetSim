@@ -1,27 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿// -----------------------------------------------------------------------
+// <copyright file="InfoWindow.xaml.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim - InfoWindow.xaml.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim
 {
+    using System;
+    using System.Linq;
+    using System.Windows;
+
     /// <summary>
-    /// Interaction logic for InfoWindow.xaml
+    /// Interaction logic for InfoWindow
     /// </summary>
     public partial class InfoWindow : Window
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InfoWindow"/> class.
+        /// </summary>
         public InfoWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
         /// <summary>

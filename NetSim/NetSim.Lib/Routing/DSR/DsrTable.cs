@@ -1,12 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using NetSim.Lib.Simulator.Components;
+﻿// -----------------------------------------------------------------------
+// <copyright file="DsrTable.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - DsrTable.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.DSR
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+
+    using NetSim.Lib.Simulator.Components;
+
+    /// <summary>
+    /// The dsr table implementation.
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimTable" />
     public class DsrTable : NetSimTable
     {
         /// <summary>
@@ -17,33 +29,36 @@ namespace NetSim.Lib.Routing.DSR
         /// <param name="metric">The metric.</param>
         public void AddInitialRouteEntry(string destination, string nextHop, int metric)
         {
-            this.Entries.Add(new DsrTableEntry()
-            {
-                Destination = destination,
-                Metric = metric,
-                Route = new List<string>() { nextHop }
-            });
+            this.Entries.Add(
+                new DsrTableEntry()
+                {
+                    Destination = destination,
+                    Metric = metric,
+                    Route = new List<string>() { nextHop }
+                });
         }
 
         /// <summary>
-        /// Handles the response.
+        /// Clones this instance.
         /// </summary>
-        /// <param name="message">The message.</param>
-        public void HandleResponse(DsrRouteReplyMessage message)
+        /// <returns>
+        /// The cloned instance.
+        /// </returns>
+        public override object Clone()
         {
-            // search for a route for this destination
-            var entry = GetRouteFor(message.Sender);
+            return new DsrTable() { Entries = this.Entries.Select(e => (NetSimTableEntry)e.Clone()).ToList() };
+        }
 
-            // if no route found or the metric of the found route is bigger
-            if (entry == null || entry.Metric > message.Route.Count - 1)
-            {
-                this.Entries.Add(new DsrTableEntry()
-                {
-                    Destination = message.Sender,
-                    Metric = message.Route.Count - 1,
-                    Route = new List<string>(message.Route)
-                });
-            }
+        /// <summary>
+        /// Gets the route for.
+        /// </summary>
+        /// <param name="destinationId">The destination identifier.</param>
+        /// <returns>
+        /// The found route for the destination or null.
+        /// </returns>
+        public override NetSimTableEntry GetRouteFor(string destinationId)
+        {
+            return this.Entries.FirstOrDefault(e => e.Destination.Equals(destinationId));
         }
 
         /// <summary>
@@ -54,7 +69,9 @@ namespace NetSim.Lib.Routing.DSR
         public void HandleError(string endpointFrom, string notReachableNodeTo)
         {
             // search entries where message endpointFrom and message notreachable are in path (direct connected)
-            foreach (var netSimTableEntry in Entries.Where(e => ((DsrTableEntry)e).Route.Contains(notReachableNodeTo)).ToList())
+            foreach (
+                var netSimTableEntry in
+                this.Entries.Where(e => ((DsrTableEntry)e).Route.Contains(notReachableNodeTo)).ToList())
             {
                 var entry = (DsrTableEntry)netSimTableEntry;
 
@@ -63,54 +80,15 @@ namespace NetSim.Lib.Routing.DSR
 
                 // if index - 1 out or range - endpoint from is not in route
                 if (index - 1 < 0)
+                {
                     continue;
+                }
 
                 // if route element before the notreachable node equals the sender of the error message 
                 if (entry.Route[index - 1].Equals(endpointFrom))
                 {
                     // remove the route 
-                    RemoveRoute(entry.Destination);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Handles the request route caching.
-        /// </summary>
-        /// <param name="reqMessage">The req message.</param>
-        public void HandleRequestRouteCaching(DsrRouteRequestMessage reqMessage)
-        {
-            // search for already cached route
-            var route = (DsrTableEntry)this.GetRouteFor(reqMessage.Sender);
-
-            // reverse the request route
-            var cachedRoute = reqMessage.Nodes.Reverse<string>().ToList();
-
-            if (route == null)
-            {
-                // add route to table
-                Entries.Add(new DsrTableEntry()
-                {
-                    Destination = reqMessage.Sender,
-                    Route = cachedRoute,
-                    Metric = cachedRoute.Count - 1
-                });
-            }
-            else
-            {
-                // check if new route is shorter
-                if (cachedRoute.Count < route.Metric)
-                {
-                    // remove route and add new one
-                    Entries.Remove(route);
-
-                    // add new route
-                    Entries.Add(new DsrTableEntry()
-                    {
-                        Destination = reqMessage.Sender,
-                        Route = cachedRoute,
-                        Metric = cachedRoute.Count - 1
-                    });
+                    this.RemoveRoute(entry.Destination);
                 }
             }
         }
@@ -137,12 +115,13 @@ namespace NetSim.Lib.Routing.DSR
             if (route == null)
             {
                 // add route to table
-                Entries.Add(new DsrTableEntry()
-                {
-                    Destination = repMessage.Sender,
-                    Route = cachedRoute,
-                    Metric = cachedRoute.Count - 1
-                });
+                this.Entries.Add(
+                    new DsrTableEntry()
+                    {
+                        Destination = repMessage.Sender,
+                        Route = cachedRoute,
+                        Metric = cachedRoute.Count - 1
+                    });
             }
             else
             {
@@ -150,50 +129,83 @@ namespace NetSim.Lib.Routing.DSR
                 if (cachedRoute.Count - 1 < route.Metric)
                 {
                     // remove route and add new one
-                    Entries.Remove(route);
+                    this.Entries.Remove(route);
 
                     // add new route
-                    Entries.Add(new DsrTableEntry()
-                    {
-                        Destination = repMessage.Sender,
-                        Route = cachedRoute,
-                        Metric = cachedRoute.Count - 1
-                    });
+                    this.Entries.Add(
+                        new DsrTableEntry()
+                        {
+                            Destination = repMessage.Sender,
+                            Route = cachedRoute,
+                            Metric = cachedRoute.Count - 1
+                        });
                 }
             }
         }
 
         /// <summary>
-        /// Removes the route.
+        /// Handles the request route caching.
         /// </summary>
-        /// <param name="destination">The destination.</param>
-        private void RemoveRoute(string destination)
+        /// <param name="reqMessage">The request message.</param>
+        public void HandleRequestRouteCaching(DsrRouteRequestMessage reqMessage)
         {
-            var entry = GetRouteFor(destination);
+            // search for already cached route
+            var route = (DsrTableEntry)this.GetRouteFor(reqMessage.Sender);
 
-            if (entry != null)
+            // reverse the request route
+            var cachedRoute = reqMessage.Nodes.Reverse<string>().ToList();
+
+            if (route == null)
             {
-                this.Entries.Remove(entry);
+                // add route to table
+                this.Entries.Add(
+                    new DsrTableEntry()
+                    {
+                        Destination = reqMessage.Sender,
+                        Route = cachedRoute,
+                        Metric = cachedRoute.Count - 1
+                    });
+            }
+            else
+            {
+                // check if new route is shorter
+                if (cachedRoute.Count < route.Metric)
+                {
+                    // remove route and add new one
+                    this.Entries.Remove(route);
+
+                    // add new route
+                    this.Entries.Add(
+                        new DsrTableEntry()
+                        {
+                            Destination = reqMessage.Sender,
+                            Route = cachedRoute,
+                            Metric = cachedRoute.Count - 1
+                        });
+                }
             }
         }
 
         /// <summary>
-        /// Gets the route for.
+        /// Handles the response.
         /// </summary>
-        /// <param name="destinationId">The destination identifier.</param>
-        /// <returns></returns>
-        public override NetSimTableEntry GetRouteFor(string destinationId)
+        /// <param name="message">The message.</param>
+        public void HandleResponse(DsrRouteReplyMessage message)
         {
-            return Entries.FirstOrDefault(e => e.Destination.Equals(destinationId));
-        }
+            // search for a route for this destination
+            var entry = this.GetRouteFor(message.Sender);
 
-        /// <summary>
-        /// Clones this instance.
-        /// </summary>
-        /// <returns></returns>
-        public override object Clone()
-        {
-            return new DsrTable() { Entries = this.Entries.Select(e => (NetSimTableEntry)e.Clone()).ToList() };
+            // if no route found or the metric of the found route is bigger
+            if (entry == null || entry.Metric > message.Route.Count - 1)
+            {
+                this.Entries.Add(
+                    new DsrTableEntry()
+                    {
+                        Destination = message.Sender,
+                        Metric = message.Route.Count - 1,
+                        Route = new List<string>(message.Route)
+                    });
+            }
         }
 
         /// <summary>
@@ -210,6 +222,20 @@ namespace NetSim.Lib.Routing.DSR
             builder.Append(base.ToString());
 
             return builder.ToString();
+        }
+
+        /// <summary>
+        /// Removes the route.
+        /// </summary>
+        /// <param name="destination">The destination.</param>
+        private void RemoveRoute(string destination)
+        {
+            var entry = this.GetRouteFor(destination);
+
+            if (entry != null)
+            {
+                this.Entries.Remove(entry);
+            }
         }
     }
 }

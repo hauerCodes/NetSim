@@ -1,14 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using NetSim.Lib.Simulator;
-using NetSim.Lib.Simulator.Components;
+﻿// -----------------------------------------------------------------------
+// <copyright file="OlsrHelloMessage.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - OlsrHelloMessage.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Routing.OLSR
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+
+    using NetSim.Lib.Simulator.Components;
+
+    /// <summary>
+    /// The olsr hello message implementation.
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimMessage" />
     public class OlsrHelloMessage : NetSimMessage
     {
         /// <summary>
@@ -21,20 +31,20 @@ namespace NetSim.Lib.Routing.OLSR
         }
 
         /// <summary>
-        /// Gets or sets the neighbors.
-        /// </summary>
-        /// <value>
-        /// The neighbors.
-        /// </value>
-        public List<string> Neighbors { get; set; }
-
-        /// <summary>
         /// Gets or sets the multi point relays.
         /// </summary>
         /// <value>
         /// The multi point relays.
         /// </value>
         public List<string> MultiPointRelays { get; set; }
+
+        /// <summary>
+        /// Gets or sets the neighbors.
+        /// </summary>
+        /// <value>
+        /// The neighbors.
+        /// </value>
+        public List<string> Neighbors { get; set; }
 
         /// <summary>
         /// Gets the short name.
@@ -47,16 +57,18 @@ namespace NetSim.Lib.Routing.OLSR
         /// <summary>
         /// Clones this instance.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// A new object that is a copy of this instance.
+        /// </returns>
         public override object Clone()
         {
             var clone = new OlsrHelloMessage()
             {
-                Neighbors = new List<string>(Neighbors),
-                MultiPointRelays = new List<string>(MultiPointRelays)
+                Neighbors = new List<string>(this.Neighbors),
+                MultiPointRelays = new List<string>(this.MultiPointRelays)
             };
 
-            return CopyTo(clone);
+            return this.CopyTo(clone);
         }
 
         /// <summary>
@@ -71,14 +83,14 @@ namespace NetSim.Lib.Routing.OLSR
 
             builder.AppendLine(base.ToString());
 
-            if (Neighbors?.Count > 0)
+            if (this.Neighbors?.Count > 0)
             {
-                builder.AppendFormat("| Neighbors: {0}\n", string.Join(",", Neighbors));
+                builder.AppendFormat("| Neighbors: {0}\n", string.Join(",", this.Neighbors));
             }
 
-            if (MultiPointRelays?.Count > 0)
+            if (this.MultiPointRelays?.Count > 0)
             {
-                builder.AppendFormat("| MPRs: {0}\n", string.Join(",", MultiPointRelays));
+                builder.AppendFormat("| MPRs: {0}\n", string.Join(",", this.MultiPointRelays));
             }
 
             builder.AppendLine($"+[/{this.GetType().Name}]");

@@ -1,8 +1,19 @@
-﻿using System;
-using System.Linq;
+﻿// -----------------------------------------------------------------------
+// <copyright file="NetSimRoutingProtocol.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - NetSimRoutingProtocol.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Simulator.Components
 {
+    using System;
+    using System.Linq;
+
+    /// <summary>
+    /// The base class for every routing protocol implementation in the simulator.
+    /// </summary>
     public abstract class NetSimRoutingProtocol
     {
         /// <summary>
@@ -16,20 +27,30 @@ namespace NetSim.Lib.Simulator.Components
         protected readonly NetSimClient Client;
 
         /// <summary>
-        /// The step counter
-        /// </summary>
-        // ReSharper disable once InconsistentNaming
-        protected int stepCounter;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="NetSimRoutingProtocol"/> class.
         /// </summary>
         /// <param name="client">The client.</param>
         protected NetSimRoutingProtocol(NetSimClient client)
         {
             this.Client = client;
-            this.stepCounter = 0;
+            this.StepCounter = 0;
         }
+
+        /// <summary>
+        /// Gets the routing data.
+        /// </summary>
+        /// <value>
+        /// The routing data.
+        /// </value>
+        public string RoutingData => this.GetRoutingData();
+
+        /// <summary>
+        /// Gets or sets the step counter.
+        /// </summary>
+        /// <value>
+        /// The step counter.
+        /// </value>
+        public int StepCounter { get; set; }
 
         /// <summary>
         /// Gets or sets the table.
@@ -40,28 +61,12 @@ namespace NetSim.Lib.Simulator.Components
         public NetSimTable Table { get; set; }
 
         /// <summary>
-        /// Gets the routing data.
-        /// </summary>
-        /// <value>
-        /// The routing data.
-        /// </value>
-        public string RoutingData => GetRoutingData();
-
-        /// <summary>
-        /// Gets the step counter.
-        /// </summary>
-        /// <value>
-        /// The step counter.
-        /// </value>
-        public int StepCounter => stepCounter;
-
-        /// <summary>
         /// Initializes this instance.
         /// </summary>
         public virtual void Initialize()
         {
             // reset stepcounter
-            this.stepCounter = 0;
+            this.StepCounter = 0;
         }
 
         /// <summary>
@@ -76,20 +81,20 @@ namespace NetSim.Lib.Simulator.Components
         public abstract void SendMessage(NetSimMessage message);
 
         /// <summary>
-        /// Gets the routing data.
-        /// </summary>
-        /// <returns></returns>
-        protected abstract string GetRoutingData();
-
-        /// <summary>
         /// Gets the route.
         /// </summary>
         /// <param name="destinationId">The destination identifier.</param>
-        /// <returns></returns>
+        /// <returns>The found route for the destination or null.</returns>
         protected virtual string GetRoute(string destinationId)
         {
-            return Table.GetRouteFor(destinationId)?.NextHop;
+            return this.Table.GetRouteFor(destinationId)?.NextHop;
         }
+
+        /// <summary>
+        /// Gets the routing data.
+        /// </summary>
+        /// <returns>The string representation of the protocol specific routing data.</returns>
+        protected abstract string GetRoutingData();
 
         /// <summary>
         /// Determines whether the connection with the specified endpoint identifier is reachable.
@@ -101,10 +106,8 @@ namespace NetSim.Lib.Simulator.Components
         /// </returns>
         protected virtual bool IsConnectionReachable(string destinationId)
         {
-            return Client?.Connections != null &&
-                Client.Connections.ContainsKey(destinationId) &&
-                !Client.Connections[destinationId].IsOffline;
+            return this.Client?.Connections != null && this.Client.Connections.ContainsKey(destinationId)
+                   && !this.Client.Connections[destinationId].IsOffline;
         }
-
     }
 }

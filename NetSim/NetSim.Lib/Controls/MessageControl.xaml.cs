@@ -1,29 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿// -----------------------------------------------------------------------
+// <copyright file="MessageControl.xaml.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - MessageControl.xaml.cs</summary>
+// -----------------------------------------------------------------------
 
 namespace NetSim.Lib.Controls
 {
+    using System;
+    using System.Linq;
+    using System.Windows.Controls;
+
     /// <summary>
-    /// Interaction logic for Message.xaml
+    /// Interaction logic for Message
     /// </summary>
+    // ReSharper disable once RedundantExtendsListEntry
     public partial class MessageControl : UserControl
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageControl"/> class.
         /// </summary>
-        public MessageControl() : this(string.Empty) { }
+        public MessageControl()
+            : this(string.Empty)
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageControl" /> class.
@@ -31,10 +32,9 @@ namespace NetSim.Lib.Controls
         /// <param name="messageName">Name of the message.</param>
         public MessageControl(string messageName)
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
-            MessageName.Text = messageName;
+            this.MessageName.Text = messageName;
         }
-
     }
 }

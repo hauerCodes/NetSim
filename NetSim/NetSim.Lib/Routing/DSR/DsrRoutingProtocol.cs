@@ -1,15 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using NetSim.Lib.Routing.Helpers;
-using NetSim.Lib.Simulator.Components;
-using NetSim.Lib.Simulator.Messages;
-
+﻿// -----------------------------------------------------------------------
+// <copyright file="DsrRoutingProtocol.cs" company="FH Wr.Neustadt">
+//      Copyright Christoph Hauer. All rights reserved.
+// </copyright>
+// <author>Christoph Hauer</author>
+// <summary>NetSim.Lib - DsrRoutingProtocol.cs</summary>
+// -----------------------------------------------------------------------
 // ReSharper disable UnusedMember.Local
-
 namespace NetSim.Lib.Routing.DSR
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using NetSim.Lib.Routing.Helpers;
+    using NetSim.Lib.Simulator.Components;
+    using NetSim.Lib.Simulator.Messages;
+
+    /// <summary>
+    /// The dsr routing protocol implementation.
+    /// </summary>
+    /// <seealso cref="NetSim.Lib.Simulator.Components.NetSimRoutingProtocol" />
     public class DsrRoutingProtocol : NetSimRoutingProtocol
     {
         /// <summary>
@@ -21,10 +31,19 @@ namespace NetSim.Lib.Routing.DSR
         /// Initializes a new instance of the <see cref="DsrRoutingProtocol"/> class.
         /// </summary>
         /// <param name="client">The client.</param>
-        public DsrRoutingProtocol(NetSimClient client) : base(client)
+        public DsrRoutingProtocol(NetSimClient client)
+            : base(client)
         {
-            handlerResolver = new MessageHandlerResolver(this.GetType());
+            this.handlerResolver = new MessageHandlerResolver(this.GetType());
         }
+
+        /// <summary>
+        /// Gets or sets the current request identifier.
+        /// </summary>
+        /// <value>
+        /// The current request identifier.
+        /// </value>
+        public int CurrentRequestId { get; set; }
 
         /// <summary>
         /// Gets the output message queue (should be used only for data messages).
@@ -43,14 +62,6 @@ namespace NetSim.Lib.Routing.DSR
         public List<NetSimRequestCacheEntry> RequestCache { get; private set; }
 
         /// <summary>
-        /// Gets or sets the current request identifier.
-        /// </summary>
-        /// <value>
-        /// The current request identifier.
-        /// </value>
-        public int CurrentRequestId { get; set; }
-
-        /// <summary>
         /// Initializes this instance.
         /// </summary>
         public override void Initialize()
@@ -58,23 +69,23 @@ namespace NetSim.Lib.Routing.DSR
             // call base initialization (stepcounter and data)
             base.Initialize();
 
-            //intialize routing table
+            // intialize routing table
             this.Table = new DsrTable();
 
-            //intialize request cache
+            // intialize request cache
             this.RequestCache = new List<NetSimRequestCacheEntry>();
 
             // intialize request id for route request identification 
             this.CurrentRequestId = 1;
 
-            //intialize outgoing messages
+            // intialize outgoing messages
             this.OutputQueue = new Queue<NetSimQueuedMessage>();
 
             // local table reference casted to the right type
             var localTableRef = (DsrTable)this.Table;
 
             // self routing entry with metric 0
-            localTableRef.AddInitialRouteEntry(Client.Id, Client.Id, 0);
+            localTableRef.AddInitialRouteEntry(this.Client.Id, this.Client.Id, 0);
         }
 
         /// <summary>
@@ -82,13 +93,13 @@ namespace NetSim.Lib.Routing.DSR
         /// </summary>
         public override void PerformRoutingStep()
         {
-            //handle all incomming messages
-            HandleIncomingMessages();
+            // handle all incomming messages
+            this.HandleIncomingMessages();
 
-            //handle outgoing queued messages
-            HandleOutgoingMessages();
+            // handle outgoing queued messages
+            this.HandleOutgoingMessages();
 
-            stepCounter++;
+            this.StepCounter++;
         }
 
         /// <summary>
@@ -98,106 +109,41 @@ namespace NetSim.Lib.Routing.DSR
         public override void SendMessage(NetSimMessage message)
         {
             // queue message
-            OutputQueue.Enqueue(new NetSimQueuedMessage()
-            {
-                Message = message,
-            });
+            this.OutputQueue.Enqueue(new NetSimQueuedMessage() { Message = message, });
         }
 
         /// <summary>
-        /// Handles the outgoing messages.
+        /// Gets the routing data.
         /// </summary>
-        private void HandleOutgoingMessages()
+        /// <returns>
+        /// The string representation of the protocol specific routing data.
+        /// </returns>
+        protected override string GetRoutingData()
         {
-            // get the count of queued messages 
-            int counter = OutputQueue.Count;
-
-            // run for each queued message
-            while (counter > 0)
-            {
-                // get next queued message
-                var queuedMessage = OutputQueue.Dequeue();
-
-                //check if message is a dsr message
-                if (IsDsrMessage(queuedMessage.Message))
-                {
-                    // handle "resend" of dsr message intialy send from other node
-                    ForwardDsrMessage(queuedMessage);
-                }
-                else
-                {
-                    //if here messages gets initally send from this node
-                    HandleRouteDiscoveryForOutgoingMessage(queuedMessage);
-                }
-                counter--;
-            }
+            return this.Table.ToString();
         }
 
         /// <summary>
-        /// Handles the new outgoing message.
+        /// Adds the cached request.
         /// </summary>
-        /// <param name="queuedMessage">The queued message.</param>
-        private void HandleRouteDiscoveryForOutgoingMessage(NetSimQueuedMessage queuedMessage)
+        /// <param name="reqMessage">The request message.</param>
+        private void AddCachedRequest(DsrRouteRequestMessage reqMessage)
         {
-            //search the route for message (also in cache)
-            var searchedRoute = GetDsrRoute(queuedMessage.Message.Receiver);
+            var nodeCache = this.RequestCache.FirstOrDefault(r => r.Id.Equals(reqMessage.Sender));
 
-            // if route found - send the message via the connection
-            if (searchedRoute != null)
+            if (nodeCache == null)
             {
-                var sendMessage = queuedMessage.Message;
+                nodeCache = new NetSimRequestCacheEntry() { Id = reqMessage.Sender };
 
-                //pack message in dsrframemessage and set found route
-                var dsrFrame = new DsrFrameMessage()
-                {
-                    Data = (NetSimMessage)sendMessage.Clone(),
-                    Receiver = sendMessage.Receiver,
-                    Sender = sendMessage.Sender,
-                    Route = new List<string>(searchedRoute.Route),
-                };
-
-                //determine the next hop of the requested route
-                var nextHopId = dsrFrame.GetNextHop(Client.Id);
-
-                //lay message on wire - intial send
-                if (IsConnectionReachable(nextHopId))
-                {
-                    Client.Connections[nextHopId].StartTransportMessage(dsrFrame, this.Client.Id, nextHopId);
-                }
-                else
-                {
-                    HandleNotReachableRoute(nextHopId, null);
-                }
+                this.RequestCache.Add(nodeCache);
             }
-            else
-            {
-                // if route not found and route discovery is not started for this message
-                if (!queuedMessage.IsRouteDiscoveryStarted)
-                {
-                    // mark as started
-                    queuedMessage.IsRouteDiscoveryStarted = true;
 
-                    //broadcast to all neighbors
-                    Client.BroadcastMessage(new DsrRouteRequestMessage()
-                    {
-                        Sender = Client.Id,
-                        Receiver = queuedMessage.Message.Receiver,
-                        RequestId = this.CurrentRequestId,
-                        Nodes = { this.Client.Id }
-                    }, false);
-
-                    //increase route request id
-                    this.CurrentRequestId++;
-                }
-
-                // and enqueue message again
-                OutputQueue.Enqueue(queuedMessage);
-            }
+            nodeCache.CachedRequests.Add(reqMessage.RequestId);
         }
 
         /// <summary>
         /// Handles the outgoing DSR message.
-        /// Note: Messages handled in this methods where intialy send from another node.
+        /// Note: Messages handled in this methods where initially send from another node.
         /// </summary>
         /// <param name="queuedMessage">The queued message.</param>
         private void ForwardDsrMessage(NetSimQueuedMessage queuedMessage)
@@ -205,33 +151,45 @@ namespace NetSim.Lib.Routing.DSR
             // searches a handler method with the dsrmessagehandler attribute and the 
             // right message type and for incoming(false) or outgoing (true, default) messages.
             // e.g. IncomingDsrRouteRequestMessageHandler
-            var method = handlerResolver.GetHandlerMethod(queuedMessage.Message.GetType());
+            var method = this.handlerResolver.GetHandlerMethod(queuedMessage.Message.GetType());
 
             method?.Invoke(this, new object[] { queuedMessage });
         }
 
         /// <summary>
-        /// The outgoing DSR frame message handler.
-        /// dsrframe - forward to destination
+        /// Gets the DSR cached route.
         /// </summary>
-        /// <param name="queuedMessage">The queued message.</param>
-        [MessageHandler(typeof(DsrFrameMessage), Outgoing = true)]
-        private void OutgoingDsrFrameMessageHandler(NetSimQueuedMessage queuedMessage)
+        /// <param name="receiver">The receiver.</param>
+        /// <returns>The found dsr table entry or null.</returns>
+        private DsrTableEntry GetDsrRoute(string receiver)
         {
-            //get dsr frame message instacne
-            var frameMessage = (DsrFrameMessage)queuedMessage.Message;
+            return (DsrTableEntry)this.Table.GetRouteFor(receiver);
+        }
 
-            // get next hop from in frame message saved route info
-            var nextHop = frameMessage.GetNextHop(Client.Id);
-
-            if (IsConnectionReachable(nextHop))
+        /// <summary>
+        /// Handles the incoming messages.
+        /// </summary>
+        private void HandleIncomingMessages()
+        {
+            if (this.Client.InputQueue.Count <= 0)
             {
-                // lay message "on" wire - start transmitting via connection
-                Client.Connections[nextHop].StartTransportMessage(frameMessage, this.Client.Id, nextHop);
+                return;
             }
-            else
+
+            while (this.Client.InputQueue.Count > 0)
             {
-                HandleNotReachableRoute(nextHop, frameMessage);
+                // dequues message to handle
+                var message = this.Client.InputQueue.Dequeue();
+
+                // searches a handler method with the dsrmessagehandler attribute and the 
+                // right message type and for incoming(false) or outgoing (true) messages.
+                // e.g. IncomingDsrRouteRequestMessageHandler
+                var method = this.handlerResolver.GetHandlerMethod(message.GetType(), false);
+
+                // call handler
+                method?.Invoke(this, new object[] { message });
+
+                // ignore all not dsr messages - all messages have to be packed in dsrFrame                
             }
         }
 
@@ -242,214 +200,189 @@ namespace NetSim.Lib.Routing.DSR
         /// <param name="frameMessage">The frame message.</param>
         private void HandleNotReachableRoute(string nextHopId, DsrFrameMessage frameMessage)
         {
-            var dsrTable = Table as DsrTable;
+            var dsrTable = this.Table as DsrTable;
 
             // remove notreachable route 
-            dsrTable?.HandleError(Client.Id, nextHopId);
+            dsrTable?.HandleError(this.Client.Id, nextHopId);
 
             // broadcast route error to neighbors - Neighbors remove every route with sender -> notreachable in path
-            Client.BroadcastMessage(new DsrRouteErrorMessage()
-            {
-                Sender = Client.Id,
-                NotReachableNode = nextHopId,
-            });
+            this.Client.BroadcastMessage(
+                new DsrRouteErrorMessage() { Sender = this.Client.Id, NotReachableNode = nextHopId, });
 
             if (frameMessage != null)
             {
                 // send route error to sender with back path in message 
                 // receiver removes every route with sender - notreachable in path
-                SendMessage(new DsrRouteErrorMessage()
+                this.SendMessage(
+                    new DsrRouteErrorMessage()
+                    {
+                        Sender = this.Client.Id,
+                        Receiver = frameMessage.Sender,
+                        Route = frameMessage.Route,
+                        NotReachableNode = nextHopId,
+                        FailedMessage = frameMessage.Data
+                    });
+            }
+        }
+
+        /// <summary>
+        /// Handles the outgoing messages.
+        /// </summary>
+        private void HandleOutgoingMessages()
+        {
+            // get the count of queued messages 
+            int counter = this.OutputQueue.Count;
+
+            // run for each queued message
+            while (counter > 0)
+            {
+                // get next queued message
+                var queuedMessage = this.OutputQueue.Dequeue();
+
+                // check if message is a dsr message
+                if (this.IsDsrMessage(queuedMessage.Message))
                 {
-                    Sender = Client.Id,
-                    Receiver = frameMessage.Sender,
-                    Route = frameMessage.Route,
-                    NotReachableNode = nextHopId,
-                    FailedMessage = frameMessage.Data
-                });
-            }
-        }
-
-        /// <summary>
-        /// Handles the outgoing dsr frame message.
-        /// dsrrouterequest - send to every neighbor
-        /// </summary>
-        /// <param name="queuedMessage">The queued message.</param>
-        [MessageHandler(typeof(DsrRouteRequestMessage), Outgoing = true)]
-        private void OutgoingDsrRouteRequestMessageHandler(NetSimQueuedMessage queuedMessage)
-        {
-            //get dsr requestMessage instacne - note: the request message was alreay handled in incomming messages
-            var requestMessage = (DsrRouteRequestMessage)queuedMessage.Message;
-
-            //broadcast to all neighbors
-            Client.BroadcastMessage(requestMessage, false);
-        }
-
-        /// <summary>
-        /// Handles the outgoing DsrRouteReplyMessage.
-        /// dsrrouterespone - forward the reverse route way
-        /// </summary>
-        /// <param name="queuedMessage">The queued message.</param>
-        [MessageHandler(typeof(DsrRouteReplyMessage), Outgoing = true)]
-        private void OutgoingDsrRouteReplyMessageHandler(NetSimQueuedMessage queuedMessage)
-        {
-            var responseMessage = (DsrRouteReplyMessage)queuedMessage.Message;
-
-            // get the next hop id from the route info saved within this message
-            string nextHopId = responseMessage.GetNextReverseHop(Client.Id);
-
-            if (IsConnectionReachable(nextHopId))
-            {
-                // start message transport
-                Client.Connections[nextHopId].StartTransportMessage(responseMessage, this.Client.Id, nextHopId);
-            }
-            else
-            {
-                HandleNotReachableRoute(nextHopId, null);
-            }
-        }
-
-        /// <summary>
-        ///Handles the outgoing DSR remove route messages.
-        /// </summary>
-        /// <param name="queuedMessage">The queued message.</param>
-        [MessageHandler(typeof(DsrRouteErrorMessage), Outgoing = true)]
-        private void OutgoingDsrRouteErrorMessageHandler(NetSimQueuedMessage queuedMessage)
-        {
-            var errorMessage = (DsrRouteErrorMessage)queuedMessage.Message;
-
-            // get the next hop id from the route info saved within this message
-            string nextHopId = errorMessage.GetNextReverseHop(Client.Id);
-
-            // if client has this connection (e.g. not deleted) and connection is not offline
-            if (IsConnectionReachable(nextHopId))
-            {
-                // start message transport
-                Client.Connections[nextHopId].StartTransportMessage(errorMessage, this.Client.Id, nextHopId);
-            }
-        }
-
-        /// <summary>
-        /// Handles the incomming messages.
-        /// </summary>
-        private void HandleIncomingMessages()
-        {
-            if (Client.InputQueue.Count <= 0)
-            {
-                return;
-            }
-
-            while (Client.InputQueue.Count > 0)
-            {
-                // dequues message to handle
-                var message = Client.InputQueue.Dequeue();
-
-                // searches a handler method with the dsrmessagehandler attribute and the 
-                // right message type and for incoming(false) or outgoing (true) messages.
-                // e.g. IncomingDsrRouteRequestMessageHandler
-                var method = handlerResolver.GetHandlerMethod(message.GetType(), false);
-
-                //call handler
-                method?.Invoke(this, new object[] { message });
-
-                // ignore all not dsr messages - all messages have to be packed in dsrFrame                
-            }
-        }
-
-        /// <summary>
-        /// Handles the incomming dsr route request message.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        [MessageHandler(typeof(DsrRouteRequestMessage), Outgoing = false)]
-        private void IncomingDsrRouteRequestMessageHandler(NetSimMessage message)
-        {
-            DsrTable dsrTable = (DsrTable)Table;
-            DsrRouteRequestMessage reqMessage = (DsrRouteRequestMessage)message;
-
-            //if duplicate
-            if (HasCachedRequest(reqMessage))
-            {
-                //ignore message and proceed
-                return;
-            }
-
-            //add request to cache
-            AddCachedRequest(reqMessage);
-
-            //add this node id to message Route
-            reqMessage.Nodes.Add(this.Client.Id);
-
-            //if this node was sender of request - ignore
-            if (IsOwnRequest(reqMessage))
-            {
-                return;
-            }
-
-            // cache route
-            dsrTable.HandleRequestRouteCaching(reqMessage);
-
-            //check if message destination is current node (me)
-            if (reqMessage.Receiver.Equals(this.Client.Id))
-            {
-                //send back rrep mesage the reverse way with found route 
-                var response = new DsrRouteReplyMessage()
+                    // handle "resend" of dsr message intialy send from other node
+                    this.ForwardDsrMessage(queuedMessage);
+                }
+                else
                 {
-                    Receiver = reqMessage.Sender,
-                    Sender = Client.Id,
-                    Route = new List<string>(reqMessage.Nodes)
+                    // if here messages gets initally send from this node
+                    this.HandleRouteDiscoveryForOutgoingMessage(queuedMessage);
+                }
+
+                counter--;
+            }
+        }
+
+        /// <summary>
+        /// Handles the new outgoing message.
+        /// </summary>
+        /// <param name="queuedMessage">The queued message.</param>
+        private void HandleRouteDiscoveryForOutgoingMessage(NetSimQueuedMessage queuedMessage)
+        {
+            // search the route for message (also in cache)
+            var searchedRoute = this.GetDsrRoute(queuedMessage.Message.Receiver);
+
+            // if route found - send the message via the connection
+            if (searchedRoute != null)
+            {
+                var sendMessage = queuedMessage.Message;
+
+                // pack message in dsrframemessage and set found route
+                var dsrFrame = new DsrFrameMessage()
+                {
+                    Data = (NetSimMessage)sendMessage.Clone(),
+                    Receiver = sendMessage.Receiver,
+                    Sender = sendMessage.Sender,
+                    Route = new List<string>(searchedRoute.Route),
                 };
 
-                //enqueue message for sending
-                SendMessage(response);
+                // determine the next hop of the requested route
+                var nextHopId = dsrFrame.GetNextHop(this.Client.Id);
 
-                return;
+                // lay message on wire - intial send
+                if (this.IsConnectionReachable(nextHopId))
+                {
+                    this.Client.Connections[nextHopId].StartTransportMessage(dsrFrame, this.Client.Id, nextHopId);
+                }
+                else
+                {
+                    this.HandleNotReachableRoute(nextHopId, null);
+                }
             }
             else
             {
-                // Check if route to the end destination for request is cached
-                var route = Table.GetRouteFor(reqMessage.Receiver);
-
-                if (route != null)
+                // if route not found and route discovery is not started for this message
+                if (!queuedMessage.IsRouteDiscoveryStarted)
                 {
-                    var dsrRoute = (DsrTableEntry)route;
+                    // mark as started
+                    queuedMessage.IsRouteDiscoveryStarted = true;
 
-                    var newRoute = new List<string>(reqMessage.Nodes);
+                    // broadcast to all neighbors
+                    this.Client.BroadcastMessage(
+                        new DsrRouteRequestMessage()
+                        {
+                            Sender = this.Client.Id,
+                            Receiver = queuedMessage.Message.Receiver,
+                            RequestId = this.CurrentRequestId,
+                            Nodes = { this.Client.Id }
+                        },
+                        false);
 
-                    //remove last entry
-                    newRoute.RemoveAt(newRoute.Count - 1);
-
-                    // add cached route entries
-                    newRoute.AddRange(dsrRoute.Route);
-
-                    //send back rrep mesage the reverse way with found route 
-                    //note: sender is the orig. receiver of the req
-                    var response = new DsrRouteReplyMessage()
-                    {
-                        Receiver = reqMessage.Sender,
-                        Sender = reqMessage.Receiver,
-                        Route = newRoute
-                    };
-
-                    //enqueue message for sending
-                    SendMessage(response);
-
-                    return;
+                    // increase route request id
+                    this.CurrentRequestId++;
                 }
-            }
 
-            // forward message to outgoing messages
-            SendMessage(reqMessage);
+                // and enqueue message again
+                this.OutputQueue.Enqueue(queuedMessage);
+            }
         }
 
         /// <summary>
-        /// Determines whether the given dsr rreq message is a own request.
+        /// Determines whether this protocol instance has cached request the specified request id.
         /// </summary>
-        /// <param name="reqMessage">The req message.</param>
+        /// <param name="reqMessaged">The request messaged.</param>
         /// <returns>
-        ///   <c>true</c> if is own request; otherwise, <c>false</c>.
+        ///   <c>true</c> if has cached request with the specified request message; otherwise, <c>false</c>.
         /// </returns>
-        private bool IsOwnRequest(DsrRouteRequestMessage reqMessage)
+        private bool HasCachedRequest(DsrRouteRequestMessage reqMessaged)
         {
-            return reqMessage.Nodes.Count > 0 && reqMessage.Nodes[0].Equals(this.Client.Id);
+            return
+                this.RequestCache
+                .FirstOrDefault(r => r.Id.Equals(reqMessaged.Sender))?.HasCachedRequest(reqMessaged.RequestId) ?? false;
+        }
+
+        /// <summary>
+        /// Handles the Incoming the DSR frame message.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        [MessageHandler(typeof(DsrFrameMessage), Outgoing = false)]
+        private void IncomingDsrFrameMessageHandler(NetSimMessage message)
+        {
+            // forward message if client is not reciever
+            if (!message.Receiver.Equals(this.Client.Id))
+            {
+                this.SendMessage(message);
+            }
+            else
+            {
+                // unpack mesage from dsrframe
+                var dsrFrame = (DsrFrameMessage)message;
+
+                // forward message to client
+                this.Client.ReceiveData(dsrFrame.Data);
+            }
+        }
+
+        /// <summary>
+        /// Handles the incoming the DSR route remove message.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        [MessageHandler(typeof(DsrRouteErrorMessage), Outgoing = false)]
+        private void IncomingDsrRouteErrorMessageHandler(NetSimMessage message)
+        {
+            DsrTable dsrTable = this.Table as DsrTable;
+            DsrRouteErrorMessage errorMessage = (DsrRouteErrorMessage)message;
+
+            // delete the (cached) routes defined by the error message from table 
+            dsrTable?.HandleError(errorMessage.Sender, errorMessage.NotReachableNode);
+
+            // check if the respone is for this node
+            if (errorMessage.Receiver.Equals(this.Client.Id))
+            {
+                // check if error has failed message
+                if (errorMessage.FailedMessage != null)
+                {
+                    // try to retransmit the failed message - start route discovery again
+                    this.SendMessage(errorMessage.FailedMessage);
+                }
+            }
+            else
+            {
+                // forward message
+                this.SendMessage(errorMessage);
+            }
         }
 
         /// <summary>
@@ -459,144 +392,225 @@ namespace NetSim.Lib.Routing.DSR
         [MessageHandler(typeof(DsrRouteReplyMessage), Outgoing = false)]
         private void IncomingDsrRouteReplyMessageHandler(NetSimMessage message)
         {
-            DsrTable dsrTable = Table as DsrTable;
+            DsrTable dsrTable = this.Table as DsrTable;
             DsrRouteReplyMessage repMessage = (DsrRouteReplyMessage)message;
 
             // handle route caching
             dsrTable?.HandleReplyRouteCaching(repMessage, this.Client.Id);
 
-            //check if the respone is for this node
-            if (repMessage.Receiver.Equals(Client.Id))
+            // check if the respone is for this node
+            if (repMessage.Receiver.Equals(this.Client.Id))
             {
-                //save found route to table
+                // save found route to table
                 dsrTable?.HandleResponse(repMessage);
             }
             else
             {
                 // forward message
-                SendMessage(repMessage);
+                this.SendMessage(repMessage);
             }
         }
 
         /// <summary>
-        /// Handles the  Incommings the DSR route remove message.
+        /// Handles the incoming dsr route request message.
         /// </summary>
         /// <param name="message">The message.</param>
-        [MessageHandler(typeof(DsrRouteErrorMessage), Outgoing = false)]
-        private void IncomingDsrRouteErrorMessageHandler(NetSimMessage message)
+        [MessageHandler(typeof(DsrRouteRequestMessage), Outgoing = false)]
+        private void IncomingDsrRouteRequestMessageHandler(NetSimMessage message)
         {
-            DsrTable dsrTable = Table as DsrTable;
-            DsrRouteErrorMessage errorMessage = (DsrRouteErrorMessage)message;
+            DsrTable dsrTable = (DsrTable)this.Table;
+            DsrRouteRequestMessage reqMessage = (DsrRouteRequestMessage)message;
 
-            //delete the (cached) routes defined by the error message from table 
-            dsrTable?.HandleError(errorMessage.Sender, errorMessage.NotReachableNode);
-
-            //check if the respone is for this node
-            if (errorMessage.Receiver.Equals(Client.Id))
+            // if duplicate
+            if (this.HasCachedRequest(reqMessage))
             {
-                // check if error has failed message
-                if (errorMessage.FailedMessage != null)
+                // ignore message and proceed
+                return;
+            }
+
+            // add request to cache
+            this.AddCachedRequest(reqMessage);
+
+            // add this node id to message Route
+            reqMessage.Nodes.Add(this.Client.Id);
+
+            // if this node was sender of request - ignore
+            if (this.IsOwnRequest(reqMessage))
+            {
+                return;
+            }
+
+            // cache route
+            dsrTable.HandleRequestRouteCaching(reqMessage);
+
+            // check if message destination is current node (me)
+            if (reqMessage.Receiver.Equals(this.Client.Id))
+            {
+                // send back rrep mesage the reverse way with found route 
+                var response = new DsrRouteReplyMessage()
                 {
-                    // try to retransmit the failed message - start route discovery again
-                    SendMessage(errorMessage.FailedMessage);
+                    Receiver = reqMessage.Sender,
+                    Sender = this.Client.Id,
+                    Route = new List<string>(reqMessage.Nodes)
+                };
+
+                // enqueue message for sending
+                this.SendMessage(response);
+
+                return;
+            }
+            else
+            {
+                // Check if route to the end destination for request is cached
+                var route = this.Table.GetRouteFor(reqMessage.Receiver);
+
+                if (route != null)
+                {
+                    var dsrRoute = (DsrTableEntry)route;
+
+                    var newRoute = new List<string>(reqMessage.Nodes);
+
+                    // remove last entry
+                    newRoute.RemoveAt(newRoute.Count - 1);
+
+                    // add cached route entries
+                    newRoute.AddRange(dsrRoute.Route);
+
+                    // send back rrep mesage the reverse way with found route 
+                    // note: sender is the orig. receiver of the req
+                    var response = new DsrRouteReplyMessage()
+                    {
+                        Receiver = reqMessage.Sender,
+                        Sender = reqMessage.Receiver,
+                        Route = newRoute
+                    };
+
+                    // enqueue message for sending
+                    this.SendMessage(response);
+
+                    return;
                 }
             }
-            else
-            {
-                // forward message
-                SendMessage(errorMessage);
-            }
-        }
 
-        /// <summary>
-        /// Handles the  Incommings the DSR frame message.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        [MessageHandler(typeof(DsrFrameMessage), Outgoing = false)]
-        private void IncomingDsrFrameMessageHandler(NetSimMessage message)
-        {
-            // forward message if client is not reciever
-            if (!message.Receiver.Equals(this.Client.Id))
-            {
-                SendMessage(message);
-            }
-            else
-            {
-                //unpack mesage from dsrframe
-                var dsrFrame = (DsrFrameMessage)message;
-
-                //forward message to client
-                Client.ReceiveData(dsrFrame.Data);
-            }
+            // forward message to outgoing messages
+            this.SendMessage(reqMessage);
         }
 
         /// <summary>
         /// Determines whether if message type is a DSR message type.
         /// </summary>
         /// <param name="message">The message.</param>
-        /// <returns></returns>
+        /// <returns>
+        ///   <c>true</c> if is a dsr message with the specified message; otherwise, <c>false</c>.
+        /// </returns>
         private bool IsDsrMessage(NetSimMessage message)
         {
             List<Type> dsrTypes = new List<Type>()
-            {
-                typeof(DsrRouteReplyMessage),
-                typeof(DsrRouteRequestMessage),
-                typeof(DsrRouteErrorMessage),
-                typeof(DsrFrameMessage)
-            };
+                                  {
+                                      typeof(DsrRouteReplyMessage),
+                                      typeof(DsrRouteRequestMessage),
+                                      typeof(DsrRouteErrorMessage),
+                                      typeof(DsrFrameMessage)
+                                  };
 
             Type messageType = message.GetType();
             return dsrTypes.Any(t => t == messageType);
         }
 
         /// <summary>
-        /// Gets the DSR cached route.
+        /// Determines whether the given dsr route request message is a own request.
         /// </summary>
-        /// <param name="receiver">The receiver.</param>
-        /// <returns></returns>
-        private DsrTableEntry GetDsrRoute(string receiver)
+        /// <param name="reqMessage">The request message.</param>
+        /// <returns>
+        ///   <c>true</c> if is own request; otherwise, <c>false</c>.
+        /// </returns>
+        private bool IsOwnRequest(DsrRouteRequestMessage reqMessage)
         {
-            return (DsrTableEntry)Table.GetRouteFor(receiver);
+            return reqMessage.Nodes.Count > 0 && reqMessage.Nodes[0].Equals(this.Client.Id);
         }
 
         /// <summary>
-        /// Adds the cached request.
+        /// The outgoing DSR frame message handler.
+        /// dsr frame - forward to destination
         /// </summary>
-        /// <param name="reqMessage">The req message.</param>
-        private void AddCachedRequest(DsrRouteRequestMessage reqMessage)
+        /// <param name="queuedMessage">The queued message.</param>
+        [MessageHandler(typeof(DsrFrameMessage), Outgoing = true)]
+        private void OutgoingDsrFrameMessageHandler(NetSimQueuedMessage queuedMessage)
         {
-            var nodeCache = RequestCache.FirstOrDefault(r => r.Id.Equals(reqMessage.Sender));
+            // get dsr frame message instacne
+            var frameMessage = (DsrFrameMessage)queuedMessage.Message;
 
-            if (nodeCache == null)
+            // get next hop from in frame message saved route info
+            var nextHop = frameMessage.GetNextHop(this.Client.Id);
+
+            if (this.IsConnectionReachable(nextHop))
             {
-                nodeCache = new NetSimRequestCacheEntry() { Id = reqMessage.Sender };
-
-                RequestCache.Add(nodeCache);
+                // lay message "on" wire - start transmitting via connection
+                this.Client.Connections[nextHop].StartTransportMessage(frameMessage, this.Client.Id, nextHop);
             }
-
-            nodeCache.ChachedRequests.Add(reqMessage.RequestId);
+            else
+            {
+                this.HandleNotReachableRoute(nextHop, frameMessage);
+            }
         }
 
         /// <summary>
-        /// Determines whether this protocol instance has chached request the specified reqid.
+        /// Handles the outgoing DSR remove route messages.
         /// </summary>
-        /// <param name="reqMessaged">The req messaged.</param>
-        /// <returns></returns>
-        private bool HasCachedRequest(DsrRouteRequestMessage reqMessaged)
+        /// <param name="queuedMessage">The queued message.</param>
+        [MessageHandler(typeof(DsrRouteErrorMessage), Outgoing = true)]
+        private void OutgoingDsrRouteErrorMessageHandler(NetSimQueuedMessage queuedMessage)
         {
-            return
-                RequestCache
-                .FirstOrDefault(r => r.Id.Equals(reqMessaged.Sender))?
-                    .HasCachedRequest(reqMessaged.RequestId) ?? false;
+            var errorMessage = (DsrRouteErrorMessage)queuedMessage.Message;
+
+            // get the next hop id from the route info saved within this message
+            string nextHopId = errorMessage.GetNextReverseHop(this.Client.Id);
+
+            // if client has this connection (e.g. not deleted) and connection is not offline
+            if (this.IsConnectionReachable(nextHopId))
+            {
+                // start message transport
+                this.Client.Connections[nextHopId].StartTransportMessage(errorMessage, this.Client.Id, nextHopId);
+            }
         }
 
         /// <summary>
-        /// Gets the routing data.
+        /// Handles the outgoing DsrRouteReplyMessage.
+        /// dsr route reply - forward the reverse route way
         /// </summary>
-        /// <returns></returns>
-        protected override string GetRoutingData()
+        /// <param name="queuedMessage">The queued message.</param>
+        [MessageHandler(typeof(DsrRouteReplyMessage), Outgoing = true)]
+        private void OutgoingDsrRouteReplyMessageHandler(NetSimQueuedMessage queuedMessage)
         {
-            return Table.ToString();
+            var responseMessage = (DsrRouteReplyMessage)queuedMessage.Message;
+
+            // get the next hop id from the route info saved within this message
+            string nextHopId = responseMessage.GetNextReverseHop(this.Client.Id);
+
+            if (this.IsConnectionReachable(nextHopId))
+            {
+                // start message transport
+                this.Client.Connections[nextHopId].StartTransportMessage(responseMessage, this.Client.Id, nextHopId);
+            }
+            else
+            {
+                this.HandleNotReachableRoute(nextHopId, null);
+            }
+        }
+
+        /// <summary>
+        /// Handles the outgoing dsr frame message.
+        /// dsr route request - send to every neighbor
+        /// </summary>
+        /// <param name="queuedMessage">The queued message.</param>
+        [MessageHandler(typeof(DsrRouteRequestMessage), Outgoing = true)]
+        private void OutgoingDsrRouteRequestMessageHandler(NetSimQueuedMessage queuedMessage)
+        {
+            // get dsr requestMessage instacne - note: the request message was alreay handled in incomming messages
+            var requestMessage = (DsrRouteRequestMessage)queuedMessage.Message;
+
+            // broadcast to all neighbors
+            this.Client.BroadcastMessage(requestMessage, false);
         }
     }
 }

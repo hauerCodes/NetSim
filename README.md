@@ -26,7 +26,7 @@ and a documentation file.
 
 ![Base Classes Architecture](docs/ArchitectureBaseOverview.png)
 
-## Help
+## UI
 
 ![Main Application View](docs/startscreen.png)
 

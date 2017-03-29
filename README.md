@@ -24,9 +24,13 @@ and a documentation file.
 
 ## Implementation
 
+![Base Classes Architecture](docs/ArchitectureBaseOverview.png)
 
 ## Help
 
+![Main Application View](docs/startscreen.png)
+
+---
 
 FHWN Project
 Adaptive Systeme - Master
